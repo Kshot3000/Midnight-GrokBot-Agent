@@ -10,11 +10,13 @@ import {
   connectWithProvider,
   discoverProviders,
   normalizeConnectorError,
+  probeStatusMatrix,
   safeIconUrl,
   safeWalletLabel,
   userHintForError,
   type ConnectedSession,
   type DiscoveredProvider,
+  type StatusMatrix,
 } from '@kshot/lace-midnight-kit';
 
 const NETWORKS = [
@@ -29,6 +31,7 @@ type AppState = {
   selectedKey: string | null;
   networkId: string;
   session: ConnectedSession | null;
+  matrix: StatusMatrix | null;
   log: string[];
 };
 
@@ -37,6 +40,7 @@ const state: AppState = {
   selectedKey: null,
   networkId: MidnightNetworkIds.Preprod,
   session: null,
+  matrix: null,
   log: [],
 };
 
@@ -75,11 +79,29 @@ function render(): void {
         <p class="lede">
           Uses <code>@kshot/lace-midnight-kit</code> + official
           <code>@midnight-ntwrk/dapp-connector-api@4.0.1</code> types.
-          Enumerates wallets (UUID keys / rdns) — never hardcodes <code>window.midnight.mnLace</code>.
+          Status matrix + wallet enumeration (UUID keys / rdns) — never hardcodes <code>window.midnight.mnLace</code>.
           By <a href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>
           · <a href="${LAB_BRANDING.nightDreamUrl}" rel="noopener noreferrer">NightDream.io</a>.
         </p>
       </div>
+
+
+      <section class="panel matrix-panel">
+        <h2>0. Connect status matrix</h2>
+        <p class="muted" style="margin-top:-0.35rem;margin-bottom:0.85rem">
+          Live probe of <code>window.midnight</code> — enumeration vs legacy <code>mnLace</code>,
+          API ^4.0.0 compatibility, and duplicate <code>rdns</code>. Read-only; refresh anytime.
+        </p>
+        ${renderMatrix(state.matrix)}
+        <div class="row" style="margin-top:0.75rem;margin-bottom:0">
+          <button type="button" class="ghost" id="btn-matrix">Refresh matrix</button>
+          <span class="muted mono" style="font-size:0.78rem">${
+            state.matrix
+              ? `keys: ${(state.matrix.injectionKeysPreview || []).join(', ') || '(none)'} · v4=${state.matrix.compatibleV4Count} · mnLace=${state.matrix.legacyMnLacePresent ? 'present' : 'absent'}`
+              : 'Matrix not probed yet.'
+          }</span>
+        </div>
+      </section>
 
       <section class="panel">
         <h2>1. Discover providers</h2>
@@ -167,6 +189,13 @@ function render(): void {
     </div>
   `;
 
+  // Fill matrix provider names via text nodes (XSS-safe)
+  app.querySelectorAll('.mx-pname').forEach((el) => {
+    const key = el.getAttribute('data-key');
+    const provider = state.matrix?.providers.find((p) => p.injectionKey === key);
+    if (provider) el.textContent = provider.name;
+  });
+
   // Fill wallet names via text nodes (XSS-safe)
   app.querySelectorAll('.wallet-list li').forEach((li) => {
     const key = li.getAttribute('data-key');
@@ -184,6 +213,12 @@ function render(): void {
 
   document.getElementById('btn-refresh')?.addEventListener('click', () => {
     refreshDiscovery();
+    refreshMatrix();
+    render();
+  });
+
+  document.getElementById('btn-matrix')?.addEventListener('click', () => {
+    refreshMatrix();
     render();
   });
 
@@ -222,6 +257,66 @@ function renderSession(session: ConnectedSession | null): string {
       <div><span class="k">Indexer</span><span class="v">${escapeHtml(session.configuration?.indexerUri ?? '(config unavailable)')}</span></div>
     </div>
   `;
+}
+
+
+function statusClass(s: string): string {
+  if (s === 'ok') return 'mx-ok';
+  if (s === 'warn') return 'mx-warn';
+  if (s === 'bad') return 'mx-bad';
+  if (s === 'info') return 'mx-info';
+  return 'mx-unknown';
+}
+
+function renderMatrix(matrix: StatusMatrix | null): string {
+  if (!matrix) {
+    return `<p class="muted">Click <strong>Refresh matrix</strong> after Lace injects (or to confirm an empty probe).</p>`;
+  }
+  const rows = matrix.rows
+    .map(
+      (r) => `<tr>
+        <td><span class="mx-pill ${statusClass(r.status)}">${escapeHtml(r.status)}</span></td>
+        <td>${escapeHtml(r.label)}</td>
+        <td class="muted">${escapeHtml(r.detail)}</td>
+      </tr>`,
+    )
+    .join('');
+  const providers =
+    matrix.providers.length === 0
+      ? `<p class="muted" style="margin:0.65rem 0 0">No providers enumerated yet.</p>`
+      : `<div class="mx-providers">${matrix.providers
+          .map(
+            (p) => `<div class="mx-card">
+              <div><strong></strong><span class="mx-pname" data-key="${escapeAttr(p.injectionKey)}"></span>
+                ${p.isLegacyMnLaceKey ? '<span class="mx-pill mx-info">mnLace key</span>' : ''}
+                ${p.compatibleV4 ? '<span class="mx-pill mx-ok">^4</span>' : '<span class="mx-pill mx-warn">not ^4</span>'}
+              </div>
+              <div class="muted mono">rdns=${escapeHtml(p.rdns || '(none)')} · api=${escapeHtml(p.apiVersion || '?')} · key=${escapeHtml(p.injectionKey.slice(0, 10))}…</div>
+              <div class="muted">connect=${p.hasConnect ? 'yes' : 'no'} · enable(legacy)=${p.hasEnable ? 'yes' : 'no'}</div>
+            </div>`,
+          )
+          .join('')}</div>`;
+  return `
+    <div class="mx-table-wrap">
+      <table class="mx-table">
+        <thead><tr><th>Status</th><th>Check</th><th>Detail</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${providers}
+  `;
+}
+
+function refreshMatrix(): void {
+  try {
+    state.matrix = probeStatusMatrix({ apiVersionRange: '^4.0.0' });
+    log(
+      `Matrix: midnight=${state.matrix.hasMidnightObject} keys=${state.matrix.injectionKeyCount} providers=${state.matrix.providers.length} v4=${state.matrix.compatibleV4Count} mnLace=${state.matrix.legacyMnLacePresent}`,
+    );
+  } catch (err) {
+    const e = normalizeConnectorError(err);
+    log(`Matrix error: ${e.code} — ${userHintForError(e)}`);
+  }
 }
 
 function refreshDiscovery(): void {
@@ -291,4 +386,5 @@ function escapeAttr(s: string): string {
 }
 
 refreshDiscovery();
+refreshMatrix();
 render();

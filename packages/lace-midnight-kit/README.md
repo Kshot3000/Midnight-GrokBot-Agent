@@ -15,6 +15,7 @@ Built for the [Midnight GrokBot Agent](https://github.com/Kshot3000/Midnight-Gro
 | Read unshielded / shielded / dust addresses | ✅ (when Lace allows) |
 | Graceful `LaceMidnightKitError` + user hints | ✅ |
 | Documented Lace workarounds | ✅ see below / `src/workarounds.ts` |
+| Connect status matrix (`probeStatusMatrix`) | ✅ |
 | Mainnet / Preprod **transfers** (`makeTransfer`) | ❌ **not claimed** — not in demo |
 
 ## What it does **not** do
@@ -91,3 +92,14 @@ Export `LACE_MIDNIGHT_WORKAROUNDS` / `formatWorkaroundsMarkdown()` for in-app he
 ## License
 
 MIT (this package). Official `@midnight-ntwrk/dapp-connector-api` is Apache-2.0 — follow upstream terms for that dependency.
+
+## Status matrix
+
+`probeStatusMatrix()` returns a read-only diagnostic snapshot used by the Lace connect demo:
+
+- Is `window.midnight` present?
+- How many injection keys / providers with `connect()`?
+- Is the legacy `mnLace` key present (info only — still enumerate)?
+- How many providers satisfy DApp Connector `^4.0.0`?
+- Duplicate `rdns` warning?
+

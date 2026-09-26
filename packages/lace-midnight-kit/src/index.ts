@@ -38,6 +38,14 @@ export {
 } from './discover.js';
 
 export {
+  probeStatusMatrix,
+  type MatrixRowStatus,
+  type StatusMatrixRow,
+  type ProviderMatrixEntry,
+  type StatusMatrix,
+} from './statusMatrix.js';
+
+export {
   connectMidnightWallet,
   connectWithProvider,
   createDisconnectedSession,

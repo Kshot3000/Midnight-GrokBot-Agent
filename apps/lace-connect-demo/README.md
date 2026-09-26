@@ -2,9 +2,10 @@
 
 Minimal **Vite + TypeScript** page that uses [`packages/lace-midnight-kit`](../../packages/lace-midnight-kit) to:
 
-1. Enumerate `window.midnight` providers (UUID / rdns)
-2. Connect with a chosen `networkId` (default **preprod**)
-3. Show connection status + addresses when Lace permits
+1. **Connect status matrix** — live probe of `window.midnight` (enumeration vs legacy `mnLace`, `^4.0.0` compat, duplicate `rdns`)
+2. Enumerate `window.midnight` providers (UUID / rdns)
+3. Connect with a chosen `networkId` (default **preprod**)
+4. Show connection status + addresses when Lace permits
 
 ## Safety label
 
