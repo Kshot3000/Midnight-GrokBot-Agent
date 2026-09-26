@@ -16,7 +16,9 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 | `/escrow/` | Agent Escrow local stub |
 | `/lace/` | Lace connect demo (discovery + connect only) |
 
-Deployed automatically from `main` via [`.github/workflows/pages.yml`](./.github/workflows/pages.yml). If the URL 404s, enable Pages: **Settings → Pages → Source: GitHub Actions**.
+Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
+The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
+Until then the URL may 404.
 
 ## What’s inside
 

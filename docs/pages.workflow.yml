@@ -1,0 +1,70 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Lace connect demo (Pages base)
+        env:
+          PAGES_BASE: /Midnight-GrokBot-Agent/lace/
+        run: npm run build:lace-demo
+
+      - name: Assemble static site
+        run: |
+          set -euo pipefail
+          SITE=site
+          rm -rf "$SITE"
+          mkdir -p "$SITE/escrow" "$SITE/lace"
+          # Lab site at Pages root
+          cp -R apps/midnight-lab-site/. "$SITE/"
+          # Escrow stub under /escrow/
+          cp -R apps/agent-escrow-stub/. "$SITE/escrow/"
+          # Lace Vite dist under /lace/
+          cp -R apps/lace-connect-demo/dist/. "$SITE/lace/"
+          # Drop any nested node_modules or README noise if present
+          rm -rf "$SITE/node_modules" "$SITE/escrow/node_modules" "$SITE/lace/node_modules" || true
+          # Marker so the artifact is obviously from this workflow
+          printf '%s\n' "Midnight GrokBot Agent Pages build" > "$SITE/.pages-build"
+          ls -la "$SITE" "$SITE/escrow" "$SITE/lace"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
