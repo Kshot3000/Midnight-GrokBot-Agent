@@ -40,7 +40,7 @@ jobs:
           set -euo pipefail
           SITE=site
           rm -rf "$SITE"
-          mkdir -p "$SITE/escrow" "$SITE/lace" "$SITE/auth" "$SITE/board" "$SITE/pledge" "$SITE/market" "$SITE/invite" "$SITE/proof" "$SITE/ballot" "$SITE/passport"
+          mkdir -p "$SITE/escrow" "$SITE/lace" "$SITE/auth" "$SITE/board" "$SITE/pledge" "$SITE/market" "$SITE/invite" "$SITE/proof" "$SITE/ballot" "$SITE/passport" "$SITE/atelier"
           # Lab site at Pages root
           cp -R apps/midnight-lab-site/. "$SITE/"
           # Escrow stub under /escrow/
@@ -61,13 +61,15 @@ jobs:
           cp -R apps/private-ballot/. "$SITE/ballot/"
           # Veil Passport Studio under /passport/
           cp -R apps/veil-passport/. "$SITE/passport/"
+          # Compact Atelier under /atelier/
+          cp -R apps/compact-atelier/. "$SITE/atelier/"
           # Lace Vite dist under /lace/
           cp -R apps/lace-connect-demo/dist/. "$SITE/lace/"
           # Drop any nested node_modules or README noise if present
           rm -rf "$SITE/node_modules" "$SITE/escrow/node_modules" "$SITE/lace/node_modules" || true
           # Marker so the artifact is obviously from this workflow
           printf '%s\n' "Midnight GrokBot Agent Pages build" > "$SITE/.pages-build"
-          ls -la "$SITE" "$SITE/escrow" "$SITE/lace" "$SITE/auth" "$SITE/board" "$SITE/pledge" "$SITE/market" "$SITE/invite" "$SITE/proof" "$SITE/ballot" "$SITE/passport"
+          ls -la "$SITE" "$SITE/escrow" "$SITE/lace" "$SITE/auth" "$SITE/board" "$SITE/pledge" "$SITE/market" "$SITE/invite" "$SITE/proof" "$SITE/ballot" "$SITE/passport" "$SITE/atelier"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

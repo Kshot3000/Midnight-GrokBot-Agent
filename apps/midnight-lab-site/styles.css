@@ -1051,3 +1051,10 @@ main {
   .reveal { opacity: 1; transform: none; }
   .bg-scene .orb, .bg-aurora, .bg-nebula { animation: none !important; }
 }
+
+
+.badge-new {
+  background: rgba(110, 231, 183, 0.14);
+  color: #6ee7b7;
+  border-color: rgba(110, 231, 183, 0.4);
+}

@@ -24,6 +24,7 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | `/proof/` | **Proof Playground** — visual ZK / circuit explainer |
 | `/ballot/` | **Private Ballot Studio** — sealed polls & private votes |
 | `/passport/` | **Veil Passport Studio** — confidential credentials & selective disclosure |
+| `/atelier/` | **Compact Atelier** — editable Compact snippets + explain panel |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -44,7 +45,8 @@ Until then the URL may 404.
 │   ├── sealed-invite/         # Sealed Invite Studio — private RSVP & sealed invites
 │   ├── proof-playground/      # Proof Playground — visual ZK / circuit explainer
 │   ├── private-ballot/        # Private Ballot Studio — sealed polls & private votes
-│   └── veil-passport/         # Veil Passport Studio — confidential credentials
+│   ├── veil-passport/         # Veil Passport Studio — confidential credentials
+│   └── compact-atelier/       # Compact Atelier — editable snippets + explain panel
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
 ├── contracts/
@@ -68,6 +70,7 @@ Until then the URL may 404.
 | `apps/proof-playground` | **Proof Playground** — visual ZK circuits, witness→gate→prove theater (local stub) |
 | `apps/private-ballot` | **Private Ballot Studio** — sealed polls, nullifiers, tally theater (local stub) |
 | `apps/veil-passport` | **Veil Passport Studio** — confidential credentials, selective disclose, predicate theater (local stub) |
+| `apps/compact-atelier` | **Compact Atelier** — editable Compact snippets, explain panel, lint theater (local stub) |
 | `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
@@ -187,6 +190,19 @@ python3 -m http.server 5182
 ```
 
 Pages path (when Actions enabled): `/proof/`. Local stub only — no Compact runtime, proof server, or on-chain verify.
+
+
+## Quick start — Compact Atelier
+
+Editable Compact snippets + explain panel: load curated skeletons, annotate constructs, watch ledger vs witness rails, run a simulated lint theater.
+
+```bash
+cd apps/compact-atelier
+python3 -m http.server 5185
+# open http://localhost:5185
+```
+
+Pages path (when Actions enabled): `/atelier/`. Local stub only — not a Compact compiler, proof server, or on-chain deploy.
 
 ## Compact / Midnight toolchain (official)
 

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Compact Atelier — editable Compact snippets + explain panel for Midnight. Load lessons, annotate constructs, run lint theater. Educational local stub by @kshot9000. Not a Compact compiler. Not on-chain." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Compact Atelier — Editable Snippets · Midnight Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M16 18h32v6H16zm0 12h22v6H16zm0 12h28v6H16z' fill='none' stroke='%22a78bfa' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='44' r='6' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-aurora"></div>
+    <div class="bg-aurora bg-aurora-2"></div>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Compact<span>Atelier</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#journey">Journey</a>
+      <a href="#lessons">Lessons</a>
+      <a href="#atelier">Atelier</a>
+      <a href="#glossary">Glossary</a>
+      <a href="#lint">Lint</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-stub" title="Educational local stub — not a Compact compiler">LOCAL STUB · not a compiler</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="help-overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <div class="help-card">
+      <h3 id="help-title">Keyboard shortcuts</h3>
+      <ul>
+        <li><span>Focus editor</span><span>E</span></li>
+        <li><span>Run lint theater</span><span>R</span></li>
+        <li><span>Focus lesson picker</span><span>L</span></li>
+        <li><span>Copy buffer</span><span>C</span></li>
+        <li><span>Reset to lesson</span><span>Shift+R</span></li>
+        <li><span>Open / close this help</span><span>?</span></li>
+        <li><span>Copy donate address</span><span>D</span></li>
+        <li><span>Close overlay</span><span>Esc</span></li>
+      </ul>
+      <p class="muted small" style="margin:0.85rem 0 0">Shortcuts idle when typing in the editor. Press <kbd style="font-family:var(--mono)">?</kbd> anytime.</p>
+      <div class="btn-row" style="margin-top:1rem">
+        <button type="button" class="btn primary small" id="btn-close-help">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main" class="wrap">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Compact language · editable atelier · explain panel</p>
+      <h1>Compact Atelier</h1>
+      <p class="lede">
+        World-class educational studio for Midnight’s <strong>Compact</strong> language:
+        load curated skeletons, <strong>edit</strong> live, click constructs for an
+        <strong>explain panel</strong>, watch ledger vs witness rails, then run a
+        <strong>lint theater</strong> — without claiming a Compact compiler, proof server,
+        Lace, or on-chain deploy.
+        By <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#lessons">Pick a lesson</a>
+        <a class="btn ghost" href="#atelier">Open atelier</a>
+        <a class="btn ghost" href="#lint">Lint theater</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="kbd-bar" aria-label="Keyboard hints">
+        <span class="kbd"><kbd>L</kbd> Lessons</span>
+        <span class="kbd"><kbd>E</kbd> Editor</span>
+        <span class="kbd"><kbd>R</kbd> Lint</span>
+        <span class="kbd"><kbd>?</kbd> Shortcuts</span>
+        <span class="kbd"><kbd>D</kbd> Donate</span>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest scope:</strong> local HTML/JS teaching atelier only.
+        Does <strong>not</strong> compile Compact, start a proof server, connect Lace, or settle ADA / DUST.
+        Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
+        Snippets are <strong>teaching skeletons</strong> — verify <code>pragma</code> / APIs against
+        <a href="https://docs.midnight.network/compact" rel="noopener noreferrer">official Compact docs</a>
+        and the compatibility matrix before compiling.
+      </div>
+    </section>
+
+    <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
+      <div class="section-head">
+        <h2 id="journey-heading">Atelier journey</h2>
+        <p class="muted">Labeled phases from idle → loaded → edited → explained → linted. Lint is a teaching theater, not a compiler.</p>
+      </div>
+      <ol class="journey" id="journey-steps" aria-label="Atelier journey phases">
+        <li class="journey-step is-active" data-phase="idle" aria-current="step">
+          <span class="js-idx">1</span>
+          <div>
+            <strong>Idle</strong>
+            <span class="js-detail">Pick a lesson</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="loaded">
+          <span class="js-idx">2</span>
+          <div>
+            <strong>Loaded</strong>
+            <span class="js-detail">Skeleton in buffer</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="edited">
+          <span class="js-idx">3</span>
+          <div>
+            <strong>Edited</strong>
+            <span class="js-detail">Draft diverged</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="explained">
+          <span class="js-idx">4</span>
+          <div>
+            <strong>Explained</strong>
+            <span class="js-detail">Construct annotated</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="linted">
+          <span class="js-idx">5</span>
+          <div>
+            <strong>Linted</strong>
+            <span class="js-detail">Theater checks (sim)</span>
+          </div>
+        </li>
+      </ol>
+      <p class="journey-live status" id="journey-live" role="status">Phase: idle — pick a Compact lesson to begin.</p>
+    </section>
+
+    <section id="lessons" class="panel reveal" aria-labelledby="lessons-heading">
+      <div class="section-head">
+        <h2 id="lessons-heading">Lesson gallery</h2>
+        <p class="muted">Six curated Compact teaching skeletons. Press <kbd style="font-family:var(--mono)">L</kbd> to focus. Aligned with lab <code>hello.compact</code> / escrow notes + official docs patterns — not invented APIs.</p>
+      </div>
+      <div class="lesson-grid" id="lesson-grid" role="listbox" aria-label="Compact lessons" tabindex="0"></div>
+      <p class="muted small" id="lesson-hint" style="margin-top:0.85rem">Select a card to load it into the atelier buffer.</p>
+    </section>
+
+    <section id="atelier" class="panel reveal atelier-panel" aria-labelledby="atelier-heading">
+      <div class="section-head">
+        <h2 id="atelier-heading">Editable atelier + explain panel</h2>
+        <p class="muted">Edit freely. Click a construct chip or select text to drive the explain panel. Dual rails show public ledger surface vs private witness veil.</p>
+      </div>
+
+      <div class="threat-rail" aria-label="Compact dual-state rails">
+        <div class="rail sealed-rail">
+          <h4>Witness veil</h4>
+          <p class="muted small">Private host-supplied data that must not appear on the public ledger.</p>
+          <div class="rail-meter" id="rail-witness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Witness veil meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <p class="rail-label" id="rail-witness-label">0% witness surface</p>
+        </div>
+        <div class="rail disclose-rail">
+          <h4>Ledger rail</h4>
+          <p class="muted small">Public on-chain surface: ledgers, circuits that write, disclose() calls.</p>
+          <div class="rail-meter" id="rail-ledger" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Ledger surface meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <p class="rail-label" id="rail-ledger-label">0% ledger surface</p>
+        </div>
+      </div>
+
+      <div class="atelier-toolbar" role="toolbar" aria-label="Atelier actions">
+        <span class="toolbar-meta" id="buffer-meta">No lesson loaded</span>
+        <div class="toolbar-actions">
+          <button type="button" class="btn ghost small" id="btn-copy-buffer">Copy</button>
+          <button type="button" class="btn ghost small" id="btn-reset-lesson">Reset lesson</button>
+          <button type="button" class="btn primary small" id="btn-run-lint">Run lint theater</button>
+        </div>
+      </div>
+
+      <div class="construct-chips" id="construct-chips" aria-label="Construct chips"></div>
+
+      <div class="atelier-split">
+        <div class="editor-pane">
+          <div class="pane-head">
+            <h3>Buffer <span class="badge badge-sim">editable</span></h3>
+            <span class="muted small" id="cursor-meta">Ln 1 · Col 1</span>
+          </div>
+          <div class="editor-shell">
+            <pre class="line-numbers" id="line-numbers" aria-hidden="true">1</pre>
+            <label class="sr-only" for="code-editor">Compact source editor</label>
+            <textarea id="code-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" rows="22" placeholder="Load a lesson to begin…"></textarea>
+          </div>
+        </div>
+        <aside class="explain-pane" aria-labelledby="explain-heading">
+          <div class="pane-head">
+            <h3 id="explain-heading">Explain panel</h3>
+            <span class="badge badge-lab">teaching</span>
+          </div>
+          <div class="explain-body" id="explain-body">
+            <p class="muted">Load a lesson, then click a construct chip or select a keyword in the buffer. The panel narrates what that Compact idea is teaching — without pretending to compile.</p>
+          </div>
+          <div class="explain-tags" id="explain-tags" hidden></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="glossary" class="panel reveal" aria-labelledby="glossary-heading">
+      <div class="section-head">
+        <h2 id="glossary-heading">Compact construct glossary</h2>
+        <p class="muted">Quick reference for the tokens this atelier annotates. Prefer official docs for normative semantics.</p>
+      </div>
+      <div class="glossary-grid" id="glossary-grid"></div>
+      <p class="muted small" style="margin-top:0.85rem">
+        Docs:
+        <a href="https://docs.midnight.network/compact" rel="noopener noreferrer">Compact overview</a> ·
+        <a href="https://docs.midnight.network/compact/reference/compact-reference" rel="noopener noreferrer">Language reference</a> ·
+        <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">Install toolchain</a>
+      </p>
+    </section>
+
+    <section id="lint" class="panel reveal" aria-labelledby="lint-heading">
+      <div class="section-head">
+        <h2 id="lint-heading">Lint theater</h2>
+        <p class="muted">Simulated static checks for teaching. <strong>Not</strong> the Compact compiler. Press <kbd style="font-family:var(--mono)">R</kbd>.</p>
+      </div>
+      <div class="lint-layout">
+        <div class="lint-scorecard">
+          <div class="score-ring" id="lint-ring" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-track" cx="60" cy="60" r="52" />
+              <circle class="ring-fill" id="lint-ring-fill" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="score-num" id="lint-score">—</div>
+          </div>
+          <div>
+            <h3 style="margin:0 0 0.35rem">Theater score</h3>
+            <p class="muted small" id="lint-summary">Awaiting lint run.</p>
+            <p class="status" id="lint-status" role="status">Idle</p>
+          </div>
+        </div>
+        <div class="lint-findings" id="lint-findings" aria-live="polite">
+          <p class="muted">Findings will appear here after you run the lint theater.</p>
+        </div>
+      </div>
+      <pre class="log" id="lint-log" aria-label="Lint log">Awaiting lint theater…</pre>
+    </section>
+
+    <section id="donate" class="panel donate reveal" aria-labelledby="donate-heading">
+      <div class="section-head">
+        <h2 id="donate-heading">Support the lab</h2>
+        <p class="muted">Cardano (ADA) donations keep the 24/7 Midnight Studio Hub going. Tip only — this UI never moves ADA / DUST.</p>
+      </div>
+      <div class="donate-card">
+        <p class="mono donate-addr" id="donate-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-copy-donate">Copy address</button>
+          <a class="btn ghost" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+          <a class="btn ghost" href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p>
+        <strong>Compact Atelier</strong>
+        · LOCAL STUB · not a Compact compiler · not on-chain ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Midnight-GrokBot-Agent</a>
+        · <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+      </p>
+      <p class="muted small">Educational lab for Midnight programmable privacy. Prefer official docs over any teaching stand-in in this UI.</p>
+    </footer>
+  </main>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
