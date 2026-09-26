@@ -1,9 +1,11 @@
 # Compact Atelier
 
-Editable Compact snippets + explain panel for Midnight — educational **local stub**.
+Editable Compact snippets + explain panel for Midnight — **LOCAL-TRUE**.
 
-Load a lesson, edit the skeleton, annotate constructs, run a simulated lint theater.
-Starfield + aurora, keyboard shortcuts, donate dock (`@kshot9000` + Cardano addr), honest **LOCAL STUB · not a Compact compiler** labels.
+Load curated lessons · annotate constructs · ledger vs witness rails · simulated lint theater.
+
+Real `localStorage` (schema v2) for **lesson progress** (lesson id, draft source, explained/linted flags), BroadcastChannel multi-tab sync, JSON export/import.
+Honest labels: **LOCAL-TRUE ≠ Compact compiler / ≠ on-chain**.
 
 ## Run locally
 
@@ -11,24 +13,18 @@ Starfield + aurora, keyboard shortcuts, donate dock (`@kshot9000` + Cardano addr
 cd apps/compact-atelier
 python3 -m http.server 5185
 # open http://localhost:5185
+npm test
 ```
 
-Documented Pages path (when Actions enabled): `/atelier/`.
+Pages path (when Actions enabled): `/atelier/`.
 
 ## Honest scope
 
-- Does **not** compile Compact, start a proof server, connect Lace, or settle on-chain.
-- Does **not** claim GitHub Pages is live until workflow scope + Actions are set.
-- Snippets are **teaching skeletons** aligned with lab contracts + official docs patterns — verify `pragma` / APIs against the official Compact compatibility matrix before compiling.
+- Does **not** compile Compact, run a proof server, Lace, or real ADA / DUST.
+- Lint / explain paths are **teaching stand-ins**.
+- Export may include draft Compact source — treat as sensitive.
 
-## Flow
+## Branding
 
-| Step | Teaching point |
-|------|----------------|
-| Load lesson | Curated Compact skeletons (counter, witness, MPS-0029, disclose, map, commit) |
-| Edit | Live editable buffer · localStorage draft |
-| Explain | Click constructs · glossary · dual-rail ledger vs witness meters |
-| Lint theater | Simulated static checks (pragma, import, ownPublicKey warn) — not a compiler |
-| Reset / copy | Restore lesson or copy buffer |
-
-Built by [@kshot9000](https://x.com/kshot9000).
+- X: [@kshot9000](https://x.com/kshot9000)
+- ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`

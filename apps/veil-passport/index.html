@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Veil Passport Studio — confidential credentials & selective disclosure for Midnight. Issue claims, present veiled, prove predicates, revoke. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="description" content="Veil Passport Studio — confidential credentials. Real localStorage + multi-tab sync + export/import by @kshot9000. LOCAL-TRUE educational — not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
-  <title>Veil Passport Studio — Confidential Credentials · Midnight Lab</title>
+  <title>Veil Passport Studio — LOCAL-TRUE · Midnight GrokBot Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Crect x='12' y='16' width='40' height='32' rx='6' fill='none' stroke='%22a78bfa' stroke-width='2.2'/%3E%3Ccircle cx='26' cy='32' r='6' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Cpath d='M36 28h12M36 36h8' stroke='%236ee7b7' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
 </head>
@@ -40,7 +40,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -406,7 +406,7 @@
     <section id="board" class="panel reveal" aria-labelledby="board-heading">
       <div class="section-head">
         <h2 id="board-heading">Passport board</h2>
-        <p class="muted">Local-only credentials in <code>localStorage</code>. Clear anytime — nothing left the browser.</p>
+        <p class="muted">Schema v2 localStorage · BroadcastChannel sync · JSON export/import. LOCAL-TRUE ≠ on-chain. Clear anytime — nothing left the browser.</p>
       </div>
       <div class="board-toolbar">
         <div class="board-stats">
@@ -416,6 +416,9 @@
           <span>Revoked: <strong id="stat-revoked">0</strong></span>
         </div>
         <div class="btn-row">
+          <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+          <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
           <button type="button" class="btn ghost small" id="btn-seed-board">Seed demo board</button>
           <button type="button" class="btn danger small" id="btn-reset">Reset studio</button>
         </div>
@@ -487,12 +490,12 @@ witness salt: Bytes&lt;32&gt;;
         <a href="https://x.com/kshot9000">@kshot9000</a>
       </p>
       <p class="disclaimer">
-        LOCAL STUB · educational simulation only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Educational only. Not affiliated with Midnight / IOG / Lace beyond public docs.
         No claim of live GitHub Pages, on-chain settlement, Compact runtime, or real proof-server verification.
       </p>
     </footer>
   </main>
 
-  <script src="main.js" defer></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

@@ -1,0 +1,14 @@
+{
+  "name": "@kshot/compact-atelier",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Compact Atelier — lesson progress with real localStorage, multi-tab sync, export/import. Educational; not a Compact compiler; not on-chain.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.7"
+  }
+}

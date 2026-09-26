@@ -1,9 +1,11 @@
 # Proof Playground
 
-Visual ZK / circuit explainer for Midnight — educational **local stub**.
+Visual ZK / circuit explainer for Midnight — **LOCAL-TRUE**.
 
-Witnesses → gates → public outputs → simulated prove / verify theater.
-Starfield + aurora, keyboard shortcuts, donate dock (`@kshot9000` + Cardano addr), honest **LOCAL STUB · not on-chain** labels.
+Pick a circuit · set private witnesses · watch the graph light · simulated prove / verify theater.
+
+Real `localStorage` (schema v2) for **session history + witness presets**, BroadcastChannel multi-tab sync, JSON export/import.
+Honest labels: **LOCAL-TRUE ≠ on-chain / ≠ proof server**. Not Compact runtime.
 
 ## Run locally
 
@@ -11,24 +13,18 @@ Starfield + aurora, keyboard shortcuts, donate dock (`@kshot9000` + Cardano addr
 cd apps/proof-playground
 python3 -m http.server 5182
 # open http://localhost:5182
+npm test
 ```
 
-Documented Pages path (when Actions enabled): `/proof/`.
+Pages path (when Actions enabled): `/proof/`.
 
 ## Honest scope
 
-- Does **not** run Compact, a proof server, Lace, or real ADA / DUST.
-- Does **not** claim GitHub Pages is live until workflow scope + Actions are set.
-- Circuit diagrams and SHA-256 blobs are **teaching stand-ins** — verify official Compact / Zswap crypto before shipping.
+- Does **not** run a real proof server, Compact, Lace, or ADA / DUST.
+- Prove / verify / tamper paths are **teaching stand-ins**.
+- Export may include history blobs / witness presets — treat as sensitive.
 
-## Circuits
+## Branding
 
-| Id | Teaching point |
-|----|----------------|
-| `commit` | H(value‖salt) → public commit |
-| `range` | Prove amount ≥ T without revealing amount |
-| `equality` | Two commits, same opening |
-| `disclose` | Dual-state sealed / range / full |
-| `sum` | Prove a+b ≥ T without revealing a or b |
-
-Built by [@kshot9000](https://x.com/kshot9000).
+- X: [@kshot9000](https://x.com/kshot9000)
+- ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`

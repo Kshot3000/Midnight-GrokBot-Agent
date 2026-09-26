@@ -1,9 +1,11 @@
 # Veil Passport Studio
 
-Confidential credentials & selective disclosure for Midnight — educational **local stub**.
+Confidential credentials & selective disclosure for Midnight — **LOCAL-TRUE**.
 
 Issue sealed claims · present public commit · selectively disclose · predicate proofs (age ≥ N, membership ∈ set) · revoke via nullifier.
-Starfield + aurora, keyboard shortcuts, donate dock (`@kshot9000` + Cardano addr), honest **LOCAL STUB · not on-chain** labels.
+
+Real `localStorage` (schema v2) + BroadcastChannel multi-tab sync + JSON export/import.
+Honest labels: **LOCAL-TRUE ≠ on-chain**. Not Compact / Lace / proof server.
 
 ## Run locally
 
@@ -11,6 +13,7 @@ Starfield + aurora, keyboard shortcuts, donate dock (`@kshot9000` + Cardano addr
 cd apps/veil-passport
 python3 -m http.server 5184
 # open http://localhost:5184
+npm test
 ```
 
 Documented Pages path (when Actions enabled): `/passport/`.
@@ -19,18 +22,10 @@ Documented Pages path (when Actions enabled): `/passport/`.
 
 - Does **not** run Compact, a proof server, Lace, or real ADA / DUST.
 - Does **not** claim GitHub Pages is live until workflow scope + Actions are set.
-- Commitments, issuer signatures, and predicate π blobs are **teaching stand-ins** — verify official Compact / Zswap crypto before shipping.
+- Commitments, issuer signatures, and predicate π blobs are **teaching stand-ins**.
+- Export may include claim fields / salts / holder secrets — treat as sensitive.
 
-## Flow
+## Branding
 
-| Step | Teaching point |
-|------|----------------|
-| Issue | Private claims → credential commit + issuer sig (sim) |
-| Present | Public surface: commit + stamp only |
-| Selective disclose | Open chosen claims; rest stay veiled |
-| Over-disclose | Warn path — privacy rail collapses |
-| Predicate | Prove age ≥ N or membership ∈ set without raw claim |
-| Tamper | Mutate π → fail path |
-| Revoke | Burn nullifier → presentations fail |
-
-Built by [@kshot9000](https://x.com/kshot9000).
+- X: [@kshot9000](https://x.com/kshot9000)
+- ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
