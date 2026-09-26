@@ -7,12 +7,17 @@
     name="description"
     content="Agent Escrow UI stub — local state-machine demo for the Midnight Compact skeleton. Not on-chain. By @kshot9000."
   />
+  <meta name="theme-color" content="#05070f" />
   <title>Agent Escrow Stub — Midnight GrokBot Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%237c9cff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23a78bfa'/%3E%3C/svg%3E" />
 </head>
 <body>
-  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="bg-scene" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+  </div>
 
   <header class="site-header">
     <a class="logo" href="./">Agent<span>Escrow</span></a>
@@ -20,18 +25,21 @@
       <a href="../../contracts/agent-escrow/README.md">Compact README</a>
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+      <a href="https://nightdream.io" rel="noopener noreferrer">NightDream</a>
     </nav>
   </header>
 
   <main>
-    <p class="eyebrow">Midnight Compact · UI stub</p>
-    <h1>Agent Escrow — local stub</h1>
-    <p class="lede">
-      Walk the milestone escrow state machine in the browser. This page does
-      <strong>not</strong> talk to Lace, a proof server, or the chain. The real
-      Compact skeleton lives under <code>contracts/agent-escrow</code> and uses
-      witness-derived role commitments (MPS-0029 — never <code>ownPublicKey()</code> alone).
-    </p>
+    <div class="hero-block">
+      <p class="eyebrow">Midnight Compact · UI stub</p>
+      <h1>Agent Escrow — local stub</h1>
+      <p class="lede">
+        Walk the milestone escrow state machine in the browser. This page does
+        <strong>not</strong> talk to Lace, a proof server, or the chain. The real
+        Compact skeleton lives under <code>contracts/agent-escrow</code> and uses
+        witness-derived role commitments (MPS-0029 — never <code>ownPublicKey()</code> alone).
+      </p>
+    </div>
 
     <div class="banner" role="status">
       Stub only — no on-chain deploy. Compile with Compact ~0.31.1 before any
@@ -41,14 +49,17 @@
 
     <div class="grid">
       <div class="card">
+        <span class="role">Role</span>
         <h3>Client</h3>
         <p>Funds, starts, disputes, settles, cancels. Always an approver.</p>
       </div>
       <div class="card">
+        <span class="role">Role</span>
         <h3>Agent</h3>
         <p>Submits proof hashes. Never approves or releases own work.</p>
       </div>
       <div class="card">
+        <span class="role">Role</span>
         <h3>Approver</h3>
         <p>Releases or rejects after a proof exists. Registered at init.</p>
       </div>
@@ -91,13 +102,15 @@ per milestone: pending → proof_submitted → released | rejected</pre>
         <button type="button" data-act="refund">Dispute refund</button>
         <button type="button" class="danger" data-act="reset">Reset</button>
       </div>
-      <div id="err" class="banner" style="display:none"></div>
-      <table>
-        <thead>
-          <tr><th>ID</th><th>Description</th><th>Amount</th><th>Status</th><th>Proof</th></tr>
-        </thead>
-        <tbody id="miles"></tbody>
-      </table>
+      <div id="err" class="banner error" style="display:none" role="alert"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Description</th><th>Amount</th><th>Status</th><th>Proof</th></tr>
+          </thead>
+          <tbody id="miles"></tbody>
+        </table>
+      </div>
     </section>
 
     <section class="panel">
@@ -117,7 +130,11 @@ per milestone: pending → proof_submitted → released | rejected</pre>
   </main>
 
   <footer class="site-footer">
-    <div>Midnight GrokBot Agent lab · <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a></div>
+    <div>
+      Midnight GrokBot Agent lab ·
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> ·
+      <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
+    </div>
     <span class="addr">ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</span>
   </footer>
 

@@ -70,13 +70,16 @@ function render(): void {
         Prefer <strong>preprod / preview</strong>. Lace is <strong>browser-only</strong>.
       </div>
 
-      <h1>Lace Midnight connect demo</h1>
-      <p class="lede">
-        Uses <code>@kshot/lace-midnight-kit</code> + official
-        <code>@midnight-ntwrk/dapp-connector-api@4.0.1</code> types.
-        Enumerates wallets (UUID keys / rdns) — never hardcodes <code>window.midnight.mnLace</code>.
-        By <a href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>.
-      </p>
+      <div class="hero-intro">
+        <h1>Lace Midnight connect demo</h1>
+        <p class="lede">
+          Uses <code>@kshot/lace-midnight-kit</code> + official
+          <code>@midnight-ntwrk/dapp-connector-api@4.0.1</code> types.
+          Enumerates wallets (UUID keys / rdns) — never hardcodes <code>window.midnight.mnLace</code>.
+          By <a href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>
+          · <a href="${LAB_BRANDING.nightDreamUrl}" rel="noopener noreferrer">NightDream.io</a>.
+        </p>
+      </div>
 
       <section class="panel">
         <h2>1. Discover providers</h2>
@@ -92,7 +95,7 @@ function render(): void {
                 .map((p) => {
                   const icon = safeIconUrl(p.api);
                   const selected = p.injectionKey === state.selectedKey;
-                  return `<li data-key="${escapeAttr(p.injectionKey)}" style="${selected ? 'outline:1px solid var(--accent)' : ''}">
+                  return `<li data-key="${escapeAttr(p.injectionKey)}" class="${selected ? 'selected' : ''}">
                     ${icon ? `<img alt="" src="${escapeAttr(icon)}" />` : '<span class="muted">◇</span>'}
                     <div>
                       <div><strong></strong><span class="wallet-name"></span></div>

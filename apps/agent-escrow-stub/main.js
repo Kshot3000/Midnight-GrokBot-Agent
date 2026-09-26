@@ -56,9 +56,61 @@
     el.err.textContent = msg;
   }
 
+  function find(id) {
+    return s.milestones.find((m) => m.id === id);
+  }
+
+  function can(act) {
+    const m1 = find("m1");
+    const m2 = find("m2");
+    switch (act) {
+      case "fund":
+        return s.state === "created";
+      case "start":
+        return s.state === "funded";
+      case "proof1":
+        return s.state === "in_progress" && m1.status === "pending";
+      case "approve1":
+        return s.state === "in_progress" && m1.status === "proof_submitted";
+      case "proof2":
+        return s.state === "in_progress" && m2.status === "pending";
+      case "reject2":
+        return s.state === "in_progress" && m2.status === "proof_submitted";
+      case "settle":
+        return (
+          s.state === "in_progress" &&
+          s.milestones.every((m) => m.status === "released" || m.status === "rejected")
+        );
+      case "dispute":
+        return s.state === "funded" || s.state === "in_progress";
+      case "resume":
+      case "refund":
+        return s.state === "disputed";
+      case "reset":
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  function updateButtons() {
+    document.querySelectorAll("[data-act]").forEach((btn) => {
+      const act = btn.getAttribute("data-act");
+      btn.disabled = !can(act);
+    });
+  }
+
   function render() {
     el.statePill.textContent = s.state;
-    el.statePill.className = "pill" + (s.state === "settled" || s.state === "refunded" ? " ok" : s.state === "disputed" ? " warn" : "");
+    el.statePill.className =
+      "pill" +
+      (s.state === "settled" || s.state === "refunded"
+        ? " ok"
+        : s.state === "disputed"
+          ? " warn"
+          : s.state === "in_progress" || s.state === "funded"
+            ? " live"
+            : "");
     el.funded.textContent = String(s.funded);
     el.released.textContent = String(s.released);
     el.refunded.textContent = String(s.refunded);
@@ -66,16 +118,17 @@
     el.miles.innerHTML = s.milestones
       .map(
         (m) =>
-          `<tr><td><code>${m.id}</code></td><td>${m.description}</td><td>${m.amount}</td><td>${m.status}</td><td><code>${m.proofHash || "—"}</code></td></tr>`
+          `<tr><td><code>${m.id}</code></td><td>${m.description}</td><td>${m.amount}</td>` +
+          `<td><span class="status-tag ${m.status}">${m.status}</span></td>` +
+          `<td><code>${m.proofHash || "—"}</code></td></tr>`
       )
       .join("");
     el.log.textContent = s.audit.length
-      ? s.audit.map((e) => `#${e.seq} ${e.type} by ${e.actor} → ${e.state} ${JSON.stringify(e.data)}`).join("\n")
+      ? s.audit
+          .map((e) => `#${e.seq} ${e.type} by ${e.actor} → ${e.state} ${JSON.stringify(e.data)}`)
+          .join("\n")
       : "(empty)";
-  }
-
-  function find(id) {
-    return s.milestones.find((m) => m.id === id);
+    updateButtons();
   }
 
   const actions = {
