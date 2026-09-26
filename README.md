@@ -1,6 +1,6 @@
 # Midnight GrokBot Agent
 
-**24/7 Midnight build lab** — scaffolding, Compact starters, Lace connector kit, and a developer landing site for [Midnight](https://midnight.network/), the Cardano partner chain focused on **programmable privacy** with zero-knowledge smart contracts.
+**24/7 Midnight build lab** — scaffolding, Compact starters (incl. Agent Escrow), Lace connector kit, and a developer landing site for [Midnight](https://midnight.network/), the Cardano partner chain focused on **programmable privacy** with zero-knowledge smart contracts.
 
 Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https://nightdream.io)).
 
@@ -12,10 +12,13 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 .
 ├── apps/
 │   ├── midnight-lab-site/     # Static marketing / dev landing site
-│   └── lace-connect-demo/     # Vite demo: discover + connect Lace Midnight
+│   ├── lace-connect-demo/     # Vite demo: discover + connect Lace Midnight
+│   └── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
-├── contracts/                 # Compact starter + setup notes
+├── contracts/
+│   ├── hello-midnight/        # Compact counter starter
+│   └── agent-escrow/          # Agent Escrow Compact skeleton (~0.31.1 notes)
 ├── BRANDING.md                # Canonical donation address + socials
 ├── LICENSE                    # MIT
 └── README.md
@@ -25,8 +28,10 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 | --- | --- |
 | `apps/midnight-lab-site` | Zero-dependency HTML/CSS/JS site about Midnight + this lab |
 | `apps/lace-connect-demo` | Vite page using the kit — **discovery + connect only** (no transfer claims) |
+| `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
 | `packages/lace-midnight-kit` | Enumerate `window.midnight`, connect, addresses/network, graceful errors + Lace workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
+| `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
 | `BRANDING.md` | Donation address, X handle, NightDream mention |
 
 ## Quick start — landing site
@@ -97,8 +102,19 @@ Canonical copy lives in [`BRANDING.md`](./BRANDING.md).
 
 MIT — see [`LICENSE`](./LICENSE). Official Midnight docs/examples may use their own licenses; when copying from Midnight Foundation materials, follow those upstream terms.
 
+## Agent Escrow (Compact)
+
+Milestone escrow for AI-agent work — Compact skeleton + local UI stub:
+
+- Contract: [`contracts/agent-escrow/`](./contracts/agent-escrow/) (witness role commitments; **not** `ownPublicKey()` alone)
+- UI stub: [`apps/agent-escrow-stub/`](./apps/agent-escrow-stub/) (`python3 -m http.server 5175`)
+- Protocol reference (JS/Python): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/tree/main/apps/agent-escrow
+
+Pin Compact compiler **~0.31.1** (create-mn-app / example-bboard matrix). This lab has **not** deployed the escrow contract on-chain in the scaffold commit.
+
 ## Recommended next apps
 
-1. Wire `contracts/hello-midnight` through the official Compact compile → TypeScript bindings flow.
-2. Extend `apps/lace-connect-demo` with read-only Preprod indexer queries (still no transfer claims until proven).
-3. Follow the official privacy-preserving leaderboard tutorial end-to-end, then adapt patterns here.
+1. Compile `contracts/agent-escrow` with Compact ~0.31.1, then wire witnesses like `example-bboard`.
+2. Wire `contracts/hello-midnight` through the official Compact compile → TypeScript bindings flow.
+3. Extend `apps/lace-connect-demo` with read-only Preprod indexer queries (still no transfer claims until proven).
+4. Follow the official privacy-preserving leaderboard tutorial end-to-end, then adapt patterns here.

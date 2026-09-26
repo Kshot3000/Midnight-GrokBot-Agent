@@ -1,0 +1,334 @@
+/*
+ * agent-escrow.compact — Agent Escrow Compact skeleton
+ *
+ * Milestone-based escrow for AI-agent work on Midnight.
+ * Ported from the JS/Python reference protocol in:
+ *   https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/tree/main/apps/agent-escrow
+ *
+ * Patterns aligned with official example-bboard / create-mn-app (bboard) and
+ * the leaderboard tutorial:
+ *   - pragma language_version >= 0.23
+ *   - witness localSecretKey + persistentHash role commitments (NOT ownPublicKey)
+ *   - disclose() on every ledger write
+ *
+ * MPS-0029: Never authorize with ownPublicKey() alone. ownPublicKey() is a
+ * caller-supplied identifier, not a proof of key ownership. Authorization
+ * here uses witness-derived commitments:
+ *   roleCommitment(sk, roleTag) = persistentHash("agent-escrow:role:" || tag || sk)
+ *
+ * THIS IS AN EDUCATIONAL SKELETON. It has NOT been compiled or deployed on-chain
+ * in this commit. Compile with Compact ~0.31.1 (see README) before any deploy.
+ *
+ * Official docs:
+ *   https://docs.midnight.network/compact
+ *   https://docs.midnight.network/examples/dapps/bboard
+ *   https://docs.midnight.network/tutorials/leaderboard/smart-contract
+ *   https://github.com/midnightntwrk/example-bboard
+ *   https://github.com/midnightntwrk/create-mn-app
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+/* ---------- enums / structs ---------- */
+
+export enum EscrowState {
+  CREATED,
+  FUNDED,
+  IN_PROGRESS,
+  DISPUTED,
+  SETTLED,
+  REFUNDED,
+  CANCELLED
+}
+
+export enum MilestoneStatus {
+  PENDING,
+  PROOF_SUBMITTED,
+  RELEASED,
+  REJECTED
+}
+
+struct Milestone {
+  amount: Uint<64>,
+  status: MilestoneStatus,
+  proofHash: Bytes<32>,
+  deadline: Uint<64>
+}
+
+/* ---------- public ledger ---------- */
+
+export ledger state: EscrowState;
+
+/* Role commitments (domain-separated hashes of private secrets). NOT raw public keys. */
+export ledger clientPk: Bytes<32>;
+export ledger agentPk: Bytes<32>;
+export ledger approverPk: Bytes<32>;
+
+export ledger funded: Uint<64>;
+export ledger released: Uint<64>;
+export ledger refunded: Uint<64>;
+
+/* Freshness / deployment nonce (bboard-style sequence). */
+export ledger sequence: Counter;
+
+export ledger milestones: Map<Uint<64>, Milestone>;
+export ledger milestoneCount: Counter;
+export ledger decidedCount: Counter;
+export ledger milestoneTotal: Uint<64>;
+
+/* ---------- private witnesses (host-supplied; never on-chain) ---------- */
+
+witness localSecretKey(): Bytes<32>;
+
+/* ---------- constructor ---------- */
+
+constructor() {
+  state = EscrowState.CREATED;
+  clientPk = pad(32, "");
+  agentPk = pad(32, "");
+  approverPk = pad(32, "");
+  funded = 0;
+  released = 0;
+  refunded = 0;
+  milestoneTotal = 0;
+  sequence.increment(1);
+}
+
+/* ---------- auth helpers (MPS-0029 compliant) ---------- */
+
+/**
+ * Derive a role commitment from a local secret + role tag.
+ * Domain separator prevents cross-protocol hash reuse.
+ */
+export circuit roleCommitment(sk: Bytes<32>, roleTag: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "agent-escrow:role:"),
+    roleTag,
+    sk
+  ]);
+}
+
+export circuit clientTag(): Bytes<32> {
+  return pad(32, "client");
+}
+
+export circuit agentTag(): Bytes<32> {
+  return pad(32, "agent");
+}
+
+export circuit approverTag(): Bytes<32> {
+  return pad(32, "approver");
+}
+
+/**
+ * Prove caller holds the secret that hashes to the registered client commitment.
+ * Do NOT replace this with assert(ownPublicKey() == clientPk).
+ */
+circuit assertIsClient(): [] {
+  assert(
+    clientPk == roleCommitment(localSecretKey(), clientTag()),
+    "not the registered client (witness secret must match client commitment)"
+  );
+}
+
+circuit assertIsAgent(): [] {
+  assert(
+    agentPk == roleCommitment(localSecretKey(), agentTag()),
+    "not the registered agent (witness secret must match agent commitment)"
+  );
+}
+
+/**
+ * Approver = registered approver OR client. Agent is excluded by construction:
+ * initialize() requires agentPk to differ from clientPk and approverPk.
+ */
+circuit assertIsApprover(): [] {
+  const sk = localSecretKey();
+  const asClient = roleCommitment(sk, clientTag());
+  const asApprover = roleCommitment(sk, approverTag());
+  assert(
+    clientPk == asClient || approverPk == asApprover,
+    "not a registered approver"
+  );
+}
+
+/* ---------- lifecycle circuits ---------- */
+
+/**
+ * Register role commitments. Caller proves they are the client by disclosing
+ * a commitment derived from their localSecretKey. Agent and extra approver
+ * commitments are supplied as public parameters (precomputed off-chain by those parties).
+ */
+export circuit initialize(
+  agentCommitment: Bytes<32>,
+  approverCommitment: Bytes<32>
+): [] {
+  assert(state == EscrowState.CREATED, "can only initialize in CREATED");
+  assert(clientPk == pad(32, ""), "already initialized");
+
+  const clientCommitment = roleCommitment(localSecretKey(), clientTag());
+  clientPk = disclose(clientCommitment);
+  agentPk = disclose(agentCommitment);
+  approverPk = disclose(approverCommitment);
+
+  assert(agentPk != clientPk, "agent and client commitments must differ");
+  assert(agentPk != approverPk, "agent cannot also be the registered approver");
+  assert(clientPk != pad(32, ""), "client commitment must be non-empty");
+  assert(agentPk != pad(32, ""), "agent commitment must be non-empty");
+}
+
+/** Client adds a milestone before work starts. Amounts are integer subunits (e.g. lovelace). */
+export circuit addMilestone(amount: Uint<64>, deadline: Uint<64>): [] {
+  assertIsClient();
+  assert(
+    state == EscrowState.CREATED || state == EscrowState.FUNDED,
+    "milestones only before work starts"
+  );
+  assert((disclose(amount) as Uint<64>) > 0, "milestone amount must be positive");
+
+  milestoneCount.increment(1);
+  const id = disclose(milestoneCount.read() as Uint<64>);
+  const amt = disclose(amount);
+  milestones.insert(id, Milestone {
+    amount: amt,
+    status: MilestoneStatus.PENDING,
+    proofHash: pad(32, ""),
+    deadline: disclose(deadline)
+  });
+  milestoneTotal = milestoneTotal + amt;
+}
+
+/** Client funds the escrow budget (single funding event in this skeleton). */
+export circuit fund(amount: Uint<64>): [] {
+  assertIsClient();
+  assert(state == EscrowState.CREATED, "can only fund in CREATED");
+  assert(clientPk != pad(32, ""), "call initialize before fund");
+  assert((disclose(amount) as Uint<64>) > 0, "fund amount must be positive");
+
+  funded = disclose(amount);
+  state = EscrowState.FUNDED;
+}
+
+/** Open the engagement once milestones fit the funded budget. */
+export circuit start(): [] {
+  assertIsClient();
+  assert(state == EscrowState.FUNDED, "can only start in FUNDED");
+  assert((milestoneCount.read() as Uint<64>) > 0, "need at least one milestone");
+  assert(milestoneTotal <= funded, "milestone total exceeds funded amount");
+
+  state = EscrowState.IN_PROGRESS;
+}
+
+/** Agent submits a proof commitment (hash) for a pending milestone. */
+export circuit submitProof(milestoneId: Uint<64>, proofHash: Bytes<32>): [] {
+  assertIsAgent();
+  assert(state == EscrowState.IN_PROGRESS, "can only submit proofs while IN_PROGRESS");
+
+  const id = disclose(milestoneId);
+  assert(milestones.member(id), "unknown milestone");
+  const m = milestones.lookup(id);
+  assert(m.status == MilestoneStatus.PENDING, "milestone has no open proof slot");
+  assert(disclose(proofHash) != pad(32, ""), "proof hash must be non-empty");
+
+  milestones.insert(id, Milestone {
+    amount: m.amount,
+    status: MilestoneStatus.PROOF_SUBMITTED,
+    proofHash: disclose(proofHash),
+    deadline: m.deadline
+  });
+}
+
+/**
+ * Registered approver (or client) releases one milestone after a proof exists.
+ * Agent cannot pass assertIsApprover when agentPk != clientPk/approverPk.
+ */
+export circuit approve(milestoneId: Uint<64>): [] {
+  assertIsApprover();
+  assert(state == EscrowState.IN_PROGRESS, "can only approve while IN_PROGRESS");
+
+  const id = disclose(milestoneId);
+  assert(milestones.member(id), "unknown milestone");
+  const m = milestones.lookup(id);
+  assert(m.status == MilestoneStatus.PROOF_SUBMITTED, "milestone needs a submitted proof");
+
+  milestones.insert(id, Milestone {
+    amount: m.amount,
+    status: MilestoneStatus.RELEASED,
+    proofHash: m.proofHash,
+    deadline: m.deadline
+  });
+  released = released + m.amount;
+  decidedCount.increment(1);
+}
+
+/** Approver rejects a proof; funds stay escrowed. */
+export circuit reject(milestoneId: Uint<64>): [] {
+  assertIsApprover();
+  assert(state == EscrowState.IN_PROGRESS, "can only reject while IN_PROGRESS");
+
+  const id = disclose(milestoneId);
+  assert(milestones.member(id), "unknown milestone");
+  const m = milestones.lookup(id);
+  assert(m.status == MilestoneStatus.PROOF_SUBMITTED, "only a submitted proof can be rejected");
+
+  milestones.insert(id, Milestone {
+    amount: m.amount,
+    status: MilestoneStatus.REJECTED,
+    proofHash: m.proofHash,
+    deadline: m.deadline
+  });
+  decidedCount.increment(1);
+}
+
+/** Client opens a dispute (freezes releases). */
+export circuit dispute(): [] {
+  assertIsClient();
+  assert(
+    state == EscrowState.FUNDED || state == EscrowState.IN_PROGRESS,
+    "only FUNDED or IN_PROGRESS can be disputed"
+  );
+  state = EscrowState.DISPUTED;
+}
+
+/** Client resolves dispute with a full refund of remaining balance. */
+export circuit resolveDisputeRefund(): [] {
+  assertIsClient();
+  assert(state == EscrowState.DISPUTED, "escrow is not in dispute");
+  const bal = funded - released - refunded;
+  refunded = refunded + bal;
+  state = EscrowState.REFUNDED;
+}
+
+/** Client resolves dispute by resuming work. */
+export circuit resolveDisputeResume(): [] {
+  assertIsClient();
+  assert(state == EscrowState.DISPUTED, "escrow is not in dispute");
+  state = EscrowState.IN_PROGRESS;
+}
+
+/** After every milestone is decided, refund the remainder and settle. */
+export circuit settle(): [] {
+  assertIsClient();
+  assert(state == EscrowState.IN_PROGRESS, "only IN_PROGRESS can be settled");
+  assert(
+    decidedCount.read() == milestoneCount.read(),
+    "all milestones must be released or rejected first"
+  );
+  const bal = funded - released - refunded;
+  refunded = refunded + bal;
+  state = EscrowState.SETTLED;
+}
+
+/** Cancel before work starts; refund any deposit. */
+export circuit cancel(): [] {
+  assertIsClient();
+  assert(
+    state == EscrowState.CREATED || state == EscrowState.FUNDED,
+    "can only cancel before work starts"
+  );
+  const bal = funded - released - refunded;
+  refunded = refunded + bal;
+  state = EscrowState.CANCELLED;
+}

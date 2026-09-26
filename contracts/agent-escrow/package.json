@@ -1,0 +1,18 @@
+{
+  "name": "@kshot/agent-escrow-contract",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Agent Escrow Compact skeleton — Midnight GrokBot Agent lab (@kshot9000)",
+  "scripts": {
+    "compact": "compact compile src/agent-escrow.compact ./src/managed/agent-escrow",
+    "compile": "npm run compact"
+  },
+  "author": "Kshot (@kshot9000)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kshot3000/Midnight-GrokBot-Agent.git",
+    "directory": "contracts/agent-escrow"
+  }
+}

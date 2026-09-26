@@ -25,3 +25,6 @@ keys/
 .idea/
 .vscode/
 *.swp
+
+# Compact compiler managed output
+**/managed/

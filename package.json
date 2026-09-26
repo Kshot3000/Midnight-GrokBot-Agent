@@ -2,7 +2,7 @@
   "name": "midnight-grokbot-agent",
   "private": true,
   "version": "0.1.0",
-  "description": "Midnight GrokBot Agent — 24/7 build lab (static site, Compact starter, Lace connector kit)",
+  "description": "Midnight GrokBot Agent \u2014 24/7 build lab (static site, Compact starters incl. Agent Escrow, Lace connector kit)",
   "workspaces": [
     "packages/*",
     "apps/lace-connect-demo"
