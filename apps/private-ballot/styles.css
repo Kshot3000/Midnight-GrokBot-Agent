@@ -1120,3 +1120,6 @@ code:not(pre code) {
   background: rgba(251, 113, 133, 0.05);
   opacity: 0.85;
 }
+
+/* Export / import toolbar */
+#btn-export, #btn-import { white-space: nowrap; }

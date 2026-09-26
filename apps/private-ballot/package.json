@@ -1,0 +1,14 @@
+{
+  "name": "@kshot/private-ballot",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Private Ballot Studio — sealed polls with real localStorage, multi-tab sync, export/import. Educational; not on-chain.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.7"
+  }
+}

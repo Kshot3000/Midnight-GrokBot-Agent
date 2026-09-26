@@ -1,15 +1,28 @@
 /**
- * Private Ballot Studio — sealed polls & private votes educational stub.
- * Commitments + nullifiers + tally theater. Not Compact. Not on-chain. Not Pages-live.
+ * Private Ballot Studio — sealed polls & private votes (local-true).
+ * Real localStorage persistence, multi-tab sync, export/import.
+ * Commitments + nullifiers + tally theater. Not Compact. Not on-chain.
  */
-(function () {
-  "use strict";
+import {
+  DOMAIN,
+  DONATE_ADDR,
+  STORAGE_KEY,
+  parseOptions,
+  findDuplicateNullifier,
+  hasNullifierCollision,
+  aggregateTally,
+  acceptedVotesForBallot,
+} from "./ballot-core.mjs";
+import {
+  loadStudioState,
+  saveStudioState,
+  clearStudioState,
+  exportStudioJSON,
+  importStudioJSON,
+  createTabSync,
+} from "./persist.mjs";
 
-  const STORAGE_KEY = "mn-private-ballot-v1";
-  const DONATE_ADDR =
-    "addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v";
-  const DOMAIN = "private-ballot:v1";
-  const CIRC = 2 * Math.PI * 48; // vote ring circumference
+const CIRC = 2 * Math.PI * 48; // vote ring circumference
 
   /** @type {{ id: string, question: string, options: string[], eligCommit: string, eligSalt: string, createdAt: string, certified: boolean, tally?: Record<string, number>, tallyPi?: string, disclosed?: boolean } | null} */
   let activeBallot = null;
@@ -74,63 +87,139 @@
     el.scrollTop = el.scrollHeight;
   }
 
+  let tabSync = null;
+  let applyingRemote = false;
+
+  function snapshotState() {
+    const vault = {};
+    for (const b of ballots) {
+      let salt = null;
+      if (activeBallot && activeBallot.id === b.id && activeBallot.eligSalt) {
+        salt = activeBallot.eligSalt;
+      }
+      vault[b.id] = { eligSalt: salt };
+    }
+    if (activeBallot?.eligSalt) {
+      vault[activeBallot.id] = { eligSalt: activeBallot.eligSalt };
+    }
+    return {
+      ballots,
+      votes,
+      rejectCount,
+      activeId: activeBallot?.id || null,
+      vault,
+    };
+  }
+
+  function applyState(data, { announceRemote = false } = {}) {
+    ballots = Array.isArray(data.ballots) ? data.ballots : [];
+    votes = Array.isArray(data.votes) ? data.votes : [];
+    rejectCount = Number(data.rejectCount) || 0;
+    if (data.activeId) {
+      activeBallot = ballots.find((b) => b.id === data.activeId) || ballots[0] || null;
+    } else {
+      activeBallot = ballots[0] || null;
+    }
+    if (activeBallot && data.vault && data.vault[activeBallot.id]?.eligSalt) {
+      activeBallot = { ...activeBallot, eligSalt: data.vault[activeBallot.id].eligSalt };
+    }
+    if (announceRemote) {
+      toast("Synced from another tab");
+      announce("Ballot studio synced from another tab");
+    }
+  }
+
   function save() {
+    if (applyingRemote) return;
+    const saved = saveStudioState(snapshotState());
     try {
-      const vault = {};
-      for (const b of ballots) {
-        // Prefer live active salt; else keep prior vault entry
-        let salt = null;
-        if (activeBallot && activeBallot.id === b.id && activeBallot.eligSalt) {
-          salt = activeBallot.eligSalt;
-        }
-        vault[b.id] = { eligSalt: salt };
-      }
-      // merge prior vault salts if present
-      try {
-        const prev = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-        if (prev.vault) {
-          for (const [id, v] of Object.entries(prev.vault)) {
-            if (!vault[id]) vault[id] = v;
-            else if (!vault[id].eligSalt && v.eligSalt) vault[id].eligSalt = v.eligSalt;
-          }
-        }
-      } catch (_) {}
-      if (activeBallot?.eligSalt) {
-        vault[activeBallot.id] = { eligSalt: activeBallot.eligSalt };
-      }
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          ballots,
-          votes,
-          rejectCount,
-          activeId: activeBallot?.id || null,
-          vault,
-        })
-      );
-    } catch (_) { /* quota */ }
+      tabSync?.broadcast(saved);
+    } catch (_) {}
   }
 
   function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      ballots = Array.isArray(data.ballots) ? data.ballots : [];
-      votes = Array.isArray(data.votes) ? data.votes : [];
-      rejectCount = Number(data.rejectCount) || 0;
-      if (data.activeId) {
-        activeBallot = ballots.find((b) => b.id === data.activeId) || ballots[0] || null;
-      } else {
-        activeBallot = ballots[0] || null;
-      }
-      if (activeBallot && data.vault && data.vault[activeBallot.id]?.eligSalt) {
-        activeBallot = { ...activeBallot, eligSalt: data.vault[activeBallot.id].eligSalt };
-      }
-    } catch (_) {
-      ballots = [];
-      votes = [];
+    const data = loadStudioState();
+    applyState(data);
+  }
+
+  function startTabSync() {
+    tabSync?.stop();
+    tabSync = createTabSync({
+      onRemote(state) {
+        applyingRemote = true;
+        try {
+          applyState(state, { announceRemote: true });
+          updateChoiceSelect();
+          updatePreview();
+          renderBoard();
+          renderTallyBars(activeBallot?.tally || null, activeBallot?.options || null);
+          if (activeBallot?.certified) {
+            setJourney("certified", "Phase: certified — synced from another tab.");
+            syncRails(70, 88);
+          } else if (acceptedVotesForBallot(votes, activeBallot?.id).length) {
+            setJourney("voting", "Phase: voting — synced from another tab.");
+            syncRails(92, 42);
+          } else if (activeBallot) {
+            setJourney("sealed", "Phase: sealed — synced from another tab.");
+            syncRails(100, 30);
+          } else {
+            setJourney("idle", "Phase: idle — synced empty studio.");
+            syncRails(100, 0);
+          }
+        } finally {
+          applyingRemote = false;
+        }
+      },
+    });
+  }
+
+  function exportStudio() {
+    const json = exportStudioJSON(snapshotState());
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    a.href = url;
+    a.download = `private-ballot-export-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("Exported JSON snapshot");
+    announce("Studio exported as JSON");
+    logTo("vote-log", "export · local snapshot downloaded (sensitive if openings present)");
+  }
+
+  async function importStudioFromFile(file) {
+    if (!file) return;
+    const text = await file.text();
+    const result = importStudioJSON(text);
+    if (!result.ok) {
+      toast(result.error || "Import failed");
+      announce("Import failed");
+      setStatus("compose-status", result.error || "Import failed", "fail");
+      return;
     }
+    if (!window.confirm("Import replaces this tab's Private Ballot data. Continue?")) return;
+    applyingRemote = true;
+    try {
+      applyState(result.state);
+      saveStudioState(snapshotState());
+      tabSync?.broadcast(snapshotState());
+    } finally {
+      applyingRemote = false;
+    }
+    updateChoiceSelect();
+    updatePreview();
+    renderBoard();
+    renderTallyBars(activeBallot?.tally || null, activeBallot?.options || null);
+    setJourney(
+      activeBallot?.certified ? "certified" : activeBallot ? "voting" : "idle",
+      "Imported local snapshot — still LOCAL educational data, not on-chain."
+    );
+    toast("Import applied");
+    announce("Ballot studio imported");
+    logTo("vote-log", `import · ${result.state.ballots.length} ballot(s) · ${result.state.votes.length} vote(s)`);
   }
 
   function setJourney(phase, liveMsg) {
@@ -167,13 +256,6 @@
     if (lpl) lpl.textContent = `${pub}% public surface`;
   }
 
-  function parseOptions(raw) {
-    return String(raw || "")
-      .split(/\r?\n/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .slice(0, 6);
-  }
 
   function updateChoiceSelect() {
     const sel = document.getElementById("vote-choice");
@@ -343,9 +425,7 @@
     await pause(400);
     const eligMaterial = activeBallot.eligSalt || activeBallot.eligCommit;
     const nullifier = await sha256(`${DOMAIN}|null|${activeBallot.id}|${secret}|${eligMaterial}`);
-    const dup = votes.some(
-      (v) => v.ballotId === activeBallot.id && v.nullifier === nullifier && !v.rejected
-    );
+    const dup = findDuplicateNullifier(votes, activeBallot.id, nullifier);
     if (dup) {
       setEligStage("null", "is-fail", "DUP");
       rejectCount += 1;
@@ -494,7 +574,7 @@
 
   function activeVotes() {
     if (!activeBallot) return [];
-    return votes.filter((v) => v.ballotId === activeBallot.id && !v.rejected);
+    return acceptedVotesForBallot(votes, activeBallot.id);
   }
 
   function renderTallyBars(tally, options) {
@@ -545,16 +625,7 @@
       setTallyStage("check-null", "is-active", "…");
       setMeter(40, "40% — checking nullifiers");
       await sleep(450);
-      const seen = new Set();
-      let dup = false;
-      for (const v of av) {
-        if (seen.has(v.nullifier)) {
-          dup = true;
-          break;
-        }
-        seen.add(v.nullifier);
-      }
-      if (dup) {
+      if (hasNullifierCollision(av)) {
         setTallyStage("check-null", "is-fail", "DUP");
         setMeter(40, "40% — nullifier collision");
         setTallyCard("Tally rejected", "—", "Duplicate nullifier in set", "is-fail");
@@ -565,7 +636,7 @@
         return;
       }
       setTallyStage("check-null", "is-done", "unique");
-      logTo("tally-log", `null · ${seen.size} unique`);
+      logTo("tally-log", `null · ${av.length} unique`);
 
       setTallyStage("aggregate", "is-active", "…");
       setMeter(70, "70% — aggregating counts");
@@ -829,8 +900,9 @@
     rejectCount = 0;
     activeBallot = null;
     lastTallyOk = null;
+    clearStudioState();
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      tabSync?.broadcast(snapshotState());
     } catch (_) {}
     updateChoiceSelect();
     updatePreview();
@@ -1016,12 +1088,22 @@
       seedBoard().catch(console.error);
     });
     document.getElementById("btn-reset")?.addEventListener("click", resetStudio);
+    document.getElementById("btn-export")?.addEventListener("click", exportStudio);
+    document.getElementById("btn-import")?.addEventListener("click", () => {
+      document.getElementById("import-file")?.click();
+    });
+    document.getElementById("import-file")?.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      importStudioFromFile(file).catch(console.error);
+      e.target.value = "";
+    });
     document.getElementById("btn-copy-donate")?.addEventListener("click", () =>
       copyAddr("btn-copy-donate", "donate-status")
     );
     document.getElementById("dock-copy-addr")?.addEventListener("click", () =>
       copyAddr("dock-copy-addr", "donate-status")
     );
+    startTabSync();
 
     document.addEventListener("keydown", (e) => {
       const tag = (e.target && e.target.tagName) || "";
@@ -1057,10 +1139,12 @@
       } else if (e.key === "N" && e.shiftKey) {
         e.preventDefault();
         seedDemo().catch(console.error);
+      } else if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        exportStudio();
       }
     });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
-})();

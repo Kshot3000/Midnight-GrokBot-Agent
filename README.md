@@ -71,7 +71,7 @@ Until then the URL may 404.
 | `apps/night-market` | **Night Market Studio** — sealed listings, private bids, bid-threshold theater (local stub) |
 | `apps/sealed-invite` | **Sealed Invite Studio** — private RSVP, capacity proofs, selective admit (local stub) |
 | `apps/proof-playground` | **Proof Playground** — visual ZK circuits, witness→gate→prove theater (local stub) |
-| `apps/private-ballot` | **Private Ballot Studio** — sealed polls, nullifiers, tally theater (local stub) |
+| `apps/private-ballot` | **LOCAL-TRUE** sealed polls — localStorage v2, multi-tab sync, export/import, vitest · educational hashes only |
 | `apps/veil-passport` | **Veil Passport Studio** — confidential credentials, selective disclose, predicate theater (local stub) |
 | `apps/compact-atelier` | **Compact Atelier** — editable Compact snippets, explain panel, lint theater (local stub) |
 | `apps/nocturne-messenger` | **Nocturne Messenger Studio** — sealed DMs, envelope veil, selective reveal (local stub) |

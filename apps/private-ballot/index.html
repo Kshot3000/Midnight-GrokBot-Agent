@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Private Ballot Studio — sealed polls & private votes for Midnight. Eligibility proofs, nullifiers, tally theater. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="description" content="Private Ballot Studio — sealed polls & private votes for Midnight. Eligibility proofs, nullifiers, tally theater. Real localStorage + multi-tab sync + export/import by @kshot9000. Not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
   <title>Private Ballot Studio — Sealed Polls · Midnight Lab</title>
@@ -40,7 +40,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+    <span class="badge badge-stub" title="Educational local stub">LOCAL-TRUE · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -61,6 +61,7 @@
         <li><span>Open / close this help</span><span>?</span></li>
         <li><span>Copy donate address</span><span>D</span></li>
         <li><span>Seed demo poll + votes</span><span>Shift+N</span></li>
+        <li><span>Export JSON snapshot</span><span>E</span></li>
         <li><span>Close overlay</span><span>Esc</span></li>
       </ul>
       <p class="muted small" style="margin:0.85rem 0 0">Shortcuts idle when typing in inputs. Press <kbd style="font-family:var(--mono)">?</kbd> anytime.</p>
@@ -372,6 +373,9 @@
         </div>
         <div class="btn-row">
           <button type="button" class="btn ghost small" id="btn-seed-board">Seed demo board</button>
+          <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+          <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
           <button type="button" class="btn danger small" id="btn-reset">Reset studio</button>
         </div>
       </div>
@@ -454,6 +458,6 @@ witness voterSecret: Bytes&lt;32&gt;;
     </footer>
   </main>
 
-  <script src="main.js" defer></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
