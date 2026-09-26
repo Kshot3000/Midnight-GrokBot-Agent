@@ -16,6 +16,11 @@ Built for the [Midnight GrokBot Agent](https://github.com/Kshot3000/Midnight-Gro
 | Graceful `LaceMidnightKitError` + user hints | ✅ |
 | Documented Lace workarounds | ✅ see below / `src/workarounds.ts` |
 | Connect status matrix (`probeStatusMatrix`) | ✅ |
+| Connect journey phases (`createConnectJourney`) | ✅ |
+| Injection watch (`watchMidnightInjection`) | ✅ |
+| Capability probe (`probeSessionCapabilities`) | ✅ read-only |
+| Demo / simulated session (`createDemoSession`) | ✅ labeled SIMULATED |
+| Address format helpers | ✅ |
 | Mainnet / Preprod **transfers** (`makeTransfer`) | ❌ **not claimed** — not in demo |
 
 ## What it does **not** do

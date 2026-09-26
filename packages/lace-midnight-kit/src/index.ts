@@ -72,6 +72,44 @@ export {
 
 export { parseSemVer, semverSatisfies, type SemVer } from './semver.js';
 
+export {
+  formatAddress,
+  formatInjectionKey,
+  formatProbeTime,
+} from './format.js';
+
+export {
+  watchMidnightInjection,
+  type InjectionWatchSnapshot,
+  type WatchInjectionOptions,
+  type InjectionWatcher,
+} from './watchInjection.js';
+
+export {
+  ConnectJourneyPhases,
+  CONNECT_JOURNEY_STEPS,
+  createConnectJourney,
+  advanceConnectJourney,
+  journeyStepIndex,
+  type ConnectJourneyPhase,
+  type ConnectJourneyStep,
+  type ConnectJourneyState,
+} from './connectJourney.js';
+
+export {
+  probeSessionCapabilities,
+  type CapabilityStatus,
+  type CapabilityProbeRow,
+  type CapabilityProbe,
+} from './capabilities.js';
+
+export {
+  DEMO_MODE_LABEL,
+  createDemoSession,
+  createDemoCapabilityProbe,
+  isDemoSession,
+} from './demoMode.js';
+
 /** Lab branding constants (canonical — also in BRANDING.md). */
 export const LAB_BRANDING = {
   donationAddressAda:
@@ -81,3 +119,6 @@ export const LAB_BRANDING = {
   nightDreamUrl: 'https://nightdream.io',
   repoUrl: 'https://github.com/Kshot3000/Midnight-GrokBot-Agent',
 } as const;
+
+/** Kit semver for UI badges. */
+export const KIT_VERSION = '0.2.0';

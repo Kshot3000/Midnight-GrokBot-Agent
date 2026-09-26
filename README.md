@@ -14,7 +14,7 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 | --- | --- |
 | `/` | Lab site (landing + apps gallery + compat matrix) |
 | `/escrow/` | Agent Escrow local stub |
-| `/lace/` | Lace connect demo (discovery + connect only) |
+| `/lace/` | **Lace Connect Studio** — journey + matrix + capability radar |
 | `/auth/` | MPS-0029 Auth Lab (forge demo + local bboard stub) |
 | `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
 
@@ -28,7 +28,7 @@ Until then the URL may 404.
 .
 ├── apps/
 │   ├── midnight-lab-site/     # Static marketing / dev landing site
-│   ├── lace-connect-demo/     # Vite demo: discover + connect Lace Midnight
+│   ├── lace-connect-demo/     # Lace Connect Studio (journey, matrix, capabilities)
 │   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
 │   ├── auth-lab/              # MPS-0029 Auth Lab (forge demo + local bboard)
 │   └── shield-board/          # Flagship dual-state privacy bulletin studio
@@ -45,11 +45,11 @@ Until then the URL may 404.
 | Path | Role |
 | --- | --- |
 | `apps/midnight-lab-site` | Zero-dependency HTML/CSS/JS site about Midnight + this lab |
-| `apps/lace-connect-demo` | Vite page using the kit — **discovery + connect only** (no transfer claims) |
+| `apps/lace-connect-demo` | **Lace Connect Studio** — journey stepper, injection watch, matrix, capability radar · **discovery + connect only** |
 | `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
 | `apps/auth-lab` | MPS-0029 educational lab — forgeable `ownPublicKey` vs witness-derived auth |
 | `apps/shield-board` | **Flagship** dual-state privacy bulletin — public commitments + private vault + selective disclose |
-| `packages/lace-midnight-kit` | Enumerate `window.midnight`, connect, addresses/network, graceful errors + Lace workarounds |
+| `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
 | `BRANDING.md` | Donation address, X handle, NightDream mention |
