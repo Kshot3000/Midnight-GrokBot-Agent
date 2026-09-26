@@ -131,3 +131,63 @@ Landed in `@kshot/preprod-hello-stub` + repo root:
 - Funding guide: [`docs/PREPROD-FUNDING.md`](./PREPROD-FUNDING.md)
 
 **Still NOT claimed:** on-chain Preprod deploy / funded faucet credit.
+
+
+---
+
+## Update — Local ZK prove vs :6300 (2026-09-26 ~00:49 CT)
+
+**Real progress:** circuit-level ZK prove for hello `increment` against local proof-server — **no wallet required**.
+
+### What landed
+
+| Item | Detail |
+| --- | --- |
+| Script | `npm run prove:hello-local` → `@kshot/preprod-hello-stub` `src/prove-hello-local.mjs` |
+| API path | `proofDataIntoSerializedPreimage(input,output,publicTranscript,privateTranscriptOutputs,keyLocation)` → `httpClientProvingProvider` → `POST /check` + `POST /prove` |
+| ZK config | `NodeZkConfigProvider(contracts/hello-midnight/out)` |
+| Measured | greetings 0→1 · preimage 83 B · check ~9–22 ms · **proof 2940 B · prove ~37–502 ms** |
+| Tests | vitest **11/11** (live prove skips only if `:6300` down) |
+| Packaging | `contracts/ARTIFACT-CONSUMERS.md` + `npm run artifacts:list` (hello + escrow 12 circuits) |
+
+### Success criteria (`prove:hello-local`)
+
+1. `GET http://127.0.0.1:6300/health` → 200 / `status: ok`
+2. Compiled hello artifacts present (`keys/increment.prover` etc.)
+3. Off-chain `increment` greetings **0 → 1**
+4. Serialized preimage `byteLength > 0`
+5. `/check` returns binding-slot array
+6. `/prove` returns `Uint8Array` with `proofBytes > 0` (hello typical **2940**)
+7. Report claim string includes **NOT a Preprod deploy**
+
+Exit **3** if proof-server unhealthy; **1** on artifact/runtime failure; **0** on success.
+
+### Still NOT claimed
+
+| Item | Status |
+| --- | --- |
+| On-chain Preprod deploy | **no** — faucet still captcha-blocked; wallet slots null |
+| `proveTx` / `deployContract` | **not used** — this path is circuit `/prove` only |
+| Funded tNIGHT / tDUST | **blocked** |
+| X posts | **none** |
+
+### Exact API gap for chain submit
+
+Local prove uses **ProvingProvider** (`/check`, `/prove`). On-chain still needs:
+
+1. Funded wallet + DUST registration
+2. `walletProvider` + `midnightProvider` (WalletFacade)
+3. `createUnprovenDeployTx` / `deployContract` (or call tx) → `proofProvider.proveTx(unprovenTx)` → submit
+
+See [`ARTIFACT-CONSUMERS.md`](../contracts/ARTIFACT-CONSUMERS.md) and [`PREPROD-FUNDING.md`](./PREPROD-FUNDING.md).
+
+### Cheat-sheet add
+
+```bash
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env)" && fnm use 22
+curl -sS http://127.0.0.1:6300/health
+npm run prove:hello-local
+npm run artifacts:list
+npm run stub:test
+```

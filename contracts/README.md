@@ -59,7 +59,9 @@ npm run compact:escrow:skip-zk
 
 Artifacts under `**/managed/` and `contracts/hello-midnight/out*` are **gitignored**. Re-run compile locally. **No on-chain deploy** is claimed.
 
-Still blocked on this box for the *full* DApp loop: **no Docker** → cannot run `midnightntwrk/proof-server:8.1.0`; Node is **v20** while `create-mn-app` wants **Node 22+**.
+Lab box now has **Podman 5.4.2** + proof-server **8.1.0** on `:6300`, and **Node 22.23.3 via fnm** (system node may stay v20). Local circuit prove works (`npm run prove:hello-local`). Still blocked for *on-chain* Preprod: funded wallet + captcha faucet / tDUST.
+
+Consumer packaging: [`ARTIFACT-CONSUMERS.md`](./ARTIFACT-CONSUMERS.md) · inventory: `npm run artifacts:list`.
 
 Exact CLI flags and output layout can change between Compact releases — always prefer the current docs:
 

@@ -49,6 +49,21 @@ npm test -w @kshot/preprod-hello-stub
 
 Root aliases: `stub:check`, `stub:offchain`, `stub:preprod-config`, `stub:providers`, `stub:require-wallet`, `stub:wallet-gen`, `stub:faucet-attempt`, `stub:deploy-preprod`, `stub:test`.
 
+## Local ZK prove (no wallet)
+
+Against a healthy proof-server on `:6300` — circuit `/check` + `/prove` only:
+
+```bash
+curl -sS http://127.0.0.1:6300/health
+npm run prove:hello-local -w @kshot/preprod-hello-stub
+# root alias: npm run prove:hello-local
+```
+
+Success: greetings 0→1, preimage >0 B, proofBytes ≈2940, claim **NOT a Preprod deploy**.
+Exit 3 if proof-server down. Does **not** call `deployContract` / `proveTx`.
+
+
+
 ## CLI output
 
 Every command prints:
@@ -111,6 +126,7 @@ curl -sS http://127.0.0.1:6300/health
 | --- | --- |
 | Compact hello compiled | **yes** (`contracts/hello-midnight/out`) |
 | Providers wiring | **yes** (wallet slots null until funded) |
-| Proof-server | local `:6300` — optional health probe |
+| Proof-server | local `:6300` — **required** for `prove:hello-local` |
+| Local ZK prove | **yes** — `prove:hello-local` (circuit `/prove`, no wallet) |
 | Faucet / tDUST | **blocked** on captcha / funding |
 | On-chain deploy | **no** — refuse to claim |

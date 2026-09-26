@@ -336,7 +336,7 @@ See [`docs/UPSTREAM-SWEEP-2026-09-25.md`](./docs/UPSTREAM-SWEEP-2026-09-25.md) f
 ## Recommended next apps
 
 1. ~~Compile escrow / hello with Compact ~0.31.1~~ **done**.
-2. ~~Wire compact-runtime + off-chain circuits~~ **done** — `@kshot/preprod-hello-stub` (`npm run stub:offchain`).
+2. ~~Wire compact-runtime + off-chain circuits~~ **done** — `@kshot/preprod-hello-stub` (`npm run stub:offchain` · `prove:hello-local`).
 3. ~~Proof-server 8.1.0~~ **done on lab box via Podman** (`npm run proof-server:podman` / Lace Local `:6300`).
 4. ~~Preprod providers scaffold + clear-fail deploy gate~~ **done** (`stub:providers` / `stub:deploy-preprod`).
 5. **Next (Kshot):** fund Preprod wallet (faucet captcha) + tDUST registration, then real `deployContract` — claim only after tx confirm.
@@ -350,7 +350,7 @@ See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-20
 | --- | --- |
 | Node 22 (fnm; keeps system Node 20) | `fnm install 22 && fnm use 22` |
 | Compile hello + ZK keys | `npm run compact:hello` |
-| Off-chain stub (real artifacts) | `npm run stub:offchain` / `npm run stub:test` |
+| Off-chain stub (real artifacts) | `npm run stub:offchain` · `prove:hello-local` / `npm run stub:test` |
 | Proof-server 8.1.0 (reuse if healthy) | `curl -sS http://127.0.0.1:6300/health` or `npm run proof-server:podman` |
 | Providers wiring + probes | `npm run stub:providers` |
 | Env template | `cp .env.preprod.example .env.preprod` |
@@ -364,4 +364,13 @@ See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-20
 - **X:** [@kshot9000](https://x.com/kshot9000)
 
 **Not claimed:** on-chain Preprod deploy success, Pages live, X posts from this pass.
+
+## Local prove (2026-09-26)
+
+```bash
+npm run prove:hello-local   # hello increment ZK vs http://127.0.0.1:6300 — NOT Preprod deploy
+npm run artifacts:list      # hello + escrow compiled artifact inventory
+```
+
+See `docs/COMPACT-PREPROD-PATH-2026-09-26.md` and `contracts/ARTIFACT-CONSUMERS.md`.
 
