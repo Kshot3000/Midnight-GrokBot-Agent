@@ -1,0 +1,21 @@
+{
+  "name": "midnight-grokbot-agent",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Midnight GrokBot Agent — 24/7 build lab (static site, Compact starter, Lace connector kit)",
+  "workspaces": [
+    "packages/*",
+    "apps/lace-connect-demo"
+  ],
+  "scripts": {
+    "build:kit": "npm run build -w @kshot/lace-midnight-kit",
+    "dev:lace-demo": "npm run build -w @kshot/lace-midnight-kit && npm run dev -w @kshot/lace-connect-demo",
+    "build:lace-demo": "npm run build -w @kshot/lace-midnight-kit && npm run build -w @kshot/lace-connect-demo"
+  },
+  "author": "Kshot (@kshot9000)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kshot3000/Midnight-GrokBot-Agent.git"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@kshot/lace-connect-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal Vite demo: Lace Midnight discovery + connect using @kshot/lace-midnight-kit. No transfer claims.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@kshot/lace-midnight-kit": "file:../../packages/lace-midnight-kit",
+    "@midnight-ntwrk/dapp-connector-api": "4.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vite": "^6.0.0"
+  }
+}

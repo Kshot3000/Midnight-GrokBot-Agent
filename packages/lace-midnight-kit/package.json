@@ -1,0 +1,52 @@
+{
+  "name": "@kshot/lace-midnight-kit",
+  "version": "0.1.0",
+  "description": "Reusable Lace / Midnight DApp connector helpers — discover window.midnight providers, connect, read address/network, graceful errors. Types from @midnight-ntwrk/dapp-connector-api.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "midnight",
+    "lace",
+    "dapp-connector",
+    "cardano",
+    "wallet"
+  ],
+  "author": "Kshot (@kshot9000)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kshot3000/Midnight-GrokBot-Agent.git",
+    "directory": "packages/lace-midnight-kit"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/dapp-connector-api": "4.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "@midnight-ntwrk/dapp-connector-api": "^4.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false
+}
