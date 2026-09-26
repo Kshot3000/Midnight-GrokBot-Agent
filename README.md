@@ -15,7 +15,7 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 | `/` | Lab site (landing + apps gallery + compat matrix) |
 | `/escrow/` | Agent Escrow local stub |
 | `/lace/` | **Lace Connect Studio** — journey + matrix + capability radar |
-| `/auth/` | MPS-0029 Auth Lab (forge demo + local bboard stub) |
+| `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard + forge theater |
 | `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
@@ -30,7 +30,7 @@ Until then the URL may 404.
 │   ├── midnight-lab-site/     # Static marketing / dev landing site
 │   ├── lace-connect-demo/     # Lace Connect Studio (journey, matrix, capabilities)
 │   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
-│   ├── auth-lab/              # MPS-0029 Auth Lab (forge demo + local bboard)
+│   ├── auth-lab/              # Auth Forge Studio (MPS-0029 journey + scorecard)
 │   └── shield-board/          # Flagship dual-state privacy bulletin studio
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
@@ -47,7 +47,7 @@ Until then the URL may 404.
 | `apps/midnight-lab-site` | Zero-dependency HTML/CSS/JS site about Midnight + this lab |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — journey stepper, injection watch, matrix, capability radar · **discovery + connect only** |
 | `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
-| `apps/auth-lab` | MPS-0029 educational lab — forgeable `ownPublicKey` vs witness-derived auth |
+| `apps/auth-lab` | **Auth Forge Studio** — attack journey, scorecard, forge theater, local bboard |
 | `apps/shield-board` | **Flagship** dual-state privacy bulletin — public commitments + private vault + selective disclose |
 | `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |

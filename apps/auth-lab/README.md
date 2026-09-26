@@ -1,20 +1,27 @@
-# MPS-0029 Auth Lab
+# Auth Forge Studio (MPS-0029)
 
-Interactive **local** demo that teaches why `ownPublicKey()` alone is forgeable for Compact authorization, and why witness-derived keys (`publicKey(localSecretKey)` / `persistentHash` patterns) are the safe default — the same pattern used by [`example-bboard`](https://github.com/midnightntwrk/example-bboard).
+Flagship educational lab that teaches why `ownPublicKey()` alone is forgeable for Compact authorization, and why witness-derived keys (`publicKey(localSecretKey)` / `persistentHash` patterns) are the safe default — the same pattern used by [`example-bboard`](https://github.com/midnightntwrk/example-bboard).
+
+Built by [@kshot9000](https://x.com/kshot9000).
 
 ## What this is
 
-- Polished static HTML/CSS/JS (no npm)
-- Side-by-side **unsafe vs safe** Compact snippets
+- Flagship static HTML/CSS/JS (no npm) — starfield, aurora/nebula, sticky topbar, donate dock
+- **Attack journey** stepper (idle → deployed → forged → witness-bound)
+- Dual-rail threat meters + interactive **auth scorecard**
+- Forge theater: unsafe `ownPublicKey` bypass vs secret-bound reject
 - Local bulletin-board stub bound to a browser-generated secret (not on-chain)
-- Live `window.midnight` enumeration panel (never hardcodes `mnLace`)
+- Live `window.midnight` enumeration + optional injection watch (never hardcodes `mnLace`)
+- a11y: skip link, live region, reduced-motion, focus rings, mobile nav
 - Links to [MPS-0029](https://github.com/midnightntwrk/midnight-improvement-proposals/blob/main/mps/mps-0029-compact-caller-identity.md)
+- Donate ADA + **@kshot9000** always visible
 
 ## What this is not
 
-- Not a deployed Compact contract
+- Not a deployed Compact contract / proof server
 - Not a proof that Lace transfers work
-- Does not call `ownPublicKey()` for auth in the stub — the unsafe path is simulated to show the forge
+- Does not claim GitHub Pages is live until Actions are enabled
+- SHA-256 “derive” is a teaching stand-in — verify official Compact crypto before shipping
 
 ## Run locally
 
