@@ -1,0 +1,47 @@
+/*
+ * hello.compact — educational Compact starter for Midnight GrokBot Agent lab
+ *
+ * NOT a production contract. Align `pragma` / APIs with the Compact version
+ * from the official compatibility matrix before compiling:
+ *   https://docs.midnight.network/getting-started/installation
+ *   https://docs.midnight.network/compact
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ *
+ * Compact contracts typically combine:
+ *   1) public ledger state (on-chain, replicated)
+ *   2) ZK circuits (prove valid transitions without revealing private inputs)
+ *   3) local / off-chain witnesses (private data that never leaves the client)
+ *
+ * This skeleton only demonstrates a tiny public Counter so the file stays
+ * readable while you install the toolchain. Extend toward witnesses,
+ * disclose(), ownership checks, and Maps using the official tutorials
+ * (e.g. leaderboard / writing-a-contract guides on docs.midnight.network).
+ */
+
+// Pin to the language version your Compact compiler expects.
+// Check docs / matrix — do not guess if compile fails.
+pragma language_version 0.16;
+
+import CompactStandardLibrary;
+
+// Public, on-chain counter. Counter is a Compact standard-library ledger type.
+export ledger greetings: Counter;
+
+/**
+ * increment — public circuit that bumps the on-chain counter by 1.
+ * Callers pay fees in DUST (tDUST on testnets). No private inputs here.
+ *
+ * Circuit declaration style may vary slightly by Compact release;
+ * if compile fails, compare with the "writing a contract" page in the docs.
+ */
+export circuit increment(): [] {
+  greetings.increment(1);
+}
+
+/*
+ * Next steps (official paths — do not invent APIs):
+ * - Add a witness for private client state
+ * - Use disclose() when a private value must become public
+ * - Gate privileged circuits with ownership / public-key checks
+ * - Follow: https://docs.midnight.network/tutorials/leaderboard/overview
+ */
