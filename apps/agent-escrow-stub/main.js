@@ -41,8 +41,8 @@
       released: 0,
       refunded: 0,
       milestones: [
-        { id: "m1", description: "scaffold", amount: 1 * L, status: "pending", proofHash: null },
-        { id: "m2", description: "app", amount: 4 * L, status: "pending", proofHash: null },
+        { id: "m1", description: "scaffold", amount: 1 * L, status: "pending", proofHash: null, privateNote: null },
+        { id: "m2", description: "app", amount: 4 * L, status: "pending", proofHash: null, privateNote: null },
       ],
       audit: [],
     };
@@ -50,6 +50,32 @@
 
   let s = fresh();
   let toastTimer = null;
+  /** @type {"client"|"agent"|"approver"} */
+  let activeRole = "client";
+
+  const ROLE_ACTS = {
+    client: ["fund", "start", "settle", "dispute", "resume", "refund", "reset", "approve1", "reject2"],
+    agent: ["proof1", "proof2", "reset"],
+    approver: ["approve1", "reject2", "reset"],
+  };
+
+  const ROLE_HINTS = {
+    client: "Acting as <strong>Client</strong> — fund / start / settle / dispute when state allows. Client is also an approver here.",
+    agent: "Acting as <strong>Agent</strong> — submit proof hashes + private work notes. You cannot release your own milestones.",
+    approver: "Acting as <strong>Approver</strong> — release or reject after a public proof exists. Private notes stay shielded.",
+  };
+
+  const PROOF_NOTES = {
+    m1: "Private note: scaffolded Compact layout + witness stubs for role commitments (local only).",
+    m2: "Private note: app milestone — UI wired to local state machine; CI still red in demo reject path.",
+  };
+
+  async function hashProof(milestoneId, note) {
+    const payload = `agent-escrow:v1|${milestoneId}|${note}|${Date.now()}`;
+    const dig = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload));
+    return "0x" + [...new Uint8Array(dig)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+  }
+
 
   const el = {
     statePill: document.getElementById("statePill"),
@@ -65,6 +91,11 @@
     disabledHelp: document.getElementById("disabledHelp"),
     stepper: document.getElementById("escrowStepper"),
     milestoneTrack: document.getElementById("milestoneTrack"),
+    publicProofs: document.getElementById("publicProofs"),
+    privateProofs: document.getElementById("privateProofs"),
+    publicProofsEmpty: document.getElementById("publicProofsEmpty"),
+    privateProofsEmpty: document.getElementById("privateProofsEmpty"),
+    roleHint: document.getElementById("roleHint"),
   };
 
   function bal() {
@@ -106,7 +137,7 @@
     return s.milestones.find((m) => m.id === id);
   }
 
-  function can(act) {
+  function stateAllows(act) {
     const m1 = find("m1");
     const m2 = find("m2");
     switch (act) {
@@ -137,6 +168,14 @@
       default:
         return false;
     }
+  }
+
+  function roleAllows(act) {
+    return (ROLE_ACTS[activeRole] || []).includes(act);
+  }
+
+  function can(act) {
+    return roleAllows(act) && stateAllows(act);
   }
 
   function nextAction() {
@@ -179,15 +218,23 @@
     document.querySelectorAll("[data-act]").forEach((btn) => {
       const act = btn.getAttribute("data-act");
       const enabled = can(act);
+      const roleOk = roleAllows(act);
+      const stateOk = stateAllows(act);
       btn.disabled = !enabled;
       btn.classList.toggle("cta-pulse", enabled && act === next && act !== "reset");
+      btn.classList.toggle("wrong-role", !roleOk && stateOk);
       btn.setAttribute("aria-disabled", enabled ? "false" : "true");
       if (!enabled) {
-        btn.title = WHY_DISABLED[act] || "Not available in current state";
+        if (!roleOk) {
+          btn.title = "Switch role — this action belongs to another party.";
+        } else {
+          btn.title = WHY_DISABLED[act] || "Not available in current state";
+        }
       } else {
         btn.title = btn.getAttribute("data-label") || act;
       }
     });
+    if (el.roleHint) el.roleHint.innerHTML = ROLE_HINTS[activeRole] || "";
   }
 
   function renderStepper() {
@@ -267,6 +314,43 @@
       .join("");
   }
 
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderProofs() {
+    if (!el.publicProofs || !el.privateProofs) return;
+    const withProof = s.milestones.filter((m) => m.proofHash);
+    el.publicProofs.innerHTML = "";
+    el.privateProofs.innerHTML = "";
+    if (el.publicProofsEmpty) el.publicProofsEmpty.hidden = withProof.length > 0;
+    if (el.privateProofsEmpty) el.privateProofsEmpty.hidden = withProof.length > 0;
+
+    withProof.forEach((m) => {
+      const pub = document.createElement("li");
+      pub.className = "proof-card";
+      pub.innerHTML =
+        `<div class="meta"><span class="tag sealed">${escapeHtml(m.id)}</span>` +
+        `<span class="status-tag ${m.status}">${escapeHtml(m.status)}</span></div>` +
+        `<div class="commitment mono">H = ${escapeHtml(m.proofHash)}</div>` +
+        `<p class="body muted">Body sealed — commitment only (approver sees this).</p>`;
+      el.publicProofs.appendChild(pub);
+
+      const priv = document.createElement("li");
+      priv.className = "proof-card";
+      priv.innerHTML =
+        `<div class="meta"><span class="tag sealed">vault · ${escapeHtml(m.id)}</span></div>` +
+        `<p class="body">${escapeHtml(m.privateNote || "(no note)")}</p>` +
+        `<div class="commitment mono">H = ${escapeHtml(m.proofHash)}</div>`;
+      el.privateProofs.appendChild(priv);
+    });
+  }
+
   function render() {
     el.statePill.textContent = s.state;
     el.statePill.className =
@@ -298,6 +382,7 @@
     if (el.nextHint) el.nextHint.innerHTML = hintText();
     renderStepper();
     renderMilestones();
+    renderProofs();
     updateButtons();
   }
 
@@ -315,13 +400,15 @@
       s.state = "in_progress";
       push("started", "client", { milestoneTotal: total });
     },
-    proof1() {
+    async proof1() {
       if (s.state !== "in_progress") throw new Error("need in_progress");
       const m = find("m1");
       if (m.status !== "pending") throw new Error("m1 not pending");
+      const note = PROOF_NOTES.m1;
+      m.privateNote = note;
+      m.proofHash = await hashProof("m1", note);
       m.status = "proof_submitted";
-      m.proofHash = "0x9f2c41ab";
-      push("proof_submitted", "agent", { milestone: "m1" });
+      push("proof_submitted", "agent", { milestone: "m1", proofHash: m.proofHash });
     },
     approve1() {
       if (s.state !== "in_progress") throw new Error("need in_progress");
@@ -331,13 +418,15 @@
       s.released += m.amount;
       push("milestone_released", "approver", { milestone: "m1", amount: m.amount });
     },
-    proof2() {
+    async proof2() {
       if (s.state !== "in_progress") throw new Error("need in_progress");
       const m = find("m2");
       if (m.status !== "pending") throw new Error("m2 not pending");
+      const note = PROOF_NOTES.m2;
+      m.privateNote = note;
+      m.proofHash = await hashProof("m2", note);
       m.status = "proof_submitted";
-      m.proofHash = "0x41b0de77";
-      push("proof_submitted", "agent", { milestone: "m2" });
+      push("proof_submitted", "agent", { milestone: "m2", proofHash: m.proofHash });
     },
     reject2() {
       if (s.state !== "in_progress") throw new Error("need in_progress");
@@ -379,11 +468,14 @@
   };
 
   document.querySelectorAll("[data-act]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const act = btn.getAttribute("data-act");
       try {
+        if (!roleAllows(act)) {
+          throw new Error("Wrong role — switch the role theater to use this action.");
+        }
         showErr("");
-        actions[act]();
+        await Promise.resolve(actions[act]());
         render();
         showToast(SUCCESS_MSG[act] || "Done (local stub).", false);
       } catch (e) {
@@ -392,25 +484,52 @@
         showToast(msg, true);
       }
     });
-    btn.addEventListener("mouseenter", () => {
+    const helpFor = (btn) => {
       if (!el.disabledHelp) return;
       const act = btn.getAttribute("data-act");
-      if (btn.disabled) {
-        el.disabledHelp.textContent = WHY_DISABLED[act] || "Not available.";
-      } else {
+      if (!btn.disabled) {
         el.disabledHelp.textContent = "";
+        return;
       }
-    });
-    btn.addEventListener("focus", () => {
-      if (!el.disabledHelp) return;
-      const act = btn.getAttribute("data-act");
-      if (btn.disabled) {
-        el.disabledHelp.textContent = WHY_DISABLED[act] || "Not available.";
+      if (!roleAllows(act)) {
+        el.disabledHelp.textContent = "Switch role — this action belongs to another party.";
       } else {
-        el.disabledHelp.textContent = "";
+        el.disabledHelp.textContent = WHY_DISABLED[act] || "Not available.";
       }
+    };
+    btn.addEventListener("mouseenter", () => helpFor(btn));
+    btn.addEventListener("focus", () => helpFor(btn));
+  });
+
+  // Role theater
+  document.querySelectorAll(".role-card[data-role]").forEach((card) => {
+    card.addEventListener("click", () => {
+      activeRole = card.getAttribute("data-role") || "client";
+      document.querySelectorAll(".role-card[data-role]").forEach((c) => {
+        const on = c.getAttribute("data-role") === activeRole;
+        c.classList.toggle("active", on);
+        c.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      updateButtons();
+      showToast("Now acting as " + activeRole, false);
     });
   });
+
+  // Donate copy
+  const copyAddr = document.getElementById("copy-addr");
+  const donationAddr = document.getElementById("donation-addr");
+  if (copyAddr && donationAddr) {
+    copyAddr.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(donationAddr.textContent.trim());
+        const prev = copyAddr.textContent;
+        copyAddr.textContent = "Copied";
+        setTimeout(() => { copyAddr.textContent = prev; }, 1600);
+      } catch {
+        copyAddr.textContent = "Select & copy";
+      }
+    });
+  }
 
   // Mobile nav
   const header = document.getElementById("site-header");

@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta
     name="description"
-    content="Agent Escrow UI stub — local state-machine demo for the Midnight Compact skeleton. Not on-chain. By @kshot9000."
+    content="Agent Escrow — role theater + dual-state proof UX for Midnight Compact. Local stub by @kshot9000 / Kshot3000. Not on-chain."
   />
   <meta name="theme-color" content="#05070f" />
-  <title>Agent Escrow Stub — Midnight GrokBot Lab</title>
+  <title>Agent Escrow — Role Theater · Midnight GrokBot Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%237c9cff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23a78bfa'/%3E%3C/svg%3E" />
 </head>
 <body>
   <div class="bg-scene" aria-hidden="true">
     <div class="bg-aurora"></div>
+    <div class="bg-aurora bg-aurora-2"></div>
     <div class="bg-grid"></div>
     <div class="orb orb-a"></div>
     <div class="orb orb-b"></div>
@@ -27,24 +28,35 @@
     <a class="logo" href="./">Agent<span>Escrow</span></a>
     <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
     <nav id="site-nav" aria-label="Primary">
+      <a href="#roles">Roles</a>
+      <a href="#proofs">Proofs</a>
+      <a href="#donate">Donate</a>
       <a href="../">Lab site</a>
-      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/contracts/agent-escrow" rel="noopener noreferrer">Compact README</a>
+      <a href="../board/">Shield Board</a>
+      <a href="../auth/">Auth Lab</a>
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
-      <a href="https://nightdream.io" rel="noopener noreferrer">NightDream</a>
     </nav>
+    <span class="badge badge-sim">LOCAL STUB · not on-chain</span>
   </header>
 
   <main id="main">
     <div class="hero-block">
-      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Midnight Compact · UI stub</p>
-      <h1>Agent Escrow — local stub</h1>
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Midnight Compact · milestone escrow UX</p>
+      <h1>Agent Escrow — role theater + dual-state proofs</h1>
       <p class="lede">
-        Walk the milestone escrow state machine in the browser. This page does
-        <strong>not</strong> talk to Lace, a proof server, or the chain. The real
-        Compact skeleton lives under <code>contracts/agent-escrow</code> and uses
-        witness-derived role commitments (MPS-0029 — never <code>ownPublicKey()</code> alone).
+        Walk a milestone escrow state machine as <strong>Client</strong>, <strong>Agent</strong>, or <strong>Approver</strong>.
+        Proof submissions mint a <em>public</em> commitment hash while the work note stays in a <em>private</em> vault —
+        Midnight dual-state UX, browser-local. Compact skeleton:
+        <code>contracts/agent-escrow</code> (witness-derived roles · MPS-0029).
+        Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000
+        (Midnight GrokBot Agent).
       </p>
+      <div class="cta-row hero-cta">
+        <a class="btn primary" href="#roles">Enter role theater</a>
+        <a class="btn ghost" href="#proofs">Dual-state proofs</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
     </div>
 
     <div class="banner" role="status">
@@ -53,23 +65,30 @@
       witness + <code>persistentHash</code>, not <code>ownPublicKey()</code> for authorization (MPS-0029).
     </div>
 
-    <div class="grid">
-      <div class="card">
-        <span class="role">Role</span>
-        <h3>Client</h3>
-        <p>Funds, starts, disputes, settles, cancels. Always an approver.</p>
+    <section id="roles" class="panel role-theater" aria-labelledby="roles-heading">
+      <div class="section-head">
+        <h2 id="roles-heading">Role theater</h2>
+        <p class="muted">Act as one party. Actions outside your role stay disabled — mirrors witness-bound circuits.</p>
       </div>
-      <div class="card">
-        <span class="role">Role</span>
-        <h3>Agent</h3>
-        <p>Submits proof hashes. Never approves or releases own work.</p>
+      <div class="role-picker" role="radiogroup" aria-label="Active escrow role">
+        <button type="button" class="role-card active" data-role="client" aria-pressed="true">
+          <span class="role">You are</span>
+          <h3>Client</h3>
+          <p>Fund, start, dispute, settle, refund. Always an approver in this stub.</p>
+        </button>
+        <button type="button" class="role-card" data-role="agent" aria-pressed="false">
+          <span class="role">You are</span>
+          <h3>Agent</h3>
+          <p>Submit proof hashes + private work notes. Never release your own milestones.</p>
+        </button>
+        <button type="button" class="role-card" data-role="approver" aria-pressed="false">
+          <span class="role">You are</span>
+          <h3>Approver</h3>
+          <p>Release or reject after a public proof exists. Sees commitment, not the private note.</p>
+        </button>
       </div>
-      <div class="card">
-        <span class="role">Role</span>
-        <h3>Approver</h3>
-        <p>Releases or rejects after a proof exists. Registered at init.</p>
-      </div>
-    </div>
+      <p class="hint" id="roleHint" aria-live="polite">Acting as <strong>Client</strong> — fund / start / settle / dispute enabled when state allows.</p>
+    </section>
 
     <section class="panel" aria-labelledby="timeline-heading">
       <h2 id="timeline-heading">Escrow timeline</h2>
@@ -95,6 +114,38 @@
     <section class="panel" aria-labelledby="milestone-heading">
       <h2 id="milestone-heading">Milestone progress</h2>
       <div class="milestone-track" id="milestoneTrack" aria-live="polite"></div>
+    </section>
+
+
+    <section id="proofs" class="panel" aria-labelledby="proofs-heading">
+      <div class="section-head">
+        <h2 id="proofs-heading">Dual-state proofs <span class="badge badge-sim">simulated</span></h2>
+        <p class="muted">Public pane = commitment the ledger would store. Private pane = agent work notes that never leave this browser until you reset.</p>
+      </div>
+      <div class="dual-pane" role="group" aria-label="Public commitments and private work notes">
+        <article class="pane pane-public">
+          <header class="pane-head">
+            <div>
+              <p class="pane-eyebrow">Public ledger</p>
+              <h3>Proof commitments</h3>
+            </div>
+            <span class="pane-pill public">Visible</span>
+          </header>
+          <ul class="proof-list" id="publicProofs" aria-live="polite"></ul>
+          <p class="empty" id="publicProofsEmpty">No proofs yet — switch to Agent and submit m1 / m2.</p>
+        </article>
+        <article class="pane pane-private">
+          <header class="pane-head">
+            <div>
+              <p class="pane-eyebrow">Private vault</p>
+              <h3>Agent work notes</h3>
+            </div>
+            <span class="pane-pill private">Shielded</span>
+          </header>
+          <ul class="proof-list" id="privateProofs" aria-live="polite"></ul>
+          <p class="empty" id="privateProofsEmpty">Vault empty. Agent notes appear here when you submit a proof.</p>
+        </article>
+      </div>
     </section>
 
     <section class="panel" aria-labelledby="controls-heading">
@@ -141,6 +192,25 @@
       <pre class="log" id="log">(empty)</pre>
     </section>
 
+
+    <section id="donate" class="panel donate">
+      <h2>Support the lab</h2>
+      <p class="muted">Built by @kshot9000 / Kshot3000 (Midnight GrokBot Agent). Cardano donations keep the 24/7 Midnight build lab going.</p>
+      <div class="addr-box">
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" class="btn ghost small" id="copy-addr">Copy</button>
+      </div>
+      <p class="muted small">
+        <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+        ·
+        <a href="../board/">Shield Board</a>
+        ·
+        <a href="../auth/">Auth Lab</a>
+      </p>
+    </section>
+
     <section class="panel">
       <h2>Next steps</h2>
       <ol>
@@ -154,12 +224,16 @@
 
   <footer class="site-footer">
     <div>
-      Midnight GrokBot Agent lab ·
-      <a href="../">Lab site</a> ·
-      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> ·
-      <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
+      <strong>Agent Escrow</strong> · Midnight GrokBot Agent · MIT
+      · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000
+      · <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      · <a href="../">Lab home</a>
     </div>
-    <span class="addr">ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</span>
+    <div class="footer-donate">
+      <span>Donate ADA:</span>
+      <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+    </div>
+    <p class="disclaimer">Stub only — no Lace, proof server, or on-chain Compact deploy claimed.</p>
   </footer>
 
   <script src="main.js"></script>
