@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Veil Pledge Studio — Midnight private tip jar & pledge board. Seal amounts, commit public hashes, prove thresholds without revealing exact tips. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Veil Pledge Studio — Private Tip Jar · Midnight Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M18 40 Q32 12 46 40' fill='none' stroke='%23a78bfa' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='36' r='7' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Cpath d='M28 36h8M32 32v8' stroke='%237c9cff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Veil<span>Pledge</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#journey">Journey</a>
+      <a href="#lesson">Lesson</a>
+      <a href="#compose">Compose</a>
+      <a href="#threshold">Threshold</a>
+      <a href="#board">Board</a>
+      <a href="#jar">Tip jar</a>
+      <a href="#snippets">Snippets</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <main id="main" class="wrap">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Dual-state · private tip jar</p>
+      <h1>Veil Pledge Studio</h1>
+      <p class="lede">
+        World-class educational tip jar for Midnight’s dual-state model:
+        seal a private amount + note, commit only a <strong>public hash</strong> to the simulated ledger,
+        then prove a <strong>threshold</strong> (amount ≥ X) without disclosing the exact tip —
+        or selectively disclose when you choose.
+        By <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#compose">Compose a pledge</a>
+        <a class="btn ghost" href="#threshold">Threshold theater</a>
+        <a class="btn ghost" href="#jar">Open tip jar</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest scope:</strong> local HTML/JS simulation only.
+        Does <strong>not</strong> run Compact, a proof server, Lace, or real ADA transfers.
+        Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
+        SHA-256 commitments here are a <strong>teaching stand-in</strong> — verify against official Compact / Zswap crypto before shipping.
+      </div>
+    </section>
+
+    <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
+      <div class="section-head">
+        <h2 id="journey-heading">Pledge journey</h2>
+        <p class="muted">Labeled phases from private compose → public commitment → selective disclose. Error / reject is first-class.</p>
+      </div>
+      <ol class="journey" id="journey-steps" aria-label="Pledge journey phases">
+        <li class="journey-step is-active" data-phase="idle" aria-current="step">
+          <span class="js-idx">1</span>
+          <div>
+            <strong>Idle</strong>
+            <span class="js-detail">No sealed draft</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="sealed">
+          <span class="js-idx">2</span>
+          <div>
+            <strong>Sealed</strong>
+            <span class="js-detail">Private vault holds amount</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="committed">
+          <span class="js-idx">3</span>
+          <div>
+            <strong>Committed</strong>
+            <span class="js-detail">Public hash on ledger</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="disclosed">
+          <span class="js-idx">4</span>
+          <div>
+            <strong>Disclosed</strong>
+            <span class="js-detail">Range or full reveal</span>
+          </div>
+        </li>
+      </ol>
+      <p class="journey-live status" id="journey-live" role="status">Phase: idle — compose a private pledge to begin.</p>
+    </section>
+
+    <section id="lesson" class="panel reveal" aria-labelledby="lesson-heading">
+      <div class="section-head">
+        <h2 id="lesson-heading">The dual-state tip in one screen</h2>
+        <p class="muted">Public ledger sees a commitment. Private vault keeps amount + salt. Threshold proofs disclose a predicate — not the tip itself.</p>
+      </div>
+      <div class="rule-grid">
+        <article class="rule-card ok">
+          <div class="rule-tag">Public ledger</div>
+          <h3>Commitment only</h3>
+          <p>On-chain (here: simulated) state holds <code>H(amount ‖ note ‖ salt ‖ domain)</code> + optional range claim. No ADA amount in the clear.</p>
+          <ul>
+            <li>Commitment hash (hex)</li>
+            <li>Timestamp / pledge id</li>
+            <li>Optional disclosed flag / range tag</li>
+          </ul>
+        </article>
+        <article class="rule-card vault">
+          <div class="rule-tag">Private vault</div>
+          <h3>Local witnesses</h3>
+          <p>Amount, note, and salt stay in <code>localStorage</code> — a stand-in for Compact witnesses / local state that never leave the client.</p>
+          <ul>
+            <li><code>amountAda</code> (decimal)</li>
+            <li><code>note</code> (private message)</li>
+            <li><code>salt</code> (32-byte hex)</li>
+          </ul>
+        </article>
+      </div>
+      <div class="threat-rail" aria-label="Disclosure rails">
+        <div class="rail sealed-rail">
+          <h4>Sealed rail</h4>
+          <p class="muted small">Observers see only the commitment. Exact tip stays veiled.</p>
+          <div class="rail-meter" id="rail-sealed" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Privacy meter">
+            <div class="rail-fill" style="width:100%"></div>
+          </div>
+          <span class="rail-label" id="rail-sealed-label">100% veiled (no pledges yet)</span>
+        </div>
+        <div class="rail disclose-rail">
+          <h4>Disclose rail</h4>
+          <p class="muted small">Threshold or full disclose trades privacy for proof / gratitude.</p>
+          <div class="rail-meter warn" id="rail-disclose" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Disclosure meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <span class="rail-label" id="rail-disclose-label">0% disclosed</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="compose" class="panel reveal" aria-labelledby="compose-heading">
+      <div class="section-head">
+        <h2 id="compose-heading">Compose &amp; seal <span class="badge badge-sim">simulated</span></h2>
+        <p class="muted">Build a private pledge, seal witnesses, then commit the hash to the public board. No Compact runtime — educational only.</p>
+      </div>
+      <div class="compose-layout">
+        <div class="compose-card">
+          <h3>1. Private tip</h3>
+          <p class="muted">Amount and note stay in the vault until you disclose.</p>
+          <div class="field">
+            <label for="pledge-amount">Amount (ADA)</label>
+            <input id="pledge-amount" type="number" min="0.1" step="0.1" value="5" inputmode="decimal" aria-describedby="amount-hint" />
+            <span class="field-hint" id="amount-hint">Teaching stub — not a real transfer</span>
+          </div>
+          <div class="field">
+            <label for="pledge-note">Private note</label>
+            <textarea id="pledge-note" rows="3" maxlength="160" placeholder="Thanks for the Midnight lab…"></textarea>
+            <div class="char-count muted small" id="note-count">0 / 160</div>
+          </div>
+          <div class="field">
+            <label for="pledge-handle">Public alias (optional)</label>
+            <input id="pledge-handle" type="text" maxlength="32" placeholder="@anon" autocomplete="off" />
+          </div>
+          <button type="button" class="btn primary" id="btn-seal">Seal into vault</button>
+          <p class="status" id="seal-status" role="status">No sealed draft.</p>
+        </div>
+
+        <div class="compose-card">
+          <h3>2. Commitment preview</h3>
+          <p class="muted">Domain-separated SHA-256 stand-in for a Compact commitment.</p>
+          <dl class="kv-list">
+            <div><dt>Salt</dt><dd class="mono" id="prev-salt">—</dd></div>
+            <div><dt>Commitment</dt><dd class="mono" id="prev-commit">—</dd></div>
+            <div><dt>Vault amount</dt><dd id="prev-amount">—</dd></div>
+            <div><dt>Note (private)</dt><dd id="prev-note">—</dd></div>
+          </dl>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-commit" disabled>Commit to ledger</button>
+            <button type="button" class="btn ghost" id="btn-clear-draft">Clear draft</button>
+          </div>
+          <p class="status" id="commit-status" role="status">Seal first, then commit.</p>
+        </div>
+
+        <div class="compose-card wide tip-target">
+          <h3>3. Tip target <span class="badge badge-lab">lab ADA</span></h3>
+          <p class="muted">Real Cardano donation address for this lab — copy anytime. The pledge theater does <strong>not</strong> send ADA.</p>
+          <code class="mono block" id="tip-target-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+          <div class="btn-row">
+            <button type="button" class="btn ghost" id="btn-copy-tip-target">Copy address</button>
+            <a class="btn ghost" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="threshold" class="panel reveal" aria-labelledby="thresh-heading">
+      <div class="section-head">
+        <h2 id="thresh-heading">Threshold theater <span class="badge badge-sim">simulated</span></h2>
+        <p class="muted">Prove <code>amount ≥ threshold</code> without revealing the exact tip. Reject is a first-class outcome when the vault cannot satisfy the claim.</p>
+      </div>
+      <div class="thresh-layout">
+        <div class="thresh-card">
+          <h3>Claim</h3>
+          <div class="field">
+            <label for="thresh-value">Threshold (ADA)</label>
+            <input id="thresh-value" type="number" min="0.1" step="0.1" value="3" />
+          </div>
+          <div class="field">
+            <label for="thresh-pledge">Against pledged commitment</label>
+            <select id="thresh-pledge" aria-describedby="thresh-pledge-hint">
+              <option value="">— select a committed pledge —</option>
+            </select>
+            <span class="field-hint" id="thresh-pledge-hint">Must be sealed + committed first</span>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-prove-thresh">Prove ≥ threshold</button>
+            <button type="button" class="btn ghost" id="btn-full-disclose">Full disclose</button>
+            <button type="button" class="btn danger" id="btn-reseal">Re-seal (hide again)</button>
+          </div>
+          <p class="status" id="thresh-status" role="status">No proof attempted.</p>
+        </div>
+        <div class="thresh-card proof-pane">
+          <h3>Proof transcript <span class="muted small">(local)</span></h3>
+          <pre class="log" id="thresh-log" tabindex="0" aria-label="Threshold proof log" aria-live="polite"></pre>
+          <div class="proof-badge" id="proof-badge" aria-live="polite">
+            <span class="proof-label">Result</span>
+            <strong id="proof-result">—</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="board" class="panel reveal" aria-labelledby="board-heading">
+      <div class="section-head">
+        <h2 id="board-heading">Pledge board</h2>
+        <p class="muted">Public commitments first. Private bodies stay veiled until threshold or full disclose. Data in <code>localStorage</code> only.</p>
+      </div>
+      <div class="board-toolbar">
+        <div class="board-stats" aria-live="polite">
+          <span><strong id="stat-count">0</strong> pledges</span>
+          <span><strong id="stat-sealed">0</strong> sealed</span>
+          <span><strong id="stat-disclosed">0</strong> disclosed</span>
+          <span>Σ veiled <strong id="stat-sum">—</strong></span>
+        </div>
+        <button type="button" class="btn ghost small" id="btn-clear-board">Clear all (local)</button>
+      </div>
+      <ul class="pledge-list" id="pledge-list"></ul>
+    </section>
+
+    <section id="jar" class="panel reveal" aria-labelledby="jar-heading">
+      <div class="section-head">
+        <h2 id="jar-heading">Tip jar atelier</h2>
+        <p class="muted">Visual fill from local pledges. Real tips still go to the Cardano address below — this jar does not move coins.</p>
+      </div>
+      <div class="jar-layout">
+        <div class="jar-visual" aria-hidden="true">
+          <div class="jar-glass">
+            <div class="jar-fill" id="jar-fill" style="height:8%"></div>
+            <div class="jar-shine"></div>
+          </div>
+          <div class="jar-label" id="jar-label">0 ADA · empty</div>
+        </div>
+        <div class="jar-copy">
+          <h3>Support the Midnight lab</h3>
+          <p class="muted">
+            Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+            (creator of <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>).
+            Paste this address in Lace / any Cardano wallet. Optional memo: “Veil Pledge”.
+          </p>
+          <code class="mono block" id="jar-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-copy-jar">Copy donate address</button>
+            <a class="btn ghost" href="https://x.com/kshot9000" rel="noopener noreferrer">Follow @kshot9000</a>
+          </div>
+          <p class="status" id="jar-status" role="status">Jar fill is from local simulated pledges only.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="snippets" class="panel reveal" aria-labelledby="snip-heading">
+      <div class="section-head">
+        <h2 id="snip-heading">Compact shape (illustrative)</h2>
+        <p class="muted">Not compilable as-is — verify against current Compact docs / Zswap APIs before shipping.</p>
+      </div>
+      <div class="snip-grid">
+        <div class="snip bad">
+          <div class="snip-label">✗ Cleartext tip on ledger</div>
+<pre><code>export ledger tipAda: Uint&lt;64&gt;;
+
+export circuit tip(amount: Uint&lt;64&gt;): [] {
+  // Everyone sees the tip forever
+  tipAda = amount;
+}</code></pre>
+        </div>
+        <div class="snip ok">
+          <div class="snip-label">✓ Commitment + selective disclose</div>
+<pre><code>witness tipAmount(): Uint&lt;64&gt;;
+witness tipSalt(): Bytes&lt;32&gt;;
+
+export ledger commitment: Bytes&lt;32&gt;;
+
+export circuit seal(): [] {
+  commitment = disclose(
+    persistentHash&lt;…&gt;([tipAmount(), tipSalt()])
+  );
+}
+
+// Later: prove tipAmount() &gt;= threshold in-circuit
+// without writing the exact amount to the ledger.</code></pre>
+        </div>
+      </div>
+      <p class="muted snip-note">
+        Prefer official starters:
+        <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a>
+        ·
+        <a href="https://docs.midnight.network/compact" rel="noopener noreferrer">Compact docs</a>
+        ·
+        <a href="https://docs.midnight.network/guides/security-best-practices" rel="noopener noreferrer">security best practices</a>.
+        Auth gates: never <code>assert(ownPublicKey() == owner)</code> alone — see
+        <a href="../auth/">Auth Forge Studio</a> / MPS-0029.
+      </p>
+    </section>
+
+    <footer class="site-footer" id="donate">
+      <div>
+        <strong>Veil Pledge Studio</strong>
+        · part of <a href="../">Midnight GrokBot Agent</a>
+        · MIT · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
+        · <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">GitHub</a>
+      </div>
+      <div class="footer-donate">
+        <span>Donate ADA:</span>
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" class="btn ghost small" id="copy-addr">Copy address</button>
+      </div>
+      <p class="disclaimer">
+        Educational stub only. Not affiliated with the Midnight Foundation or Input Output.
+        Does not claim on-chain Compact deploy, real ADA tips from this UI, or live GitHub Pages until Actions are enabled.
+        Verify against official docs before mainnet use.
+      </p>
+    </footer>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>

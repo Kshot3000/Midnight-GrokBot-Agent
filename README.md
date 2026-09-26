@@ -17,6 +17,7 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 | `/lace/` | **Lace Connect Studio** — journey + matrix + capability radar |
 | `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard + forge theater |
 | `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
+| `/pledge/` | **Veil Pledge Studio** — private tip jar & pledge board |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -31,7 +32,8 @@ Until then the URL may 404.
 │   ├── lace-connect-demo/     # Lace Connect Studio (journey, matrix, capabilities)
 │   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
 │   ├── auth-lab/              # Auth Forge Studio (MPS-0029 journey + scorecard)
-│   └── shield-board/          # Flagship dual-state privacy bulletin studio
+│   ├── shield-board/          # Flagship dual-state privacy bulletin studio
+│   └── veil-pledge/           # Veil Pledge Studio — private tip jar & pledge board
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
 ├── contracts/
@@ -49,6 +51,7 @@ Until then the URL may 404.
 | `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
 | `apps/auth-lab` | **Auth Forge Studio** — attack journey, scorecard, forge theater, local bboard |
 | `apps/shield-board` | **Flagship** dual-state privacy bulletin — public commitments + private vault + selective disclose |
+| `apps/veil-pledge` | **Veil Pledge Studio** — private tip jar, sealed pledges, threshold proofs (local stub) |
 | `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
@@ -91,6 +94,19 @@ python3 -m http.server 5177
 ```
 
 Pages path (when Actions enabled): `/board/`. Local stub only — no on-chain Compact deploy.
+
+
+## Quick start — Veil Pledge Studio
+
+Private tip jar & pledge board: seal amounts, commit public hashes, prove thresholds without revealing exact tips.
+
+```bash
+cd apps/veil-pledge
+python3 -m http.server 5179
+# open http://localhost:5179
+```
+
+Pages path (when Actions enabled): `/pledge/`. Local stub only — no on-chain Compact deploy, no real ADA transfer from this UI.
 
 ## Compact / Midnight toolchain (official)
 
