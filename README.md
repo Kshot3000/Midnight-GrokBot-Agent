@@ -16,7 +16,7 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | `/` | **Midnight Studio Hub** — flagship homepage, studio cards, live status, Compat Explorer |
 | `/escrow/` | **Agent Escrow Studio** — role theater (LOCAL-TRUE) |
 | `/lace/` | **Lace Connect Studio** — journey + matrix + capability radar |
-| `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard + forge theater |
+| `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard (LOCAL-TRUE) |
 | `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
 | `/pledge/` | **Veil Pledge Studio** — private tip jar & pledge board |
 | `/market/` | **Night Market Studio** — sealed listings & bids (LOCAL-TRUE) |
@@ -39,7 +39,7 @@ Until then the URL may 404.
 │   ├── midnight-lab-site/     # Midnight Studio Hub (flagship homepage)
 │   ├── lace-connect-demo/     # Lace Connect Studio (journey, matrix, capabilities)
 │   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
-│   ├── auth-lab/              # Auth Forge Studio (MPS-0029 journey + scorecard)
+│   ├── auth-lab/              # Auth Forge Studio LOCAL-TRUE (MPS-0029)
 │   ├── shield-board/          # Flagship dual-state privacy bulletin studio
 │   ├── veil-pledge/           # Veil Pledge Studio — private tip jar & pledge board
 │   ├── night-market/          # Night Market Studio — sealed listings & private bids
@@ -65,15 +65,15 @@ Until then the URL may 404.
 | `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Explorer, **⌘K command palette**, donate dock |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — real Lace discover/connect, localStorage prefs, reconnect, balances, health · **no transfers** |
 | `apps/agent-escrow-stub` | **LOCAL-TRUE** escrow role theater — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
-| `apps/auth-lab` | **Auth Forge Studio** — attack journey, scorecard, forge theater, local bboard |
+| `apps/auth-lab` | **LOCAL-TRUE** Auth Forge — localStorage v2, multi-tab sync, export/import, vitest · MPS-0029 · not on-chain |
 | `apps/shield-board` | **LOCAL-TRUE** dual-state bulletin — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
-| `apps/veil-pledge` | **Veil Pledge Studio** — private tip jar, sealed pledges, threshold proofs (local stub) |
+| `apps/veil-pledge` | **LOCAL-TRUE** Veil Pledge — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
 | `apps/night-market` | **LOCAL-TRUE** Night Market — localStorage v2, multi-tab sync, export/import, vitest · sealed listings & bids · not on-chain |
 | `apps/sealed-invite` | **LOCAL-TRUE** Sealed Invite — localStorage v2, multi-tab sync, export/import, vitest · private RSVP · not on-chain |
-| `apps/proof-playground` | **Proof Playground** — visual ZK circuits, witness→gate→prove theater (local stub) |
+| `apps/proof-playground` | **LOCAL-TRUE** Proof Playground — localStorage v2, multi-tab sync, export/import, vitest · not a proof server |
 | `apps/private-ballot` | **LOCAL-TRUE** sealed polls — localStorage v2, multi-tab sync, export/import, vitest · educational hashes only |
-| `apps/veil-passport` | **Veil Passport Studio** — confidential credentials, selective disclose, predicate theater (local stub) |
-| `apps/compact-atelier` | **Compact Atelier** — editable Compact snippets, explain panel, lint theater (local stub) |
+| `apps/veil-passport` | **LOCAL-TRUE** Veil Passport — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
+| `apps/compact-atelier` | **LOCAL-TRUE** Compact Atelier — localStorage lesson progress, multi-tab sync, export/import, vitest · not a Compact compiler |
 | `apps/nocturne-messenger` | **LOCAL-TRUE** Nocturne Messenger — localStorage v2, multi-tab sync, export/import, vitest · sealed DMs · not a relay / not on-chain |
 | `packages/lace-midnight-kit` | **v0.3.0** — discover, connect, prefs, reconnect, balance refresh, health watch, capability probe, vitest |
 | `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
@@ -90,7 +90,7 @@ Serve each app from its own folder (or assemble for Pages). Default lab ports:
 | --- | --- | --- | --- |
 | **5173** | Midnight Studio Hub | `/` | `cd apps/midnight-lab-site && python3 -m http.server 5173` |
 | **5174** | Lace Connect Studio | `/lace/` | `npm run dev:lace-demo` (Vite) |
-| **5175** | Agent Escrow stub | `/escrow/` | `cd apps/agent-escrow-stub && python3 -m http.server 5175` |
+| **5175** | Agent Escrow Studio | `/escrow/` | `cd apps/agent-escrow-stub && python3 -m http.server 5175` |
 | **5177** | Shield Board | `/board/` | `cd apps/shield-board && python3 -m http.server 5177` |
 | **5176** | Auth Forge Studio | `/auth/` | `cd apps/auth-lab && python3 -m http.server 5176` |
 | **5179** | Veil Pledge Studio | `/pledge/` | `cd apps/veil-pledge && python3 -m http.server 5179` |
@@ -133,7 +133,7 @@ Safety: the demo does **not** call `makeTransfer` / submit. A successful connect
 
 ## Quick start — Auth Forge Studio
 
-MPS-0029 attack journey, scorecard, forge theater, local bulletin board.
+MPS-0029 attack journey, scorecard, forge theater, local bulletin board — **LOCAL-TRUE** persist + sync + export/import.
 
 ```bash
 cd apps/auth-lab
@@ -141,7 +141,11 @@ python3 -m http.server 5176
 # open http://localhost:5176
 ```
 
-Pages path (when Actions enabled): `/auth/`. Local stub only — no on-chain Compact deploy.
+```bash
+cd apps/auth-lab && npm install && npm test
+```
+
+Pages path (when Actions enabled): `/auth/`. LOCAL-TRUE — not on-chain Compact / Lace settlement.
 
 ## Quick start — Shield Board (flagship)
 
@@ -153,7 +157,7 @@ python3 -m http.server 5177
 # open http://localhost:5177
 ```
 
-Pages path (when Actions enabled): `/board/`. Local stub only — no on-chain Compact deploy.
+Pages path (when Actions enabled): `/board/`. LOCAL-TRUE — not on-chain Compact / Lace settlement.
 
 
 ## Quick start — Veil Pledge Studio

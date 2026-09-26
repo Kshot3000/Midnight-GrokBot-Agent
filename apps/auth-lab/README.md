@@ -2,15 +2,17 @@
 
 Flagship educational lab that teaches why `ownPublicKey()` alone is forgeable for Compact authorization, and why witness-derived keys (`publicKey(localSecretKey)` / `persistentHash` patterns) are the safe default — the same pattern used by [`example-bboard`](https://github.com/midnightntwrk/example-bboard).
 
+**LOCAL-TRUE** — real `localStorage` (schema v2), multi-tab sync (`BroadcastChannel` + `storage`), JSON export/import, vitest.
+
 Built by [@kshot9000](https://x.com/kshot9000).
 
 ## What this is
 
-- Flagship static HTML/CSS/JS (no npm) — starfield, aurora/nebula, sticky topbar, donate dock
+- Flagship static HTML/CSS/JS — starfield, aurora/nebula, sticky topbar, donate dock
 - **Attack journey** stepper (idle → deployed → forged → witness-bound)
 - Dual-rail threat meters + interactive **auth scorecard**
 - Forge theater: unsafe `ownPublicKey` bypass vs secret-bound reject
-- Local bulletin-board stub bound to a browser-generated secret (not on-chain)
+- Local bulletin-board bound to a browser-generated secret (persisted + syncable)
 - Live `window.midnight` enumeration + optional injection watch (never hardcodes `mnLace`)
 - a11y: skip link, live region, reduced-motion, focus rings, mobile nav
 - Links to [MPS-0029](https://github.com/midnightntwrk/midnight-improvement-proposals/blob/main/mps/mps-0029-compact-caller-identity.md)
@@ -22,6 +24,7 @@ Built by [@kshot9000](https://x.com/kshot9000).
 - Not a proof that Lace transfers work
 - Does not claim GitHub Pages is live until Actions are enabled
 - SHA-256 “derive” is a teaching stand-in — verify official Compact crypto before shipping
+- **LOCAL-TRUE browser persistence ≠ on-chain**
 
 ## Run locally
 
@@ -29,6 +32,14 @@ Built by [@kshot9000](https://x.com/kshot9000).
 cd apps/auth-lab
 python3 -m http.server 5176
 # open http://localhost:5176
+```
+
+Tests:
+
+```bash
+cd apps/auth-lab
+npm install
+npm test
 ```
 
 On GitHub Pages (once workflow is live): `/auth/`

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Auth Forge Studio — MPS-0029 interactive lab. Forgeable ownPublicKey vs witness-derived Compact auth on Midnight. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="description" content="Auth Forge Studio — MPS-0029 interactive lab. Real localStorage + multi-tab sync + export/import by @kshot9000. LOCAL-TRUE educational — not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
-  <title>Auth Forge Studio — MPS-0029 · Midnight Lab</title>
+  <title>Auth Forge Studio — LOCAL-TRUE · MPS-0029 · Midnight Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M20 42 L32 16 L44 42 Z' fill='none' stroke='%23a78bfa' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='38' r='5' fill='%2322d3ee'/%3E%3Cpath d='M26 38h12' stroke='%237c9cff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
 </head>
@@ -40,7 +40,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -71,10 +71,11 @@
         <a class="btn ghost" href="#donate">Donate ADA</a>
       </div>
       <div class="honesty" role="note">
-        <strong>Honest scope:</strong> local HTML/JS simulation only.
+        <strong>Honest scope:</strong> LOCAL-TRUE browser persistence (schema v2 localStorage, multi-tab sync, JSON export/import).
         Does <strong>not</strong> run Compact, a proof server, or Lace <code>makeTransfer</code>.
         Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
         SHA-256 “derive” here is a teaching stand-in — verify against official Compact crypto before shipping.
+        <strong>LOCAL-TRUE ≠ on-chain.</strong>
       </div>
     </section>
 
@@ -272,7 +273,14 @@
     <section id="board" class="panel reveal" aria-labelledby="board-heading">
       <div class="section-head">
         <h2 id="board-heading">Safe local bulletin board</h2>
-        <p class="muted">bboard-inspired stub: posts bind to <code>publicKey(localSecret)</code>. Only the secret holder can take down a post. Data stays in <code>localStorage</code>.</p>
+        <p class="muted">bboard-inspired LOCAL-TRUE board: posts bind to <code>publicKey(localSecret)</code>. Schema v2 localStorage · BroadcastChannel sync · JSON export/import. Not on-chain.</p>
+      </div>
+      <div class="persist-bar btn-row" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+        <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+        <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+        <button type="button" class="btn danger small" id="btn-reset-studio" title="Clear scorecard, board, forge, secret">Reset studio</button>
+        <span class="muted small">Donate + @kshot9000 · sensitive secrets may be in exports</span>
       </div>
       <div class="board-layout">
         <div class="board-side">
@@ -379,13 +387,13 @@ export circuit adminOnly(): [] {
         <button type="button" class="btn ghost small" id="copy-addr">Copy address</button>
       </div>
       <p class="disclaimer">
-        Educational stub only. Not affiliated with the Midnight Foundation or Input Output.
-        Does not claim on-chain Compact deploy or live GitHub Pages until Actions are enabled.
+        LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Educational only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        Does not claim live GitHub Pages until Actions are enabled.
         Verify against official docs before mainnet use.
       </p>
     </footer>
   </main>
 
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

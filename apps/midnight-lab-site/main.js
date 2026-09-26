@@ -196,7 +196,7 @@
       emptyEl.setAttribute("role", "status");
       emptyEl.innerHTML =
         '<p><strong>No studios match this filter.</strong></p>' +
-        '<p class="muted small">Try <em>All</em> or clear the chip — every card is a LOCAL STUB, not on-chain.</p>' +
+        '<p class="muted small">Try <em>All</em> or clear the chip — cards are LOCAL-TRUE or CONNECT ONLY, not on-chain.</p>' +
         '<button type="button" class="btn ghost small" id="btn-clear-filter">Show all studios</button>';
       grid.after(emptyEl);
       emptyEl.querySelector("#btn-clear-filter")?.addEventListener("click", () => {
@@ -335,13 +335,13 @@
         banner.textContent = "file:// mode — probes skipped. Serve with python3 -m http.server to check siblings.";
         banner.className = "probe-banner is-miss";
       } else if (reachable === 0) {
-        banner.textContent = `0/${total} reachable on this origin — expected when only the Hub is served. Assembled Pages or a multi-app root would show Reachable. LOCAL STUB honesty.`;
+        banner.textContent = `0/${total} reachable on this origin — expected when only the Hub is served. Assembled Pages or a multi-app root would show Reachable. LOCAL-TRUE / CONNECT ONLY honesty.`;
         banner.className = "probe-banner is-miss";
       } else if (reachable < total) {
         banner.textContent = `${reachable}/${total} reachable — partial suite on this origin. Missing paths are honest misses, not fake Pages claims.`;
         banner.className = "probe-banner is-partial";
       } else {
-        banner.textContent = `All ${total} studios reachable on this origin. Still LOCAL STUB — not on-chain.`;
+        banner.textContent = `All ${total} studios reachable on this origin. Still LOCAL-TRUE / CONNECT ONLY — not on-chain.`;
         banner.className = "probe-banner is-ok";
       }
     }
@@ -519,7 +519,7 @@
         list.innerHTML =
           '<li class="cmd-empty" role="presentation">' +
           '<strong>No matches</strong>' +
-          '<span class="muted small">Try “nocturne”, “lace”, “ballot”, or “donate”. Esc closes · LOCAL STUB links only.</span>' +
+          '<span class="muted small">Try “nocturne”, “lace”, “ballot”, or “donate”. Esc closes · LOCAL-TRUE / CONNECT ONLY links.</span>' +
           '</li>';
         return;
       }
