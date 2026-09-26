@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Proof Playground — visual ZK / circuit explainer for Midnight. Witnesses, gates, public outputs, simulated prove/verify theater. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Proof Playground — Visual ZK Circuits · Midnight Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%2322d3ee' stroke-width='2.2'/%3E%3Ccircle cx='20' cy='28' r='4' fill='%23a78bfa'/%3E%3Ccircle cx='44' cy='28' r='4' fill='%237c9cff'/%3E%3Ccircle cx='32' cy='44' r='4' fill='%236ee7b7'/%3E%3Cpath d='M20 28L32 44L44 28' fill='none' stroke='%2322d3ee' stroke-width='1.6' opacity='0.7'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Proof<span>Playground</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#journey">Journey</a>
+      <a href="#lesson">Lesson</a>
+      <a href="#circuits">Circuits</a>
+      <a href="#playground">Playground</a>
+      <a href="#theater">Theater</a>
+      <a href="#history">History</a>
+      <a href="#snippets">Snippets</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="help-overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <div class="help-card">
+      <h3 id="help-title">Keyboard shortcuts</h3>
+      <ul>
+        <li><span>Focus circuit picker</span><span>C</span></li>
+        <li><span>Run prove theater</span><span>P</span></li>
+        <li><span>Verify last proof</span><span>V</span></li>
+        <li><span>Open / close this help</span><span>?</span></li>
+        <li><span>Copy donate address</span><span>D</span></li>
+        <li><span>Seed demo witnesses</span><span>Shift+N</span></li>
+        <li><span>Close overlay</span><span>Esc</span></li>
+      </ul>
+      <p class="muted small" style="margin:0.85rem 0 0">Shortcuts idle when typing in inputs. Press <kbd style="font-family:var(--mono)">?</kbd> anytime.</p>
+      <div class="btn-row" style="margin-top:1rem">
+        <button type="button" class="btn primary small" id="btn-close-help">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main" class="wrap">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Visual ZK · circuit explainer</p>
+      <h1>Proof Playground</h1>
+      <p class="lede">
+        World-class educational studio for Midnight’s zero-knowledge intuition:
+        pick a <strong>circuit</strong>, set <strong>private witnesses</strong>,
+        watch the graph light from gates → public outputs,
+        then run a <strong>simulated prove / verify theater</strong> —
+        without claiming a real proof server or Compact runtime.
+        By <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#playground">Open playground</a>
+        <a class="btn ghost" href="#circuits">Pick a circuit</a>
+        <a class="btn ghost" href="#theater">Proof theater</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="kbd-bar" aria-label="Keyboard hints">
+        <span class="kbd"><kbd>C</kbd> Circuits</span>
+        <span class="kbd"><kbd>P</kbd> Prove</span>
+        <span class="kbd"><kbd>V</kbd> Verify</span>
+        <span class="kbd"><kbd>?</kbd> Shortcuts</span>
+        <span class="kbd"><kbd>D</kbd> Donate</span>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest scope:</strong> local HTML/JS simulation only.
+        Does <strong>not</strong> run Compact, a proof server, Lace, or real ADA / DUST transfers.
+        Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
+        Circuit diagrams and SHA-256 stand-ins are <strong>teaching visuals</strong> — verify against official Compact / Zswap crypto before shipping.
+      </div>
+    </section>
+
+    <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
+      <div class="section-head">
+        <h2 id="journey-heading">Proof journey</h2>
+        <p class="muted">Labeled phases from idle → witnesses → circuit lit → proven → verified. Reject / fail is first-class.</p>
+      </div>
+      <ol class="journey" id="journey-steps" aria-label="Proof journey phases">
+        <li class="journey-step is-active" data-phase="idle" aria-current="step">
+          <span class="js-idx">1</span>
+          <div>
+            <strong>Idle</strong>
+            <span class="js-detail">Pick a circuit</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="witness">
+          <span class="js-idx">2</span>
+          <div>
+            <strong>Witness</strong>
+            <span class="js-detail">Private inputs set</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="compiled">
+          <span class="js-idx">3</span>
+          <div>
+            <strong>Compiled</strong>
+            <span class="js-detail">Graph lit · public IO</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="proven">
+          <span class="js-idx">4</span>
+          <div>
+            <strong>Proven</strong>
+            <span class="js-detail">Simulated proof blob</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="verified">
+          <span class="js-idx">5</span>
+          <div>
+            <strong>Verified</strong>
+            <span class="js-detail">Check against public</span>
+          </div>
+        </li>
+      </ol>
+      <p class="journey-live status" id="journey-live" role="status">Phase: idle — choose a circuit to begin.</p>
+    </section>
+
+    <section id="lesson" class="panel reveal" aria-labelledby="lesson-heading">
+      <div class="section-head">
+        <h2 id="lesson-heading">What a Midnight-style proof is really saying</h2>
+        <p class="muted">Observers see public outputs + a proof. Witnesses stay local. The circuit constrains what those witnesses are allowed to imply.</p>
+      </div>
+      <div class="dual-split">
+        <article class="rail-card private">
+          <h4>Private witnesses</h4>
+          <p class="muted small">Never leave the client in the dual-state model. Teaching stand-in: values you type below.</p>
+          <ul>
+            <li>Secret amounts, salts, identities</li>
+            <li>Opening notes for commitments</li>
+            <li>Intermediate gate wires</li>
+          </ul>
+        </article>
+        <article class="rail-card public">
+          <h4>Public outputs</h4>
+          <p class="muted small">What the simulated “ledger” / verifier is allowed to see.</p>
+          <ul>
+            <li>Commitment hashes</li>
+            <li>Threshold / range flags</li>
+            <li>Selective disclose payloads (optional)</li>
+          </ul>
+        </article>
+      </div>
+      <div class="threat-rail" style="margin-top:1.1rem" aria-label="Proof privacy rails">
+        <div class="rail sealed-rail">
+          <h4>Witness rail</h4>
+          <p class="muted small">How veiled your private inputs stay after the last run.</p>
+          <div class="rail-meter" id="rail-witness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Witness privacy meter">
+            <div class="rail-fill" style="width:100%"></div>
+          </div>
+          <p class="rail-label" id="rail-witness-label">100% private (no disclose)</p>
+        </div>
+        <div class="rail disclose-rail">
+          <h4>Public rail</h4>
+          <p class="muted small">How much the verifier learned from public outputs.</p>
+          <div class="rail-meter warn" id="rail-public" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Public output meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <p class="rail-label" id="rail-public-label">0% public surface</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="circuits" class="panel reveal" aria-labelledby="circuits-heading">
+      <div class="section-head">
+        <h2 id="circuits-heading">Circuit catalog</h2>
+        <p class="muted">Five teaching circuits. Each redraws the playground graph and witness form. Press <kbd style="font-family:var(--mono)">C</kbd> to focus.</p>
+      </div>
+      <div class="circuit-picker" id="circuit-picker" role="listbox" aria-label="Circuit catalog" tabindex="0">
+        <!-- filled by main.js -->
+      </div>
+    </section>
+
+    <section id="playground" class="panel reveal" aria-labelledby="playground-heading">
+      <div class="section-head">
+        <h2 id="playground-heading">Live circuit playground</h2>
+        <p class="muted">Witnesses on the left · animated graph in the center · public preview on the right. Edges pulse during prove.</p>
+      </div>
+      <div class="circuit-stage">
+        <div class="circuit-canvas-wrap" id="circuit-canvas-wrap">
+          <svg id="circuit-svg" viewBox="0 0 640 420" role="img" aria-labelledby="circuit-svg-title">
+            <title id="circuit-svg-title">Circuit graph</title>
+            <defs>
+              <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#22d3ee" />
+                <stop offset="50%" stop-color="#a78bfa" />
+                <stop offset="100%" stop-color="#6ee7b7" />
+              </linearGradient>
+              <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <g id="edges-layer"></g>
+            <g id="nodes-layer"></g>
+          </svg>
+          <div class="circuit-legend" aria-hidden="true">
+            <span><i class="lg-dot lg-witness"></i> Witness</span>
+            <span><i class="lg-dot lg-gate"></i> Gate</span>
+            <span><i class="lg-dot lg-public"></i> Public</span>
+            <span><i class="lg-dot lg-proof"></i> Proof</span>
+          </div>
+        </div>
+        <div>
+          <div class="witness-panel">
+            <h3 id="witness-heading">Witnesses</h3>
+            <p class="muted small" id="circuit-blurb">Select a circuit above.</p>
+            <div class="witness-fields" id="witness-fields"></div>
+            <div class="btn-row" style="margin-top:0.9rem">
+              <button type="button" class="btn primary" id="btn-compile">Compile graph</button>
+              <button type="button" class="btn ghost" id="btn-seed-w">Seed demo</button>
+            </div>
+            <p class="status" id="compile-status" role="status"></p>
+          </div>
+          <div class="prove-panel" style="margin-top:0.85rem">
+            <h3>Public preview</h3>
+            <div class="preview-box" id="public-preview">
+              <strong>No compile yet</strong>
+              Public outputs appear here after compile — never the raw witnesses (unless you pick selective disclose).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="theater" class="panel reveal" aria-labelledby="theater-heading">
+      <div class="section-head">
+        <h2 id="theater-heading">Prove / verify theater</h2>
+        <p class="muted">Simulated stages only — no proof server. Fail paths are intentional teaching moments.</p>
+      </div>
+      <div class="compose-layout">
+        <div class="compose-card">
+          <ol class="prove-stages" id="prove-stages" aria-label="Prove stages">
+            <li data-stage="bind" class="">
+              <span class="ps-idx">1</span>
+              <div><strong>Bind witnesses</strong><div class="ps-meta">hash private inputs locally</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="constrain">
+              <span class="ps-idx">2</span>
+              <div><strong>Constrain gates</strong><div class="ps-meta">check circuit relations</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="prove">
+              <span class="ps-idx">3</span>
+              <div><strong>Emit proof blob</strong><div class="ps-meta">SIMULATED · SHA-256 stand-in</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="verify">
+              <span class="ps-idx">4</span>
+              <div><strong>Verify vs public</strong><div class="ps-meta">accept or reject</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+          </ol>
+          <div class="proof-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="proof-meter" aria-label="Proof progress">
+            <div class="proof-meter-fill" id="proof-meter-fill"></div>
+          </div>
+          <p class="muted small" id="proof-meter-label">0% — idle</p>
+          <div class="btn-row" style="margin-top:0.85rem">
+            <button type="button" class="btn primary" id="btn-prove">Prove</button>
+            <button type="button" class="btn ghost" id="btn-verify">Verify</button>
+            <button type="button" class="btn danger" id="btn-tamper">Tamper public (demo fail)</button>
+          </div>
+          <div class="proof-result-card" id="proof-result-card">
+            <p class="pr-title" id="proof-result-title">No proof yet</p>
+            <p class="pr-hash" id="proof-result-hash">—</p>
+            <p class="muted small" id="proof-result-note">LOCAL STUB · simulated proof blob only.</p>
+          </div>
+        </div>
+        <div class="thresh-card">
+          <h3>Theater log</h3>
+          <pre class="log" id="theater-log" aria-live="polite">Awaiting prove…</pre>
+          <div class="section-head" style="margin-top:1rem; margin-bottom:0.5rem">
+            <h3 style="margin:0; font-size:1rem">Gate cheat-sheet</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="gate-table" id="gate-table">
+              <thead>
+                <tr><th>Gate</th><th>Role</th><th>Public?</th></tr>
+              </thead>
+              <tbody id="gate-table-body">
+                <tr><td colspan="3" class="muted">Select a circuit…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="history" class="panel reveal" aria-labelledby="history-heading">
+      <div class="section-head">
+        <h2 id="history-heading">Proof history</h2>
+        <p class="muted">Local-only runs stored in <code>localStorage</code>. Clear anytime — nothing left the browser.</p>
+      </div>
+      <div class="board-toolbar">
+        <div class="board-stats">
+          <span>Runs: <strong id="stat-runs">0</strong></span>
+          <span>Verified: <strong id="stat-ok">0</strong></span>
+          <span>Rejected: <strong id="stat-fail">0</strong></span>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost small" id="btn-seed-history">Seed demo run</button>
+          <button type="button" class="btn danger small" id="btn-reset">Reset studio</button>
+        </div>
+      </div>
+      <ul class="history-list" id="history-list" aria-label="Proof history"></ul>
+    </section>
+
+    <section id="snippets" class="panel reveal" aria-labelledby="snip-heading">
+      <div class="section-head">
+        <h2 id="snip-heading">Anti-pattern vs safe pattern</h2>
+        <p class="muted">Teaching sketches — not deployable Compact. Always verify against official docs.</p>
+      </div>
+      <div class="snip-grid">
+        <article class="snip bad">
+          <div class="snip-label">✗ Anti-pattern — clear witnesses on-chain</div>
+          <pre><code>// BAD: public ledger sees the secret
+ledger {
+  amount: Uint&lt;64&gt;;   // observers learn the tip
+  salt: Bytes&lt;32&gt;;
+}</code></pre>
+        </article>
+        <article class="snip ok">
+          <div class="snip-label">✓ Safer sketch — commit + prove</div>
+          <pre><code>// BETTER (sketch): public commitment only
+ledger {
+  commit: Bytes&lt;32&gt;;
+  thresholdMet: Boolean;
+}
+witness amount: Uint&lt;64&gt;;
+witness salt: Bytes&lt;32&gt;;
+// prove amount &gt;= T without publishing amount</code></pre>
+        </article>
+      </div>
+      <p class="snip-note muted">These snippets are educational illustrations. Official Compact syntax, circuits, and Zswap commitments may differ — check Midnight docs before shipping.</p>
+    </section>
+
+    <section id="donate" class="panel reveal" aria-labelledby="donate-heading">
+      <div class="section-head">
+        <h2 id="donate-heading">Support the lab</h2>
+        <p class="muted">Cardano donation address — always visible in the dock and here. No on-chain tip from this UI.</p>
+      </div>
+      <div class="jar-layout">
+        <div class="jar-visual" aria-hidden="true">
+          <div class="pp-seal">
+            <div class="seal-glow"></div>
+            <div class="seal-face">ZK</div>
+          </div>
+          <p class="jar-label">Proof Playground</p>
+        </div>
+        <div class="jar-copy">
+          <h3>Donate ADA to keep the midnight craft going</h3>
+          <p class="muted">Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> · creator of <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.</p>
+          <div class="footer-donate">
+            <code id="donate-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+            <button type="button" class="btn primary small" id="btn-copy-donate">Copy address</button>
+          </div>
+          <p class="status" id="donate-status" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p><strong>Proof Playground</strong> · Midnight GrokBot Agent lab ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent">GitHub</a> ·
+        <a href="https://x.com/kshot9000">@kshot9000</a>
+      </p>
+      <p class="disclaimer">
+        LOCAL STUB · educational simulation only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        No claim of live GitHub Pages, on-chain settlement, Compact runtime, or real proof-server verification.
+      </p>
+    </footer>
+  </main>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
