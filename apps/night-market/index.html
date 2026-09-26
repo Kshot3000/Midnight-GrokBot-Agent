@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Night Market Studio — Midnight sealed listings & private bids. Dual-state marketplace: public commitments, private reserves, bid-threshold proofs. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Night Market Studio — Sealed Listings · Midnight Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M14 42h36M18 42V28l14-10 14 10v14' fill='none' stroke='%23a78bfa' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='34' r='5' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Cpath d='M26 48h12' stroke='%237c9cff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Night<span>Market</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#journey">Journey</a>
+      <a href="#lesson">Lesson</a>
+      <a href="#list">List</a>
+      <a href="#bid">Bid</a>
+      <a href="#theater">Theater</a>
+      <a href="#stalls">Stalls</a>
+      <a href="#snippets">Snippets</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <main id="main" class="wrap">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Dual-state · sealed marketplace</p>
+      <h1>Night Market Studio</h1>
+      <p class="lede">
+        World-class educational marketplace for Midnight’s dual-state model:
+        publish a <strong>sealed listing</strong> (public title + commitment hash),
+        collect <strong>private bids</strong> whose amounts stay in the vault,
+        then prove a bid meets the reserve <strong>without revealing either number</strong> —
+        or award &amp; selectively disclose when the stall closes.
+        By <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#list">Seal a listing</a>
+        <a class="btn ghost" href="#bid">Place a private bid</a>
+        <a class="btn ghost" href="#theater">Bid theater</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest scope:</strong> local HTML/JS simulation only.
+        Does <strong>not</strong> run Compact, a proof server, Lace, or real ADA / DUST transfers.
+        Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
+        SHA-256 commitments here are a <strong>teaching stand-in</strong> — verify against official Compact / Zswap crypto before shipping.
+      </div>
+    </section>
+
+    <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
+      <div class="section-head">
+        <h2 id="journey-heading">Market journey</h2>
+        <p class="muted">Labeled phases from sealed stall → private bids → award / disclose. Reject is first-class.</p>
+      </div>
+      <ol class="journey" id="journey-steps" aria-label="Market journey phases">
+        <li class="journey-step is-active" data-phase="idle" aria-current="step">
+          <span class="js-idx">1</span>
+          <div>
+            <strong>Idle</strong>
+            <span class="js-detail">No open stalls</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="listed">
+          <span class="js-idx">2</span>
+          <div>
+            <strong>Listed</strong>
+            <span class="js-detail">Public title + commitment</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="bidding">
+          <span class="js-idx">3</span>
+          <div>
+            <strong>Bidding</strong>
+            <span class="js-detail">Sealed bids on the stall</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="awarded">
+          <span class="js-idx">4</span>
+          <div>
+            <strong>Awarded</strong>
+            <span class="js-detail">Winner + selective disclose</span>
+          </div>
+        </li>
+      </ol>
+      <p class="journey-live status" id="journey-live" role="status">Phase: idle — seal a listing to open the night market.</p>
+    </section>
+
+    <section id="lesson" class="panel reveal" aria-labelledby="lesson-heading">
+      <div class="section-head">
+        <h2 id="lesson-heading">The dual-state stall in one screen</h2>
+        <p class="muted">Observers see titles and commitment hashes. Reserves and bid amounts stay in the private vault until you choose to disclose.</p>
+      </div>
+      <div class="rule-grid">
+        <article class="rule-card ok">
+          <div class="rule-tag">Public ledger</div>
+          <h3>Marketplace board</h3>
+          <p>Simulated public state holds listing metadata + <code>H(reserve ‖ details ‖ salt ‖ domain)</code> and bid commitments — never clear amounts.</p>
+          <ul>
+            <li>Listing title / category (clear)</li>
+            <li>Listing commitment hash</li>
+            <li>Bid commitment hashes + bidder tags</li>
+            <li>Award flag / disclose tags</li>
+          </ul>
+        </article>
+        <article class="rule-card vault">
+          <div class="rule-tag">Private vault</div>
+          <h3>Local witnesses</h3>
+          <p>Reserve, details, bid amounts, and salts live in <code>localStorage</code> — a stand-in for Compact witnesses that never leave the client.</p>
+          <ul>
+            <li><code>reserveAda</code> (seller)</li>
+            <li><code>details</code> (private listing body)</li>
+            <li><code>bidAda</code> (each bidder)</li>
+            <li><code>salt</code> (32-byte hex)</li>
+          </ul>
+        </article>
+      </div>
+      <div class="threat-rail" aria-label="Market privacy rails">
+        <div class="rail sealed-rail">
+          <h4>Sealed rail</h4>
+          <p class="muted small">Stalls with veiled reserves and sealed bids. Observers see commitments only.</p>
+          <div class="rail-meter" id="rail-sealed" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Sealed privacy meter">
+            <div class="rail-fill" style="width:100%"></div>
+          </div>
+          <p class="rail-label" id="rail-sealed-label">100% veiled (no stalls yet)</p>
+        </div>
+        <div class="rail disclose-rail">
+          <h4>Disclose rail</h4>
+          <p class="muted small">Awards and selective reveals — range (met reserve) or full amount disclose.</p>
+          <div class="rail-meter warn" id="rail-disclose" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Disclose meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <p class="rail-label" id="rail-disclose-label">0% disclosed</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="list" class="panel reveal" aria-labelledby="list-heading">
+      <div class="section-head">
+        <h2 id="list-heading">Seal a listing</h2>
+        <p class="muted">Title stays public. Reserve + private details seal into a commitment before the stall opens.</p>
+      </div>
+      <div class="compose-layout">
+        <div class="compose-card">
+          <h3>Listing draft</h3>
+          <div class="field">
+            <label for="list-title">Public title</label>
+            <input id="list-title" type="text" maxlength="80" placeholder="Midnight lantern — sealed edition" autocomplete="off" />
+            <span class="field-hint">Visible on the board. Keep it tasteful — no secrets here.</span>
+          </div>
+          <div class="field">
+            <label for="list-category">Category</label>
+            <select id="list-category">
+              <option value="artifact">Artifact</option>
+              <option value="service">Service</option>
+              <option value="data">Data drop</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="list-reserve">Private reserve (ADA)</label>
+            <input id="list-reserve" type="number" min="0.01" step="0.01" placeholder="42.00" />
+            <span class="field-hint">Stays in the vault. Used by bid-threshold theater.</span>
+          </div>
+          <div class="field">
+            <label for="list-details">Private details</label>
+            <textarea id="list-details" maxlength="280" placeholder="Shipping notes, SKU, contact — never published until disclose."></textarea>
+            <p class="char-count muted small"><span id="details-count">0</span>/280</p>
+          </div>
+          <div class="field">
+            <label for="list-seller">Seller tag</label>
+            <input id="list-seller" type="text" maxlength="32" placeholder="@stall" autocomplete="off" />
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-seal-listing">Seal listing</button>
+            <button type="button" class="btn ghost" id="btn-clear-draft">Clear draft</button>
+          </div>
+          <p class="status" id="list-status" role="status"></p>
+        </div>
+        <div class="compose-card">
+          <h3>Vault preview <span class="badge badge-sim">SIMULATED</span></h3>
+          <dl class="kv-list">
+            <div><dt>Salt</dt><dd class="mono" id="prev-salt">—</dd></div>
+            <div><dt>Reserve</dt><dd id="prev-reserve">—</dd></div>
+            <div><dt>Details</dt><dd id="prev-details">—</dd></div>
+            <div><dt>Commitment</dt><dd class="mono block" id="prev-commit">—</dd></div>
+          </dl>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-open-stall" disabled>Open stall on board</button>
+          </div>
+          <p class="muted small">Opening publishes title + commitment only. Reserve stays sealed.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="bid" class="panel reveal" aria-labelledby="bid-heading">
+      <div class="section-head">
+        <h2 id="bid-heading">Place a private bid</h2>
+        <p class="muted">Pick an open stall. Your bid amount seals into a commitment; only the hash hits the public board.</p>
+      </div>
+      <div class="compose-layout">
+        <div class="compose-card">
+          <h3>Bid form</h3>
+          <div class="field">
+            <label for="bid-listing">Open stall</label>
+            <select id="bid-listing"></select>
+          </div>
+          <div class="field">
+            <label for="bid-amount">Private bid (ADA)</label>
+            <input id="bid-amount" type="number" min="0.01" step="0.01" placeholder="50.00" />
+          </div>
+          <div class="field">
+            <label for="bid-handle">Bidder tag</label>
+            <input id="bid-handle" type="text" maxlength="32" placeholder="@nightwalker" autocomplete="off" />
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-seal-bid">Seal &amp; submit bid</button>
+          </div>
+          <p class="status" id="bid-status" role="status"></p>
+        </div>
+        <div class="compose-card">
+          <h3>What the board learns</h3>
+          <ul class="learn-list">
+            <li><strong>Sees:</strong> bidder tag + bid commitment hash + timestamp</li>
+            <li><strong>Does not see:</strong> bid amount, whether it clears reserve</li>
+            <li><strong>Prove later:</strong> use Bid theater to show <code>bid ≥ reserve</code> without numbers</li>
+          </ul>
+          <p class="muted small">Educational only — no wallet, no settlement, no Compact proof.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="theater" class="panel reveal" aria-labelledby="theater-heading">
+      <div class="section-head">
+        <h2 id="theater-heading">Bid theater <span class="badge badge-sim">SIMULATED</span></h2>
+        <p class="muted">Prove a sealed bid meets the listing reserve — or reject. Exact amounts stay veiled unless you disclose.</p>
+      </div>
+      <div class="thresh-layout">
+        <div class="thresh-card">
+          <h3>Prove reserve clearance</h3>
+          <div class="field">
+            <label for="theater-listing">Listing</label>
+            <select id="theater-listing"></select>
+          </div>
+          <div class="field">
+            <label for="theater-bid">Bid on that stall</label>
+            <select id="theater-bid"></select>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-prove">Prove bid ≥ reserve</button>
+            <button type="button" class="btn ghost" id="btn-award">Award this bid</button>
+            <button type="button" class="btn danger" id="btn-disclose-full">Full disclose (warn)</button>
+          </div>
+          <div class="proof-badge" id="proof-badge">
+            <div>
+              <div class="proof-label">Last proof</div>
+              <strong id="proof-result">No proof yet</strong>
+            </div>
+            <span class="badge badge-stub">LOCAL STUB</span>
+          </div>
+        </div>
+        <div class="thresh-card">
+          <h3>Theater log</h3>
+          <pre class="log" id="theater-log" aria-live="polite">Awaiting proofs…</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="stalls" class="panel reveal" aria-labelledby="stalls-heading">
+      <div class="section-head">
+        <h2 id="stalls-heading">Night stalls</h2>
+        <p class="muted">Public marketplace board — commitments first, amounts only after selective disclose.</p>
+      </div>
+      <div class="board-toolbar">
+        <div class="board-stats">
+          <span>Stalls: <strong id="stat-listings">0</strong></span>
+          <span>Bids: <strong id="stat-bids">0</strong></span>
+          <span>Awarded: <strong id="stat-awarded">0</strong></span>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost small" id="btn-seed">Seed demo stall</button>
+          <button type="button" class="btn danger small" id="btn-reset">Reset market</button>
+        </div>
+      </div>
+      <ul class="pledge-list" id="stall-list" aria-label="Market stalls"></ul>
+    </section>
+
+    <section id="snippets" class="panel reveal" aria-labelledby="snip-heading">
+      <div class="section-head">
+        <h2 id="snip-heading">Anti-pattern vs safe pattern</h2>
+        <p class="muted">Teaching sketches — not deployable Compact. Always verify against official docs.</p>
+      </div>
+      <div class="snip-grid">
+        <article class="snip bad">
+          <div class="snip-label">✗ Anti-pattern — clear reserve on-chain</div>
+          <pre><code>// BAD: public ledger sees the floor
+ledger {
+  reserve: Uint&lt;64&gt;;  // observers learn the floor
+  title: Bytes&lt;64&gt;;
+}</code></pre>
+        </article>
+        <article class="snip ok">
+          <div class="snip-label">✓ Safer sketch — commit + witness</div>
+          <pre><code>// BETTER (sketch): public commitment only
+ledger {
+  listingCommit: Bytes&lt;32&gt;;
+  title: Bytes&lt;64&gt;;
+}
+witness reserveAda: Uint&lt;64&gt;;
+// prove bid ≥ reserve without publishing either</code></pre>
+        </article>
+      </div>
+      <p class="snip-note muted">These snippets are educational illustrations. Official Compact syntax, circuits, and Zswap commitments may differ — check Midnight docs before shipping.</p>
+    </section>
+
+    <section id="donate" class="panel reveal" aria-labelledby="donate-heading">
+      <div class="section-head">
+        <h2 id="donate-heading">Support the lab</h2>
+        <p class="muted">Cardano donation address — always visible in the dock and here. No on-chain tip from this UI.</p>
+      </div>
+      <div class="jar-layout">
+        <div class="jar-visual" aria-hidden="true">
+          <div class="market-sign">
+            <div class="sign-glow"></div>
+            <div class="sign-face">NM</div>
+          </div>
+          <p class="jar-label">Night Market</p>
+        </div>
+        <div class="jar-copy">
+          <h3>Donate ADA to keep the midnight craft going</h3>
+          <p class="muted">Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> · creator of <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.</p>
+          <div class="footer-donate">
+            <code id="donate-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+            <button type="button" class="btn primary small" id="btn-copy-donate">Copy address</button>
+          </div>
+          <p class="status" id="donate-status" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p><strong>Night Market Studio</strong> · Midnight GrokBot Agent lab ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent">GitHub</a> ·
+        <a href="https://x.com/kshot9000">@kshot9000</a>
+      </p>
+      <p class="disclaimer">
+        LOCAL STUB · educational simulation only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        No claim of live GitHub Pages, on-chain settlement, or real marketplace custody.
+      </p>
+    </footer>
+  </main>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
