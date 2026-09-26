@@ -40,20 +40,22 @@ jobs:
           set -euo pipefail
           SITE=site
           rm -rf "$SITE"
-          mkdir -p "$SITE/escrow" "$SITE/lace" "$SITE/auth"
+          mkdir -p "$SITE/escrow" "$SITE/lace" "$SITE/auth" "$SITE/board"
           # Lab site at Pages root
           cp -R apps/midnight-lab-site/. "$SITE/"
           # Escrow stub under /escrow/
           cp -R apps/agent-escrow-stub/. "$SITE/escrow/"
           # Auth lab under /auth/
           cp -R apps/auth-lab/. "$SITE/auth/"
+          # Shield Board flagship under /board/
+          cp -R apps/shield-board/. "$SITE/board/"
           # Lace Vite dist under /lace/
           cp -R apps/lace-connect-demo/dist/. "$SITE/lace/"
           # Drop any nested node_modules or README noise if present
           rm -rf "$SITE/node_modules" "$SITE/escrow/node_modules" "$SITE/lace/node_modules" || true
           # Marker so the artifact is obviously from this workflow
           printf '%s\n' "Midnight GrokBot Agent Pages build" > "$SITE/.pages-build"
-          ls -la "$SITE" "$SITE/escrow" "$SITE/lace" "$SITE/auth"
+          ls -la "$SITE" "$SITE/escrow" "$SITE/lace" "$SITE/auth" "$SITE/board"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

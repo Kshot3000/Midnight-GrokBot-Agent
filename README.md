@@ -16,6 +16,7 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 | `/escrow/` | Agent Escrow local stub |
 | `/lace/` | Lace connect demo (discovery + connect only) |
 | `/auth/` | MPS-0029 Auth Lab (forge demo + local bboard stub) |
+| `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -29,7 +30,8 @@ Until then the URL may 404.
 │   ├── midnight-lab-site/     # Static marketing / dev landing site
 │   ├── lace-connect-demo/     # Vite demo: discover + connect Lace Midnight
 │   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
-│   └── auth-lab/              # MPS-0029 Auth Lab (forge demo + local bboard)
+│   ├── auth-lab/              # MPS-0029 Auth Lab (forge demo + local bboard)
+│   └── shield-board/          # Flagship dual-state privacy bulletin studio
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
 ├── contracts/
@@ -46,6 +48,7 @@ Until then the URL may 404.
 | `apps/lace-connect-demo` | Vite page using the kit — **discovery + connect only** (no transfer claims) |
 | `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
 | `apps/auth-lab` | MPS-0029 educational lab — forgeable `ownPublicKey` vs witness-derived auth |
+| `apps/shield-board` | **Flagship** dual-state privacy bulletin — public commitments + private vault + selective disclose |
 | `packages/lace-midnight-kit` | Enumerate `window.midnight`, connect, addresses/network, graceful errors + Lace workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
@@ -77,9 +80,17 @@ npm run dev:lace-demo
 
 Safety: the demo does **not** call `makeTransfer` / submit. A successful connect is **not** proof that mainnet transfers work.
 
-Kit docs: [`packages/lace-midnight-kit/README.md`](./packages/lace-midnight-kit/README.md) · workarounds: [`packages/lace-midnight-kit/WORKAROUNDS.md`](./packages/lace-midnight-kit/WORKAROUNDS.md)
+## Quick start — Shield Board (flagship)
 
-Pinned types: `@midnight-ntwrk/dapp-connector-api@4.0.1` (common matrix peer: midnight-js **4.1.1** — verify against Midnight’s compatibility matrix).
+Dual-state studio: public ledger commitments vs private vault bodies.
+
+```bash
+cd apps/shield-board
+python3 -m http.server 5177
+# open http://localhost:5177
+```
+
+Pages path (when Actions enabled): `/board/`. Local stub only — no on-chain Compact deploy.
 
 ## Compact / Midnight toolchain (official)
 

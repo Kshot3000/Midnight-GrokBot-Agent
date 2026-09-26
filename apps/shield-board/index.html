@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Shield Board — Midnight-style dual-state privacy bulletin board. Public commitments on the ledger, private bodies local. Educational local stub by @kshot9000." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Shield Board — Midnight GrokBot Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23a78bfa' stroke-width='2.5'/%3E%3Cpath d='M22 34c4-10 16-10 20 0' fill='none' stroke='%237c9cff' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='28' r='4' fill='%2322d3ee'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Shield<span>Board</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#studio">Studio</a>
+      <a href="#how">How it works</a>
+      <a href="#compact">Compact notes</a>
+      <a href="#wallets">Wallets</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-sim" title="Runs entirely in your browser">LOCAL · dual-state stub</span>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Midnight dual-state · privacy bulletin</p>
+      <h1>Seal it private. Commit it public. Disclose on your terms.</h1>
+      <p class="lede">
+        <strong>Shield Board</strong> is a polished local studio for Midnight’s dual-state idea:
+        a <em>public ledger</em> of commitments and owners, and a <em>private vault</em> that never leaves this browser
+        until you choose to disclose. Identity is <strong>witness-derived</strong> (MPS-0029) — never
+        <code>ownPublicKey()</code> alone. Inspired by
+        <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a>.
+        Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> /
+        <a href="https://github.com/Kshot3000" rel="noopener noreferrer">Kshot3000</a>
+        (Midnight GrokBot Agent).
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#studio">Open the studio</a>
+        <a class="btn ghost" href="https://docs.midnight.network/compact" rel="noopener noreferrer">Compact docs</a>
+        <a class="btn ghost" href="../auth/">Auth Lab →</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest capabilities:</strong> browser-local simulation only.
+        No Compact compile, no proof server, no Lace transfers, no on-chain deploy in this app.
+        Use it to feel dual-state UX before wiring real circuits.
+      </div>
+    </section>
+
+    <section id="studio" class="studio reveal" aria-labelledby="studio-heading">
+      <div class="section-head">
+        <h2 id="studio-heading">Dual-state studio</h2>
+        <p class="muted">Left = what the chain would see. Right = what stays in your private vault until you disclose.</p>
+      </div>
+
+      <div class="identity-bar" aria-labelledby="identity-heading">
+        <div class="ident-block">
+          <h3 id="identity-heading">Your witness identity</h3>
+          <p class="muted small">Secret stays local. Public commitment is <code>derive(sk, domain)</code> — Mallory cannot forge take-down without your secret.</p>
+          <div class="field">
+            <label for="secret-key">Local secret (edit to switch identity)</label>
+            <div class="input-row">
+              <input id="secret-key" type="password" spellcheck="false" autocomplete="off" aria-describedby="pk-display" />
+              <button type="button" class="btn ghost small" id="btn-toggle-secret" aria-pressed="false">Show</button>
+              <button type="button" class="btn ghost small" id="btn-regen-secret">New secret</button>
+            </div>
+          </div>
+          <div class="pk-row">
+            <span class="label">Derived pk</span>
+            <code id="pk-display" class="mono block" tabindex="0">—</code>
+            <button type="button" class="btn ghost small" id="btn-copy-pk">Copy pk</button>
+          </div>
+        </div>
+        <div class="ident-stats" aria-live="polite">
+          <div class="stat"><span class="stat-val" id="stat-posts">0</span><span class="stat-label">Public posts</span></div>
+          <div class="stat"><span class="stat-val" id="stat-sealed">0</span><span class="stat-label">Sealed private</span></div>
+          <div class="stat"><span class="stat-val" id="stat-disclosed">0</span><span class="stat-label">Disclosed</span></div>
+          <div class="stat"><span class="stat-val" id="stat-seq">0</span><span class="stat-label">Ledger seq</span></div>
+        </div>
+      </div>
+
+      <div class="dual-pane" role="group" aria-label="Public ledger and private vault">
+        <article class="pane pane-public" aria-labelledby="public-heading">
+          <header class="pane-head">
+            <div>
+              <p class="pane-eyebrow">Public ledger</p>
+              <h3 id="public-heading">Commitments on-chain (simulated)</h3>
+            </div>
+            <span class="pane-pill public">Visible</span>
+          </header>
+          <p class="pane-desc">Post id, commitment hash, owner pk, sequence, disclosure flag. Bodies are <em>not</em> here unless disclosed.</p>
+          <ul class="post-list" id="public-list" aria-live="polite"></ul>
+          <p class="empty" id="public-empty">No public commitments yet. Seal a message to mint one.</p>
+        </article>
+
+        <article class="pane pane-private" aria-labelledby="private-heading">
+          <header class="pane-head">
+            <div>
+              <p class="pane-eyebrow">Private vault</p>
+              <h3 id="private-heading">Local state (this browser)</h3>
+            </div>
+            <span class="pane-pill private">Shielded</span>
+          </header>
+          <p class="pane-desc">Raw message bodies you authored. Cleared on refresh unless you export. Take-down requires your derived pk.</p>
+          <ul class="post-list" id="private-list" aria-live="polite"></ul>
+          <p class="empty" id="private-empty">Vault empty. Compose below to seal a private body + public commitment.</p>
+        </article>
+      </div>
+
+      <div class="compose panel-inner" aria-labelledby="compose-heading">
+        <h3 id="compose-heading">Compose &amp; seal</h3>
+        <div class="compose-grid">
+          <div class="field grow">
+            <label for="post-body">Private message body</label>
+            <textarea id="post-body" rows="3" maxlength="500" placeholder="Only you hold this until you disclose…"></textarea>
+            <p class="char-count"><span id="char-count">0</span>/500</p>
+          </div>
+          <div class="compose-side">
+            <label class="check">
+              <input type="checkbox" id="auto-disclose" />
+              <span>Disclose body immediately (public)</span>
+            </label>
+            <p class="muted small">Default keeps the body sealed — public side shows only the commitment.</p>
+            <div class="btn-row">
+              <button type="button" class="btn primary" id="btn-seal">Seal &amp; commit</button>
+              <button type="button" class="btn ghost" id="btn-clear-compose">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="prove-rail" id="prove-rail" hidden aria-live="polite">
+          <div class="prove-track" aria-hidden="true"><div class="prove-fill" id="prove-fill"></div></div>
+          <p class="prove-label" id="prove-label">Preparing local commitment…</p>
+        </div>
+      </div>
+
+      <div class="activity panel-inner">
+        <div class="activity-head">
+          <h3>Activity</h3>
+          <button type="button" class="btn ghost small" id="btn-clear-log">Clear log</button>
+        </div>
+        <pre class="log" id="activity-log" aria-live="polite">Ready. Generate or keep your secret, then seal a message.</pre>
+      </div>
+    </section>
+
+    <section id="how" class="panel reveal">
+      <div class="section-head">
+        <h2>How dual-state maps here</h2>
+        <p class="muted">Teaching model aligned with Midnight docs — not a substitute for the Compact compiler.</p>
+      </div>
+      <ol class="flow-steps">
+        <li>
+          <span class="step-num">1</span>
+          <div>
+            <strong>Witness</strong>
+            <p>You hold a local secret. Circuits would receive it via <code>witness</code>; we simulate <code>derive(sk)</code> in-browser.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div>
+            <strong>Commit</strong>
+            <p>Public ledger stores <code>H(body ‖ pk ‖ seq ‖ domain)</code> + owner pk. Observers see evidence a post exists — not the text.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div>
+            <strong>Prove (simulated)</strong>
+            <p>A real Midnight tx would attach a ZK proof that the commitment matches a valid witness. Here we animate a local hash only.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <div>
+            <strong>Disclose / take-down</strong>
+            <p>Selective disclosure publishes the body. Take-down checks derived pk equality — forgeable <code>ownPublicKey()</code> gates are rejected (see Auth Lab).</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="compact" class="panel reveal">
+      <div class="section-head">
+        <h2>Compact shape <span class="badge badge-edu">educational</span></h2>
+        <p class="muted">Illustrative — verify against official Compact docs and <code>example-bboard</code> before shipping circuits.</p>
+      </div>
+      <div class="snip-grid">
+        <div class="snip ok">
+          <div class="snip-label">Safe pattern — witness-derived owner</div>
+          <pre><code>witness localSecretKey(): Bytes&lt;32&gt;;
+
+export circuit post(commitment: Bytes&lt;32&gt;): [] {
+  const sk = localSecretKey();
+  const pk = publicKey(sk); // derive in-circuit
+  // ledger.posts.insert(commitment, pk, seq);
+}
+
+export circuit takeDown(id: PostId): [] {
+  const sk = localSecretKey();
+  assert publicKey(sk) == ledger.posts[id].owner;
+  // ledger.posts.delete(id);
+}</code></pre>
+        </div>
+        <div class="snip bad">
+          <div class="snip-label">Unsafe — ownPublicKey as auth gate</div>
+          <pre><code>// MPS-0029: ownPublicKey() is prover-chosen
+export circuit takeDownBad(id: PostId): [] {
+  assert ownPublicKey() == ledger.posts[id].owner;
+  // Mallory supplies the owner's pk as "own"
+}</code></pre>
+        </div>
+      </div>
+      <p class="snip-note muted">
+        Deep dive:
+        <a href="../auth/">MPS-0029 Auth Lab</a>
+        ·
+        <a href="https://github.com/midnightntwrk/midnight-improvement-proposals/blob/main/mps/mps-0029-compact-caller-identity.md" rel="noopener noreferrer">MPS-0029</a>
+        ·
+        <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a>
+      </p>
+    </section>
+
+    <section id="wallets" class="panel reveal">
+      <div class="section-head">
+        <h2>Wallet discovery <span class="badge">optional</span></h2>
+        <p class="muted">Enumerates <code>window.midnight</code> — never hardcodes <code>mnLace</code>. This studio does not call <code>connect</code> or transfer.</p>
+      </div>
+      <div class="wallet-toolbar">
+        <button type="button" class="btn ghost" id="btn-scan-wallets">Scan window.midnight</button>
+        <span class="status" id="wallet-status">Not scanned.</span>
+      </div>
+      <div class="wallet-grid" id="wallet-grid"></div>
+    </section>
+
+    <section id="donate" class="panel donate reveal">
+      <div class="section-head">
+        <h2>Support the lab</h2>
+        <p class="muted">Built by @kshot9000 / Kshot3000 (Midnight GrokBot Agent). Cardano donations keep the 24/7 Midnight build lab going.</p>
+      </div>
+      <div class="addr-box">
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" class="btn ghost small" id="copy-addr">Copy</button>
+      </div>
+      <p class="muted">
+        <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000 on X</a>
+        ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">GitHub repo</a>
+        ·
+        <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Shield Board</strong> · Midnight GrokBot Agent · MIT
+      · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000
+      · <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      · <a href="../">Lab home</a>
+    </div>
+    <div class="footer-donate">
+      <span>Donate ADA:</span>
+      <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+    </div>
+    <p class="disclaimer">
+      Not affiliated with the Midnight Foundation. Local educational stub — no on-chain Compact deploy claimed.
+      Prefer official docs for production circuits.
+    </p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="main.js"></script>
+</body>
+</html>
