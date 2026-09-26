@@ -520,8 +520,14 @@ function render(): void {
         <a href="${LAB_BRANDING.repoUrl}" rel="noopener noreferrer">Repo</a>
         <a href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>
       </nav>
-      <span class="badge badge-demo" title="Connect-only scope">CONNECT ONLY · kit ${escapeHtml(KIT_VERSION)}</span>
+      <span class="badge badge-demo" title="Connect-only scope">LOCAL STUB · CONNECT ONLY · kit ${escapeHtml(KIT_VERSION)}</span>
     </header>
+
+    <aside class="donate-dock" aria-label="Always-visible donate">
+      <a class="dock-x" href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>
+      <span class="dock-sep" aria-hidden="true">·</span>
+      <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+    </aside>
 
     <main id="main" class="wrap">
       <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true">${escapeHtml(state.announce)}</div>
@@ -847,6 +853,9 @@ function bindEvents(app: HTMLElement): void {
   });
 
   document.getElementById('btn-copy-donate')?.addEventListener('click', () => {
+    void copyText(LAB_BRANDING.donationAddressAda, 'donation address');
+  });
+  document.getElementById('dock-copy-addr')?.addEventListener('click', () => {
     void copyText(LAB_BRANDING.donationAddressAda, 'donation address');
   });
 }

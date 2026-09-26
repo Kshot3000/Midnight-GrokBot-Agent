@@ -11,8 +11,10 @@
   --accent-2: #a78bfa;
   --accent-3: #22d3ee;
   --ok: #6ee7b7;
-  --danger: #fb7185;
   --warn: #fbbf24;
+  --danger: #fb7185;
+  --bad: #fb7185;
+  --fail: #fb7185;
   --line: rgba(124, 156, 255, 0.22);
   --line-strong: rgba(124, 156, 255, 0.4);
   --radius: 18px;
@@ -512,4 +514,42 @@ code:not(pre code) {
 
 .reveal {
   animation: fadeUp 0.55s var(--ease) both;
+}
+
+
+/* —— Pass 14 deepen: empty, motion, error honesty —— */
+.empty-rich {
+  display: grid; gap: 0.4rem; justify-items: center;
+  list-style: none; padding: 1.75rem 1.1rem !important;
+  text-align: center; border-style: dashed !important;
+  background: rgba(8, 12, 24, 0.45);
+  animation: fadeUp 0.4s var(--ease);
+}
+.empty-rich .empty-glyph {
+  font-size: 1.55rem; color: var(--accent-2);
+  filter: drop-shadow(0 0 12px rgba(167, 139, 250, 0.4));
+}
+.empty-rich strong { color: var(--text); font-size: 1rem; }
+.empty-rich .muted { max-width: 40ch; }
+.error-honesty {
+  margin: 0.35rem 0 0.85rem; padding: 0.65rem 0.85rem; border-radius: 10px;
+  border: 1px solid rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.1); color: var(--danger);
+  font-size: 0.88rem;
+}
+.error-honesty[hidden] { display: none !important; }
+.seal-flash {
+  box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.45) !important;
+}
+.shake-err { animation: shakeErr 0.4s var(--ease); }
+@keyframes shakeErr {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.pledge-item {
+  animation: fadeUp 0.35s var(--ease) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .empty-rich, .pledge-item, .shake-err { animation: none; }
 }

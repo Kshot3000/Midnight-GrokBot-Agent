@@ -112,6 +112,7 @@
         <button type="button" class="chip" data-filter="stub" aria-pressed="false">Stub</button>
         <button type="button" class="chip ghost-chip" id="btn-probe-status">Probe status</button>
       </div>
+      <p class="probe-banner" id="probe-banner" role="status" aria-live="polite" hidden></p>
 
       <div class="apps-grid" id="studios-grid">
 
@@ -121,7 +122,6 @@
             <div class="icon" aria-hidden="true">☾</div>
             <div class="badge-stack">
               <span class="badge badge-flagship">Studio</span>
-              <span class="badge badge-new">New</span>
               <span class="badge badge-stub">LOCAL STUB</span>
             </div>
           </div>
@@ -598,10 +598,10 @@
     <div class="cmd-card">
       <div class="cmd-head">
         <h3 id="cmd-title">Jump to studio</h3>
-        <span class="muted small">Ctrl/⌘ K · Esc closes</span>
+        <span class="muted small"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>K</kbd> · <kbd>Esc</kbd> closes</span>
       </div>
       <label class="sr-only" for="cmd-input">Filter studios</label>
-      <input id="cmd-input" type="search" placeholder="Type a studio name…" autocomplete="off" />
+      <input id="cmd-input" type="search" placeholder="Jump to a studio, donate, or compat…" autocomplete="off" />
       <ul class="cmd-list" id="cmd-list" role="listbox" aria-label="Studios"></ul>
       <p class="muted small cmd-foot">Local stubs only · not on-chain · @kshot9000</p>
     </div>

@@ -236,7 +236,19 @@
 
     if (!list) return;
     if (pledges.length === 0) {
-      list.innerHTML = `<li class="empty">No pledges yet — seal &amp; commit to publish a public commitment.</li>`;
+      list.innerHTML = `<li class="empty empty-rich" role="status">
+        <div class="empty-glyph" aria-hidden="true">✧</div>
+        <strong>Pledge board quiet</strong>
+        <span class="muted small">Seal an amount into the tip jar to publish a public commitment — exact ADA stays veiled until you disclose. LOCAL STUB · not on-chain.</span>
+        <button type="button" class="btn ghost small" id="empty-focus-amount">Compose a pledge</button>
+      </li>`;
+      queueMicrotask(() => {
+        document.getElementById("empty-focus-amount")?.addEventListener("click", () => {
+          const el = document.getElementById("pledge-amount");
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          el?.focus();
+        });
+      });
       return;
     }
 
@@ -303,10 +315,16 @@
 
     if (!Number.isFinite(amount) || amount < 0.1) {
       setStatus("seal-status", "Amount must be ≥ 0.1 ADA (stub).", "fail");
+      setPledgeError("Amount must be a positive number — LOCAL STUB will not seal an empty or invalid tip.");
+      setStatus("seal-status", "Seal rejected — invalid amount.", "warn");
       announce("Seal rejected — invalid amount");
+      document.getElementById("pledge-amount")?.focus();
+      document.getElementById("btn-seal")?.classList.add("shake-err");
+      setTimeout(() => document.getElementById("btn-seal")?.classList.remove("shake-err"), 450);
       return;
     }
 
+    setPledgeError("");
     const salt = randomHex(32);
     const commitment = await commitHash(amount, note, salt);
     draft = { amount, note, handle, salt, commitment };
@@ -316,6 +334,8 @@
     setJourney("sealed", "Phase: sealed — private vault holds amount + salt.");
     announce("Pledge sealed into private vault");
     pushThreshLog(`Sealed draft ${short(commitment)} (amount veiled).`);
+    document.getElementById("btn-seal")?.classList.add("seal-flash");
+    setTimeout(() => document.getElementById("btn-seal")?.classList.remove("seal-flash"), 600);
   }
 
   function commitDraft() {
@@ -369,7 +389,7 @@
     if (!p) {
       setStatus("thresh-status", "Select a committed pledge.", "fail");
       setProofResult("REJECT — no pledge", "fail");
-      announce("Threshold proof rejected — no pledge");
+      announce("Threshold proof rejected — no pledge selected. Honest miss · LOCAL STUB.");
       return;
     }
     if (!Number.isFinite(threshold) || threshold <= 0) {
@@ -391,7 +411,7 @@
         "fail"
       );
       setProofResult("REJECT", "fail");
-      announce("Threshold proof rejected");
+      announce("Threshold proof rejected — amount below threshold (still veiled). Honest fail.");
       return;
     }
 
@@ -442,7 +462,15 @@
     announce("Pledge re-sealed in UI");
   }
 
-  async function copyDonate(btn) {
+  function setPledgeError(msg) {
+    const el = document.getElementById("pledge-error");
+    if (!el) return;
+    if (!msg) { el.hidden = true; el.textContent = ""; return; }
+    el.hidden = false;
+    el.textContent = msg;
+  }
+
+    async function copyDonate(btn) {
     try {
       await navigator.clipboard.writeText(DONATE_ADDR);
       if (btn) {

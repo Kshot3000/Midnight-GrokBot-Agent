@@ -140,17 +140,31 @@
     renderLog();
   }
 
-  function toast(msg) {
+  function toast(msg, kind) {
     const el = $('toast');
     if (!el) return;
     el.hidden = false;
     el.textContent = msg;
+    el.classList.remove('toast-ok', 'toast-err', 'toast-warn');
+    if (kind === 'err') el.classList.add('toast-err');
+    else if (kind === 'warn') el.classList.add('toast-warn');
+    else el.classList.add('toast-ok');
     el.classList.add('show');
     clearTimeout(toast._t);
     toast._t = setTimeout(() => {
       el.classList.remove('show');
+      setTimeout(() => { el.hidden = true; }, 320);
     }, 2600);
   }
+
+  function setComposeError(msg) {
+    const el = $('compose-error');
+    if (!el) return;
+    if (!msg) { el.hidden = true; el.textContent = ''; return; }
+    el.hidden = false;
+    el.textContent = msg;
+  }
+
 
   function renderLog() {
     const el = $('activity-log');
@@ -214,7 +228,8 @@
     for (const post of [...state.posts].reverse()) {
       const mine = post.ownerPk === myPkHex;
       const li = document.createElement('li');
-      li.className = 'post-card';
+      li.className = 'post-card post-enter';
+      li.style.setProperty('--i', String(pub.childElementCount));
       const bodyPublic = post.disclosed
         ? `<div class="body">${escapeHtml(post.body || '(missing body)')}</div>`
         : `<div class="body muted">Body sealed — commitment only</div>`;
@@ -302,7 +317,9 @@
     const ta = $('post-body');
     const body = (ta?.value || '').trim();
     if (!body) {
-      toast('Write a private message first.');
+      setComposeError('Private body is empty — nothing to seal. LOCAL STUB will not invent a message.');
+      toast('Write a private message first.', 'warn');
+      $('post-body')?.focus();
       return;
     }
     const discloseNow = Boolean($('auto-disclose')?.checked);
@@ -328,7 +345,10 @@
     log(
       `Sealed #${post.id.slice(0, 8)} · seq ${post.seq} · ${discloseNow ? 'disclosed' : 'private body'} · pk ${short(ownerPk)}`,
     );
-    toast(discloseNow ? 'Committed & disclosed.' : 'Sealed — body stays in vault.');
+    setComposeError('');
+    toast(discloseNow ? 'Committed & disclosed.' : 'Sealed — body stays in vault.', 'ok');
+    $('btn-seal')?.classList.add('seal-flash');
+    setTimeout(() => $('btn-seal')?.classList.remove('seal-flash'), 600);
     save();
     await renderAll();
   }
@@ -339,11 +359,11 @@
     const pk = await myPk();
     if (pk !== post.ownerPk) {
       log(`Disclose denied #${id.slice(0, 8)} — not owner.`);
-      toast('Only the owner can disclose.');
+      toast('Only the owner can disclose — witness pk mismatch. Honest reject.', 'err');
       return;
     }
     if (post.body == null) {
-      toast('No local body to disclose.');
+      toast('No local body to disclose — vault miss. LOCAL STUB honesty.', 'warn');
       return;
     }
     post.disclosed = true;
@@ -359,7 +379,7 @@
     const pk = await myPk();
     if (pk !== post.ownerPk) {
       log(`Take-down FORGED attempt blocked #${id.slice(0, 8)} — pk mismatch.`);
-      toast('Take-down rejected — witness pk does not match owner.');
+      toast('Take-down rejected — witness pk does not match owner. Honest auth fail.', 'err');
       return;
     }
     state.posts = state.posts.filter((p) => p.id !== id);
@@ -545,15 +565,25 @@
       save();
       renderLog();
     });
+    document.querySelectorAll('.empty-cta').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-focus') || 'post-body';
+        const el = $(id);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el?.focus();
+      });
+    });
     $('btn-scan-wallets')?.addEventListener('click', () => scanWallets());
-    $('copy-addr')?.addEventListener('click', async () => {
+    async function copyDonate() {
       try {
         await navigator.clipboard.writeText(DONATE);
-        toast('ADA address copied.');
+        toast('ADA address copied · @kshot9000');
       } catch {
         toast('Copy failed — select manually.');
       }
-    });
+    }
+    $('copy-addr')?.addEventListener('click', () => { void copyDonate(); });
+    $('dock-copy-addr')?.addEventListener('click', () => { void copyDonate(); });
     const addr = $('donation-addr');
     if (addr) addr.textContent = DONATE;
   }

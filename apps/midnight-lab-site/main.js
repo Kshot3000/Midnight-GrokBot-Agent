@@ -186,6 +186,29 @@
   function initFilters() {
     const chips = document.querySelectorAll(".filter-bar [data-filter]");
     const cards = document.querySelectorAll("#studios-grid .app-card");
+    const grid = document.getElementById("studios-grid");
+    let emptyEl = document.getElementById("studios-empty");
+    if (grid && !emptyEl) {
+      emptyEl = document.createElement("div");
+      emptyEl.id = "studios-empty";
+      emptyEl.className = "studios-empty";
+      emptyEl.hidden = true;
+      emptyEl.setAttribute("role", "status");
+      emptyEl.innerHTML =
+        '<p><strong>No studios match this filter.</strong></p>' +
+        '<p class="muted small">Try <em>All</em> or clear the chip — every card is a LOCAL STUB, not on-chain.</p>' +
+        '<button type="button" class="btn ghost small" id="btn-clear-filter">Show all studios</button>';
+      grid.after(emptyEl);
+      emptyEl.querySelector("#btn-clear-filter")?.addEventListener("click", () => {
+        const all = document.querySelector('.filter-bar [data-filter="all"]');
+        all?.dispatchEvent(new Event("click"));
+      });
+    }
+    function syncEmpty() {
+      if (!emptyEl) return;
+      const visible = [...cards].filter((c) => !c.classList.contains("is-hidden"));
+      emptyEl.hidden = visible.length > 0;
+    }
     chips.forEach((chip) => {
       chip.addEventListener("click", () => {
         const filter = chip.getAttribute("data-filter") || "all";
@@ -199,69 +222,132 @@
           const show = filter === "all" || tags.includes(filter);
           card.classList.toggle("is-hidden", !show);
         });
+        syncEmpty();
         announce(filter === "all" ? "Showing all studios" : `Filtered to ${filter}`);
       });
     });
+    syncEmpty();
   }
 
   /**
-   * Probe sibling studio paths on this origin.
+   * Probe sibling studio paths on this origin (parallel).
    * file:// and hub-only local serves correctly report Not found — honest, not a bug.
+   * Tries HEAD then falls back to GET; aborts after 3.5s per path.
    */
+  let probeGeneration = 0;
+  async function probeOne(path, signal) {
+    const url = new URL(path, location.href).href;
+    const opts = { cache: "no-store", signal, headers: { Accept: "text/html" } };
+    try {
+      const head = await fetch(url, { ...opts, method: "HEAD" });
+      // Some static servers 405 HEAD — treat as inconclusive and try GET
+      if (head.ok) return { ok: true, status: head.status, mode: "HEAD" };
+      if (head.status !== 405 && head.status !== 501) {
+        return { ok: false, status: head.status, mode: "HEAD" };
+      }
+    } catch {
+      /* fall through to GET */
+    }
+    const res = await fetch(url, { ...opts, method: "GET" });
+    return { ok: res.ok, status: res.status, mode: "GET" };
+  }
+
   async function probeStatuses() {
+    const gen = ++probeGeneration;
     const cards = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll("#studios-grid .app-card"));
-    let reachable = 0;
     const total = cards.length;
     const isFile = location.protocol === "file:";
+    const btn = document.getElementById("btn-probe-status");
+    if (btn) {
+      btn.setAttribute("aria-busy", "true");
+      btn.classList.add("is-probing");
+    }
+    const banner = document.getElementById("probe-banner");
+    if (banner) {
+      banner.hidden = false;
+      banner.textContent = isFile
+        ? "Probes need http:// — file:// cannot reach sibling studio paths. Honest miss, not a bug."
+        : "Probing sibling paths on this origin… Hub-only serves will show Not found — that is expected.";
+      banner.className = "probe-banner is-checking";
+    }
 
+    /** @type {{ pill: Element, path: string, id: string }[]} */
+    const jobs = [];
     for (const card of cards) {
       const id = card.getAttribute("data-id") || "";
       const path = card.getAttribute("data-path") || "";
       const pill = card.querySelector(`[data-status-for="${id}"]`);
       if (!pill) continue;
-
       pill.textContent = "Checking…";
       pill.className = "status-pill is-checking";
+      pill.setAttribute("aria-busy", "true");
+      jobs.push({ pill, path, id });
+    }
 
-      if (isFile) {
+    let reachable = 0;
+    if (isFile) {
+      for (const { pill, path } of jobs) {
         pill.textContent = "Local file";
         pill.className = "status-pill is-miss";
+        pill.removeAttribute("aria-busy");
         pill.title = "Open via http.server (assembled site) to probe sibling paths";
-        continue;
       }
-
-      try {
-        const url = new URL(path, location.href).href;
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 3500);
-        const res = await fetch(url, {
-          method: "GET",
-          cache: "no-store",
-          signal: ctrl.signal,
-          headers: { Accept: "text/html" },
-        });
-        clearTimeout(t);
-        if (res.ok) {
-          pill.textContent = "Reachable";
-          pill.className = "status-pill is-ok";
-          pill.title = `HTTP ${res.status} at ${path}`;
-          reachable += 1;
-        } else {
-          pill.textContent = `HTTP ${res.status}`;
-          pill.className = "status-pill is-miss";
-          pill.title = `Not found at ${path} on this origin — serve assembled Pages artifact or sibling folders`;
-        }
-      } catch {
-        pill.textContent = "Not found";
-        pill.className = "status-pill is-miss";
-        pill.title = `Could not reach ${path} — honest when only midnight-lab-site is served`;
-      }
+    } else {
+      await Promise.all(
+        jobs.map(async ({ pill, path }) => {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 3500);
+          try {
+            const result = await probeOne(path, ctrl.signal);
+            if (gen !== probeGeneration) return;
+            if (result.ok) {
+              pill.textContent = "Reachable";
+              pill.className = "status-pill is-ok";
+              pill.title = `HTTP ${result.status} (${result.mode}) at ${path}`;
+              reachable += 1;
+            } else {
+              pill.textContent = `HTTP ${result.status}`;
+              pill.className = "status-pill is-miss";
+              pill.title = `Not found at ${path} on this origin — serve assembled Pages artifact or sibling folders`;
+            }
+          } catch {
+            if (gen !== probeGeneration) return;
+            pill.textContent = "Not found";
+            pill.className = "status-pill is-miss";
+            pill.title = `Could not reach ${path} — honest when only midnight-lab-site is served locally`;
+          } finally {
+            clearTimeout(timer);
+            pill.removeAttribute("aria-busy");
+          }
+        })
+      );
     }
+
+    if (gen !== probeGeneration) return;
 
     const stat = document.getElementById("stat-reachable");
     if (stat) {
       if (isFile) stat.textContent = "n/a";
       else stat.textContent = `${reachable}/${total}`;
+    }
+    if (banner) {
+      if (isFile) {
+        banner.textContent = "file:// mode — probes skipped. Serve with python3 -m http.server to check siblings.";
+        banner.className = "probe-banner is-miss";
+      } else if (reachable === 0) {
+        banner.textContent = `0/${total} reachable on this origin — expected when only the Hub is served. Assembled Pages or a multi-app root would show Reachable. LOCAL STUB honesty.`;
+        banner.className = "probe-banner is-miss";
+      } else if (reachable < total) {
+        banner.textContent = `${reachable}/${total} reachable — partial suite on this origin. Missing paths are honest misses, not fake Pages claims.`;
+        banner.className = "probe-banner is-partial";
+      } else {
+        banner.textContent = `All ${total} studios reachable on this origin. Still LOCAL STUB — not on-chain.`;
+        banner.className = "probe-banner is-ok";
+      }
+    }
+    if (btn) {
+      btn.removeAttribute("aria-busy");
+      btn.classList.remove("is-probing");
     }
     announce(
       isFile
@@ -399,17 +485,22 @@
     let active = 0;
     let filtered = PALETTE_STUDIOS.slice();
 
-    function close() {
-      overlay.hidden = true;
-      announce("Command palette closed");
-    }
+    function close() { closePalette(); }
+
     function open() {
       overlay.hidden = false;
+      overlay.setAttribute("aria-hidden", "false");
       input.value = "";
       active = 0;
       render("");
       requestAnimationFrame(() => input.focus());
-      announce("Command palette open");
+      announce("Command palette open — type to filter studios");
+    }
+    function closePalette() {
+      overlay.hidden = true;
+      overlay.setAttribute("aria-hidden", "true");
+      input.removeAttribute("aria-activedescendant");
+      announce("Command palette closed");
     }
 
     function render(q) {
@@ -425,7 +516,11 @@
       if (active >= filtered.length) active = Math.max(0, filtered.length - 1);
       list.innerHTML = "";
       if (!filtered.length) {
-        list.innerHTML = '<li class="muted small" style="padding:0.75rem">No matches</li>';
+        list.innerHTML =
+          '<li class="cmd-empty" role="presentation">' +
+          '<strong>No matches</strong>' +
+          '<span class="muted small">Try “nocturne”, “lace”, “ballot”, or “donate”. Esc closes · LOCAL STUB links only.</span>' +
+          '</li>';
         return;
       }
       filtered.forEach((s, i) => {
@@ -435,11 +530,15 @@
         btn.className = "cmd-item" + (i === active ? " is-active" : "");
         btn.setAttribute("role", "option");
         btn.setAttribute("aria-selected", i === active ? "true" : "false");
+        btn.id = `cmd-opt-${i}`;
         btn.innerHTML = `<span><strong>${escapeHtml(s.name)}</strong><span>${escapeHtml(s.path)}</span></span><span class="cmd-go">↵</span>`;
         btn.addEventListener("click", () => go(s));
         li.appendChild(btn);
         list.appendChild(li);
       });
+      const activeBtn = list.querySelector(".cmd-item.is-active");
+      activeBtn?.scrollIntoView({ block: "nearest" });
+      input.setAttribute("aria-activedescendant", activeBtn?.id || "");
     }
 
     function go(s) {

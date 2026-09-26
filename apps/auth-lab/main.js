@@ -44,6 +44,14 @@
     if (el) el.textContent = msg;
   }
 
+  function setBoardError(msg) {
+    const el = document.getElementById("board-error");
+    if (!el) return;
+    if (!msg) { el.hidden = true; el.textContent = ""; return; }
+    el.hidden = false;
+    el.textContent = msg;
+  }
+
   function pushLog(line) {
     const stamp = new Date().toLocaleTimeString();
     unsafe.log.unshift(`[${stamp}] ${line}`);
@@ -453,7 +461,19 @@
     if (!list) return;
 
     if (!posts.length) {
-      list.innerHTML = `<li class="empty">Board vacant — post the first message (bound to your local pk).</li>`;
+      list.innerHTML = `<li class="empty empty-rich" role="status">
+        <div class="empty-glyph" aria-hidden="true">⬡</div>
+        <strong>Board vacant</strong>
+        <span class="muted small">Post the first message bound to your local witness pk. Take-down needs the same secret — MPS-0029 style. LOCAL STUB · not on-chain.</span>
+        <button type="button" class="btn ghost small" id="empty-focus-post">Write a post</button>
+      </li>`;
+      queueMicrotask(() => {
+        document.getElementById("empty-focus-post")?.addEventListener("click", () => {
+          const el = document.getElementById("post-body");
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          el?.focus();
+        });
+      });
       return;
     }
 
@@ -493,7 +513,7 @@
         let next = loadPosts();
         const target = next.find((x) => x.id === id);
         if (!target || target.ownerPk !== myPk) {
-          announce("Take-down denied — not your derived pk");
+          announce("Take-down denied — not your derived pk. Honest MPS-0029 reject · LOCAL STUB.");
           return;
         }
         next = next.filter((x) => x.id !== id);
@@ -534,7 +554,9 @@
     document.getElementById("btn-post")?.addEventListener("click", async () => {
       const body = (ta instanceof HTMLTextAreaElement ? ta.value : "").trim();
       if (!body) {
+        setBoardError("Post body empty — LOCAL STUB will not invent content.");
         announce("Post body empty");
+        document.getElementById("post-body")?.focus();
         return;
       }
       const pk = await derivePk(loadSk(), "bboard:poster:v1");
@@ -550,7 +572,10 @@
       if (ta instanceof HTMLTextAreaElement) ta.value = "";
       syncCount();
       renderBoard();
+      setBoardError("");
       announce("Post published to local board");
+      document.getElementById("btn-post")?.classList.add("seal-flash");
+      setTimeout(() => document.getElementById("btn-post")?.classList.remove("seal-flash"), 600);
     });
 
     document.getElementById("btn-clear-board")?.addEventListener("click", () => {
@@ -585,7 +610,11 @@
         : "window.midnight not found — install Lace (or another Midnight wallet) and reload.";
       status.className = "status warn";
       if (!silent) {
-        grid.innerHTML = `<div class="empty">No providers. Hardcoding window.midnight.mnLace would also fail here. Read-only scan — no connect.</div>`;
+        grid.innerHTML = `<div class="empty empty-rich" role="status">
+          <div class="empty-glyph" aria-hidden="true">◇</div>
+          <strong>No Midnight providers</strong>
+          <span class="muted small">window.midnight not found. Hardcoding mnLace would also fail here. Read-only scan — no connect. LOCAL STUB honesty.</span>
+        </div>`;
       }
       return;
     }

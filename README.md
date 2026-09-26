@@ -50,7 +50,8 @@ Until then the URL may 404.
 │   ├── compact-atelier/       # Compact Atelier — editable snippets + explain panel
 │   └── nocturne-messenger/    # Nocturne Messenger — sealed DMs preview studio
 ├── packages/
-│   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
+│   ├── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
+│   └── studio-craft/          # Canonical design tokens + donate dock (sync into apps)
 ├── contracts/
 │   ├── hello-midnight/        # Compact counter starter
 │   └── agent-escrow/          # Agent Escrow Compact skeleton (~0.31.1 notes)
@@ -75,9 +76,33 @@ Until then the URL may 404.
 | `apps/compact-atelier` | **Compact Atelier** — editable Compact snippets, explain panel, lint theater (local stub) |
 | `apps/nocturne-messenger` | **Nocturne Messenger Studio** — sealed DMs, envelope veil, selective reveal (local stub) |
 | `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
+| `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
 | `BRANDING.md` | Donation address, X handle, NightDream mention |
+
+
+## Local ports map (all studios)
+
+Serve each app from its own folder (or assemble for Pages). Default lab ports:
+
+| Port | App | Path (when assembled) | Command |
+| --- | --- | --- | --- |
+| **5173** | Midnight Studio Hub | `/` | `cd apps/midnight-lab-site && python3 -m http.server 5173` |
+| **5174** | Lace Connect Studio | `/lace/` | `npm run dev:lace-demo` (Vite) |
+| **5175** | Agent Escrow stub | `/escrow/` | `cd apps/agent-escrow-stub && python3 -m http.server 5175` |
+| **5177** | Shield Board | `/board/` | `cd apps/shield-board && python3 -m http.server 5177` |
+| **5176** | Auth Forge Studio | `/auth/` | `cd apps/auth-lab && python3 -m http.server 5176` |
+| **5179** | Veil Pledge Studio | `/pledge/` | `cd apps/veil-pledge && python3 -m http.server 5179` |
+| **5180** | Night Market Studio | `/market/` | `cd apps/night-market && python3 -m http.server 5180` |
+| **5181** | Sealed Invite Studio | `/invite/` | `cd apps/sealed-invite && python3 -m http.server 5181` |
+| **5182** | Proof Playground | `/proof/` | `cd apps/proof-playground && python3 -m http.server 5182` |
+| **5183** | Private Ballot Studio | `/ballot/` | `cd apps/private-ballot && python3 -m http.server 5183` |
+| **5184** | Veil Passport Studio | `/passport/` | `cd apps/veil-passport && python3 -m http.server 5184` |
+| **5185** | Compact Atelier | `/atelier/` | `cd apps/compact-atelier && python3 -m http.server 5185` |
+| **5186** | Nocturne Messenger | `/nocturne/` | `cd apps/nocturne-messenger && python3 -m http.server 5186` |
+
+Hub status pills probe sibling paths on the **same origin** (assembled Pages artifact). Serving only the Hub on 5173 correctly reports **Not found** for siblings — that is honest, not a bug. Shared craft tokens live in [`packages/studio-craft/`](./packages/studio-craft/) (copied into each app’s CSS because Pages cannot resolve cross-package links).
 
 ## Quick start — Studio Hub (flagship homepage)
 
@@ -105,6 +130,18 @@ npm run dev:lace-demo
 ```
 
 Safety: the demo does **not** call `makeTransfer` / submit. A successful connect is **not** proof that mainnet transfers work.
+
+## Quick start — Auth Forge Studio
+
+MPS-0029 attack journey, scorecard, forge theater, local bulletin board.
+
+```bash
+cd apps/auth-lab
+python3 -m http.server 5176
+# open http://localhost:5176
+```
+
+Pages path (when Actions enabled): `/auth/`. Local stub only — no on-chain Compact deploy.
 
 ## Quick start — Shield Board (flagship)
 

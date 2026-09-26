@@ -37,8 +37,14 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-sim" title="Runs entirely in your browser">LOCAL · dual-state stub</span>
+    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
   </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
 
   <main id="main">
     <section class="hero" id="top">
@@ -110,7 +116,12 @@
           </header>
           <p class="pane-desc">Post id, commitment hash, owner pk, sequence, disclosure flag. Bodies are <em>not</em> here unless disclosed.</p>
           <ul class="post-list" id="public-list" aria-live="polite"></ul>
-          <p class="empty" id="public-empty">No public commitments yet. Seal a message to mint one.</p>
+          <div class="empty empty-rich" id="public-empty" role="status">
+            <div class="empty-glyph" aria-hidden="true">◎</div>
+            <p><strong>Ledger rail quiet</strong></p>
+            <p class="muted small">No public commitments yet. Seal a message to mint a hash the chain <em>would</em> see — body stays veiled unless you disclose.</p>
+            <button type="button" class="btn ghost small empty-cta" data-focus="post-body">Compose first seal</button>
+          </div>
         </article>
 
         <article class="pane pane-private" aria-labelledby="private-heading">
@@ -123,12 +134,18 @@
           </header>
           <p class="pane-desc">Raw message bodies you authored. Cleared on refresh unless you export. Take-down requires your derived pk.</p>
           <ul class="post-list" id="private-list" aria-live="polite"></ul>
-          <p class="empty" id="private-empty">Vault empty. Compose below to seal a private body + public commitment.</p>
+          <div class="empty empty-rich" id="private-empty" role="status">
+            <div class="empty-glyph" aria-hidden="true">◈</div>
+            <p><strong>Vault empty</strong></p>
+            <p class="muted small">Private bodies live only in this browser until you disclose. LOCAL STUB — not on-chain custody.</p>
+            <button type="button" class="btn ghost small empty-cta" data-focus="post-body">Open compose</button>
+          </div>
         </article>
       </div>
 
       <div class="compose panel-inner" aria-labelledby="compose-heading">
         <h3 id="compose-heading">Compose &amp; seal</h3>
+        <p class="error-honesty" id="compose-error" role="alert" hidden></p>
         <div class="compose-grid">
           <div class="field grow">
             <label for="post-body">Private message body</label>
@@ -283,8 +300,8 @@ export circuit takeDownBad(id: PostId): [] {
       <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
     </div>
     <p class="disclaimer">
-      Not affiliated with the Midnight Foundation. Local educational stub — no on-chain Compact deploy claimed.
-      Prefer official docs for production circuits.
+      LOCAL STUB · not on-chain · not a Compact deploy · no Lace transfers.
+      Not affiliated with the Midnight Foundation. Prefer official docs for production circuits.
     </p>
   </footer>
 

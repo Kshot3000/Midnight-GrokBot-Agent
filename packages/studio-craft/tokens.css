@@ -1,0 +1,31 @@
+/**
+ * Midnight Studio craft tokens — canonical source of truth.
+ * Apps copy these into their own styles.css :root (Pages serves each app
+ * from its own path; cross-package <link> would 404 on static hosting).
+ * Keep --danger / --bad / --fail as aliases of the same rose.
+ */
+:root {
+  --bg: #05070f;
+  --bg-elevated: rgba(14, 20, 36, 0.72);
+  --bg-card: rgba(16, 24, 48, 0.68);
+  --text: #eef2ff;
+  --muted: #9aa8c7;
+  --accent: #7c9cff;
+  --accent-2: #a78bfa;
+  --accent-3: #22d3ee;
+  --ok: #6ee7b7;
+  --warn: #fbbf24;
+  --danger: #fb7185;
+  --bad: #fb7185;
+  --fail: #fb7185;
+  --line: rgba(124, 156, 255, 0.22);
+  --line-strong: rgba(124, 156, 255, 0.4);
+  --radius: 18px;
+  --radius-sm: 12px;
+  --font: "Inter", system-ui, -apple-system, sans-serif;
+  --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --focus: 0 0 0 3px rgba(124, 156, 255, 0.45);
+}

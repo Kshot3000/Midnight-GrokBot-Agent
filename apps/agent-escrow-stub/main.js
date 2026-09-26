@@ -515,6 +515,22 @@
     });
   });
 
+
+  // Donate dock (always-visible)
+  const dockCopy = document.getElementById("dock-copy-addr");
+  if (dockCopy) {
+    dockCopy.addEventListener("click", async () => {
+      const addr = (document.getElementById("donation-addr")?.textContent || "").trim()
+        || "addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v";
+      try {
+        await navigator.clipboard.writeText(addr);
+        showToast("ADA address copied · @kshot9000", false);
+      } catch {
+        showToast("Copy failed — select address manually", true);
+      }
+    });
+  }
+
   // Donate copy
   const copyAddr = document.getElementById("copy-addr");
   const donationAddr = document.getElementById("donation-addr");
