@@ -17,4 +17,6 @@ MPS text: https://github.com/midnightntwrk/midnight-improvement-proposals/blob/m
 ## Local lab posture
 - Lace kit already enumerates UUID keys (not hardcoded `mnLace`)
 - Agent escrow + hello.compact document MPS-0029 / prefer example-bboard
-- NightDream.io: live ADA spot (Coinbase) + Cardano tip (Koios) overlays on DEMO desk
+- NightDream.io: live CoinGecko/DexScreener/Koios/CIP-30 desk + NightForge network strip; `nightdream.io` DNS pending (`docs/DNS.md` in that repo)
+- Qwen Builder agent-escrow: Compact port notes + agent-not-approver create-time harden (MPS-0029 analogue)
+- nocturne: Pages 404 restored; live URL + MPS-0029 honesty note

@@ -46,3 +46,56 @@ same family of pattern as example-bboard / leaderboard tutorials.
 These audit commits update comments/pragma only unless a later note says
 otherwise. **Do not claim Compact compiled** unless the Compact toolchain was
 actually run in that shift.
+
+## 2026-09-25 (evening) — Kshot-owned Midnight apps improve pass
+
+Cross-repo improvements (this lab + sisters). No Compact toolchain run this
+shift — **do not claim compile**.
+
+### Agent Escrow JS/Python (Qwen Builder)
+
+**Finding:** Off-chain reference allowed the agent string to appear in the
+`approvers` set at create time. Runtime still blocked self-approval, but Compact
+skeleton already requires `agentPk ≠ approverPk` at `initialize`.
+
+**Lab fold-in (sister repo):**
+https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/commit/a63c7e936a7f38dc531055d080309bd398567bc3
+
+- Reject agent-as-approver at create (JS + Python) — MPS-0029 / separation analogue
+- New [`COMPACT-PORT.md`](https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/blob/main/apps/agent-escrow/COMPACT-PORT.md)
+  bridges JS/Python → this lab’s `contracts/agent-escrow`, with live starters
+  (example-bboard / create-mn-app; Counter archived)
+
+### NightDream.io
+
+**Finding:** Apex `nightdream.io` is **NXDOMAIN**. GitHub Pages URL works:
+https://kshot3000.github.io/NightDream.io/
+
+**Lab fold-in:**
+https://github.com/Kshot3000/NightDream.io/commit/0d4fe3fbe9614d70a8304d36e7325ae3aeda2909
+
+- `docs/DNS.md` — A/AAAA/CNAME → GitHub Pages
+- NightForge network strip on Midnight page (soft-fail)
+- Footer stamps Cardano donation + `@kshot9000` (canonical branding)
+
+Remote already rebuilt the desk onto live CoinGecko / DexScreener / Koios /
+CIP-30 — this pass did not regress that.
+
+### nocturne
+
+**Finding:** README still pointed at placeholder `nocturne-messenger` Pages URL
+and claimed a deleted `404.html`.
+
+**Lab fold-in:**
+https://github.com/Kshot3000/nocturne/commit/a3579b93e7931feb0df043ac5e49d3fdbf572028
+
+- Restored themed `404.html`; live URL https://kshot3000.github.io/nocturne/
+- Honesty / README: MPS-0029 + live starters for any future on-chain identity
+
+### Still blocked / out of scope
+
+- Compact compile of `contracts/agent-escrow` / `hello-midnight` (toolchain not
+  installed in this environment)
+- Upstream midnightntwrk PRs (handled by another agent / recorded in
+  [`docs/UPSTREAM-SWEEP-2026-09-25.md`](../docs/UPSTREAM-SWEEP-2026-09-25.md))
+- Auto-posting to X

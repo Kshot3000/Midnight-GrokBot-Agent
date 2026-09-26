@@ -96,7 +96,7 @@ Canonical copy lives in [`BRANDING.md`](./BRANDING.md).
 - **Cardano donation:**  
   `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
 - **X:** [@kshot9000](https://x.com/kshot9000) — https://x.com/kshot9000
-- **NightDream.io:** https://nightdream.io
+- **NightDream.io:** https://kshot3000.github.io/NightDream.io/ (custom domain `nightdream.io` pending DNS — see NightDream `docs/DNS.md`)
 
 ## License
 
@@ -109,6 +109,8 @@ Milestone escrow for AI-agent work — Compact skeleton + local UI stub:
 - Contract: [`contracts/agent-escrow/`](./contracts/agent-escrow/) (witness role commitments; **not** `ownPublicKey()` alone)
 - UI stub: [`apps/agent-escrow-stub/`](./apps/agent-escrow-stub/) (`python3 -m http.server 5175`)
 - Protocol reference (JS/Python): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/tree/main/apps/agent-escrow
+- Compact port notes (sister): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/blob/main/apps/agent-escrow/COMPACT-PORT.md
+- Audit log: [`contracts/AUDIT-NOTES.md`](./contracts/AUDIT-NOTES.md)
 
 Pin Compact compiler **~0.31.1** (create-mn-app / example-bboard matrix). This lab has **not** deployed the escrow contract on-chain in the scaffold commit.
 
