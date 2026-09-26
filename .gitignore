@@ -15,10 +15,15 @@ proof-server/
 *.zkir
 keys/
 
-# Env / secrets
+# Env / secrets — NEVER commit private keys / mnemonics
 .env
 .env.*
 !.env.example
+!.env.preprod.example
+.secrets/
+.midnight-state.json
+.midnight-wallet-state/
+*.wallet.json
 
 # OS / editor
 .DS_Store

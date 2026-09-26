@@ -57,7 +57,9 @@ Until then the URL may 404.
 │   ├── hello-midnight/        # Compact counter starter (compile → out/)
 │   └── agent-escrow/          # Agent Escrow Compact skeleton (~0.31.1)
 ├── docs/
-│   └── COMPACT-PREPROD-PATH-2026-09-26.md
+│   ├── COMPACT-PREPROD-PATH-2026-09-26.md
+│   └── PREPROD-FUNDING.md          # faucet + DUST registration (verified docs URLs)
+├── .env.preprod.example            # wallet/endpoints template (no secrets)
 ├── BRANDING.md                # Canonical donation address + socials
 ├── LICENSE                    # MIT
 └── README.md
@@ -80,7 +82,7 @@ Until then the URL may 404.
 | `apps/nocturne-messenger` | **LOCAL-TRUE** Nocturne Messenger — localStorage v2, multi-tab sync, export/import, vitest · sealed DMs · not a relay / not on-chain |
 | `packages/lace-midnight-kit` | **v0.3.0** — discover, connect, prefs, reconnect, balance refresh, health watch, capability probe, vitest |
 | `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
-| `packages/preprod-hello-stub` | **Off-chain** hello loader — compact-runtime 0.16.0 + midnight-js 4.1.1 · **not a Preprod deploy** |
+| `packages/preprod-hello-stub` | Preprod path — off-chain hello + **providers wiring** + clear-fail deploy gate · **not a confirmed Preprod deploy** |
 | `contracts/hello-midnight` | Compact counter — `npm run compact:hello` (artifacts gitignored) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
 | `BRANDING.md` | Donation address, X handle, NightDream mention |
@@ -266,7 +268,7 @@ Pages path (when Actions enabled): `/nocturne/`. **LOCAL-TRUE** — localStorage
 
 ## Compact / Midnight toolchain (official)
 
-**Lab status (2026-09-26 CT):** Compact **CLI 0.5.2** + toolchain **0.31.1** (lang **0.23.0**, ledger **8.0.2**, runtime **0.16.0**) installed on the build box. Both `hello-midnight` and `agent-escrow` **compiled with proving keys**. Proof-server / `create-mn-app` still blocked here (no Docker; Node 20 vs required 22+). See [`contracts/README.md`](./contracts/README.md) and [docs/COMPACT-PREPROD-PATH-2026-09-26.md](./docs/COMPACT-PREPROD-PATH-2026-09-26.md) for the full works-vs-blocked report.
+**Lab status (2026-09-26 CT):** Compact **CLI 0.5.2** + toolchain **0.31.1** (lang **0.23.0**, ledger **8.0.2**, runtime **0.16.0**) on the build box. Hello + agent-escrow **compiled with proving keys**. Node **22.23.3** via fnm (system Node 20 untouched). Proof-server **8.1.0** healthy on `:6300` (Podman). Preprod **providers scaffold** + clear-fail deploy gate landed — **no on-chain deploy claimed**. See [`contracts/README.md`](./contracts/README.md), [`docs/PREPROD-FUNDING.md`](./docs/PREPROD-FUNDING.md), and [docs/COMPACT-PREPROD-PATH-2026-09-26.md](./docs/COMPACT-PREPROD-PATH-2026-09-26.md).
 
 ```bash
 # After Compact is on PATH (install guide below):
@@ -334,19 +336,30 @@ See [`docs/UPSTREAM-SWEEP-2026-09-25.md`](./docs/UPSTREAM-SWEEP-2026-09-25.md) f
 1. ~~Compile escrow / hello with Compact ~0.31.1~~ **done**.
 2. ~~Wire compact-runtime + off-chain circuits~~ **done** — `@kshot/preprod-hello-stub` (`npm run stub:offchain`).
 3. ~~Proof-server 8.1.0~~ **done on lab box via Podman** (`npm run proof-server:podman` / Lace Local `:6300`).
-4. **Next:** fund Preprod wallet + DUST registration, then `deployContract` via midnight-js providers (still no fake deploy claims).
-5. Optional: `npx create-mn-app@0.5.1 -y -t hello-world` on Node 22+ for upstream parity.
+4. ~~Preprod providers scaffold + clear-fail deploy gate~~ **done** (`stub:providers` / `stub:deploy-preprod`).
+5. **Next (Kshot):** fund Preprod wallet (faucet captcha) + tDUST registration, then real `deployContract` — claim only after tx confirm.
+6. Optional: `npx create-mn-app@0.5.1 -y -t hello-world` on Node 22+ for upstream parity.
 
 ## Compact → Preprod (honest lab path)
 
-See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-2026-09-26.md)** for the live works-vs-blocked sheet.
+See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-2026-09-26.md)** and **[`docs/PREPROD-FUNDING.md`](./docs/PREPROD-FUNDING.md)**.
 
 | Step | Command / note |
 | --- | --- |
 | Node 22 (fnm; keeps system Node 20) | `fnm install 22 && fnm use 22` |
 | Compile hello + ZK keys | `npm run compact:hello` |
 | Off-chain stub (real artifacts) | `npm run stub:offchain` / `npm run stub:test` |
-| Proof-server 8.1.0 (Podman) | `npm run proof-server:podman` → Lace Local `http://localhost:6300` |
+| Proof-server 8.1.0 (reuse if healthy) | `curl -sS http://127.0.0.1:6300/health` or `npm run proof-server:podman` |
+| Providers wiring + probes | `npm run stub:providers` |
+| Env template | `cp .env.preprod.example .env.preprod` |
+| Throwaway wallet (secrets gitignored) | `npm run stub:wallet-gen` |
+| Faucet attempt (needs captcha) | `npm run stub:faucet-attempt` — browser: https://midnight-tmnight-preprod.nethermind.dev/ |
+| Deploy gate (fails without keys) | `npm run stub:require-wallet` / `npm run stub:deploy-preprod` |
 
-**Not claimed:** on-chain Preprod deploy, Pages live, X posts.
+### Support / brand
+
+- **Donate (Cardano):** `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
+- **X:** [@kshot9000](https://x.com/kshot9000)
+
+**Not claimed:** on-chain Preprod deploy success, Pages live, X posts from this pass.
 

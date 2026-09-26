@@ -19,7 +19,12 @@
     "stub:offchain": "npm run offchain -w @kshot/preprod-hello-stub",
     "stub:preprod-config": "npm run preprod:config -w @kshot/preprod-hello-stub",
     "stub:test": "npm test -w @kshot/preprod-hello-stub",
-    "proof-server:podman": "podman run --rm -p 6300:6300 docker.io/midnightntwrk/proof-server:8.1.0 midnight-proof-server -v"
+    "proof-server:podman": "podman run --rm -p 6300:6300 docker.io/midnightntwrk/proof-server:8.1.0 midnight-proof-server -v",
+    "stub:providers": "npm run preprod:providers -w @kshot/preprod-hello-stub",
+    "stub:require-wallet": "npm run preprod:require-wallet -w @kshot/preprod-hello-stub",
+    "stub:deploy-preprod": "npm run preprod:deploy -w @kshot/preprod-hello-stub",
+    "stub:wallet-gen": "npm run wallet:gen -w @kshot/preprod-hello-stub",
+    "stub:faucet-attempt": "npm run faucet:attempt -w @kshot/preprod-hello-stub"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",

@@ -118,3 +118,16 @@ podman run -d --name midnight-proof-server -p 6300:6300 \
 - No “Pages is live”.
 - Managed/out artifacts stay gitignored — regenerate locally.
 - Off-chain increment ≠ chain submit.
+
+---
+
+## Update — Preprod deploy scaffold (2026-09-26 ~00:43 CT)
+
+Landed in `@kshot/preprod-hello-stub` + repo root:
+
+- Providers wiring (`stub:providers`) — indexer/node/proof probes green; wallet slots null until funded seed
+- `.env.preprod.example` + clear-fail `stub:require-wallet` / `stub:deploy-preprod`
+- Throwaway wallet gen → `.secrets/` (gitignored); faucet attempt fails without captcha (expected)
+- Funding guide: [`docs/PREPROD-FUNDING.md`](./PREPROD-FUNDING.md)
+
+**Still NOT claimed:** on-chain Preprod deploy / funded faucet credit.

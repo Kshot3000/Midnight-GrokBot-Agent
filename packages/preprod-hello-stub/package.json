@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Thin Preprod-path stub: loads Compact-compiled hello artifacts + compact-runtime 0.16.0 / midnight-js 4.1.1. Off-chain only until proof-server + funded wallet exist. NOT a fake deploy.",
+  "description": "Preprod hello path: Compact artifacts, midnight-js 4.1.1 providers wiring, clear-fail deploy gate. NOT a fake deploy.",
   "engines": {
     "node": ">=22"
   },
@@ -11,12 +11,29 @@
     "check:artifacts": "node src/check-artifacts.mjs",
     "offchain": "node src/run-offchain.mjs",
     "test": "vitest run",
-    "preprod:config": "node src/show-preprod-config.mjs"
+    "preprod:config": "node src/show-preprod-config.mjs",
+    "preprod:providers": "node src/show-providers.mjs",
+    "preprod:require-wallet": "node src/require-wallet-env.mjs",
+    "preprod:deploy": "node src/deploy-preprod.mjs",
+    "wallet:gen": "node src/generate-throwaway-wallet.mjs",
+    "faucet:attempt": "node src/attempt-faucet.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
     "@midnight-ntwrk/midnight-js": "4.1.1",
-    "@midnight-ntwrk/midnight-js-network-id": "4.1.1"
+    "@midnight-ntwrk/midnight-js-contracts": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-network-id": "4.1.1",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-protocol": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-types": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-utils": "^4.1.1",
+    "@midnight-ntwrk/wallet-sdk": "^1.1.0",
+    "@scure/bip39": "^1.5.4",
+    "dotenv": "^16.4.7",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "vitest": "^3.2.7"
