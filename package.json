@@ -2,7 +2,7 @@
   "name": "midnight-grokbot-agent",
   "private": true,
   "version": "0.1.0",
-  "description": "Midnight GrokBot Agent \u2014 24/7 build lab (static site, Compact starters incl. Agent Escrow, Lace connector kit)",
+  "description": "Midnight GrokBot Agent — 24/7 build lab (static site, Compact starters incl. Agent Escrow, Lace connector kit)",
   "workspaces": [
     "packages/*",
     "apps/lace-connect-demo"
@@ -14,12 +14,20 @@
     "compact:hello": "compact compile +0.31.1 contracts/hello-midnight/hello.compact contracts/hello-midnight/out",
     "compact:hello:skip-zk": "compact compile +0.31.1 --skip-zk contracts/hello-midnight/hello.compact contracts/hello-midnight/out",
     "compact:escrow": "npm run compact --prefix contracts/agent-escrow",
-    "compact:escrow:skip-zk": "npm run compact:skip-zk --prefix contracts/agent-escrow"
+    "compact:escrow:skip-zk": "npm run compact:skip-zk --prefix contracts/agent-escrow",
+    "stub:check": "npm run check:artifacts -w @kshot/preprod-hello-stub",
+    "stub:offchain": "npm run offchain -w @kshot/preprod-hello-stub",
+    "stub:preprod-config": "npm run preprod:config -w @kshot/preprod-hello-stub",
+    "stub:test": "npm test -w @kshot/preprod-hello-stub",
+    "proof-server:podman": "podman run --rm -p 6300:6300 docker.io/midnightntwrk/proof-server:8.1.0 midnight-proof-server -v"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Kshot3000/Midnight-GrokBot-Agent.git"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

@@ -1,0 +1,31 @@
+{
+  "name": "@kshot/preprod-hello-stub",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Thin Preprod-path stub: loads Compact-compiled hello artifacts + compact-runtime 0.16.0 / midnight-js 4.1.1. Off-chain only until proof-server + funded wallet exist. NOT a fake deploy.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check:artifacts": "node src/check-artifacts.mjs",
+    "offchain": "node src/run-offchain.mjs",
+    "test": "vitest run",
+    "preprod:config": "node src/show-preprod-config.mjs"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.16.0",
+    "@midnight-ntwrk/midnight-js": "4.1.1",
+    "@midnight-ntwrk/midnight-js-network-id": "4.1.1"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.7"
+  },
+  "author": "Kshot (@kshot9000)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kshot3000/Midnight-GrokBot-Agent.git",
+    "directory": "packages/preprod-hello-stub"
+  }
+}

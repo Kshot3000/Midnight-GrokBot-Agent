@@ -1,7 +1,7 @@
 # Compact → Preprod path — 2026-09-26 (CT)
 
 Honest works-vs-blocked for **Midnight GrokBot Agent** lab box.
-Repo: https://github.com/Kshot3000/Midnight-GrokBot-Agent (base `0698662` LOCAL-TRUE).
+Repo: https://github.com/Kshot3000/Midnight-GrokBot-Agent
 Brand: donate `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v` · [@kshot9000](https://x.com/kshot9000).
 
 ## Compat snapshot (tracked)
@@ -12,74 +12,109 @@ Brand: donate `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y
 | Compact toolchain | **0.31.1** | **YES** — `compact compile +0.31.1 --version` |
 | Compact language | **0.23.0** | **YES** — `--language-version` |
 | Ledger (compiler) | **8.0.2** | **YES** — `--ledger-version` |
-| compact-runtime | **0.16.0** | **YES** — `--runtime-version`; npm has `@midnight-ntwrk/compact-runtime@0.16.0` |
-| midnight-js | **4.1.1** | npm latest **4.1.1** (not wired into an app this pass) |
+| compact-runtime | **0.16.0** | **YES** — npm + generated `checkRuntimeVersion('0.16.0')` |
+| midnight-js | **4.1.1** | **YES** — wired in `@kshot/preprod-hello-stub` |
 | DApp Connector API | **4.0.1** | Lace kit **0.3.0** already uses it |
-| proof-server image | **8.1.0** | Image tag exists on Docker Hub; **not run** here |
-| create-mn-app | npm **0.5.1** | Not scaffolded (Node/Docker blockers) |
+| proof-server image | **8.1.0** | **YES** — podman pull + run; `/health` → 200 |
+| create-mn-app | npm **0.5.1** | CLI runs on Node 22; dry-run OK; full scaffold still wants Docker check |
+| Node (fnm) | **22.23.3** | **YES** — user-space; system `/usr/bin/node` stays **v20.19.2** |
+| Podman | **5.4.2** | **YES** — rootless; used for proof-server |
 
 ## What WORKS (real, this session)
 
-1. **Compact installer** — after `apt install xz-utils` (installer unpacks `.tar.xz`).
+1. **Node 22 via fnm (no system break)**
    ```bash
-   curl --proto '=https' --tlsv1.2 -LsSf \
-     https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+   curl -fsSL https://fnm.vercel.app/install | bash -s -- \
+     --install-dir "$HOME/.local/share/fnm" --skip-shell
+   export PATH="$HOME/.local/share/fnm:$PATH"
+   eval "$(fnm env)"
+   fnm install 22 && fnm default 22 && fnm use 22
+   node -v   # v22.23.3
+   /usr/bin/node -v   # still v20.19.2
+   ```
+   Persist in `~/.bashrc` (already done on box):
+   ```bash
+   export FNM_PATH="$HOME/.local/share/fnm"
+   export PATH="$FNM_PATH:$PATH"
+   eval "$(fnm env)"
+   ```
+
+2. **Compact compile** (unchanged from prior pass) — hello + agent-escrow with ZK keys.
+   ```bash
    export PATH="$HOME/.local/bin:$PATH"
+   npm run compact:hello
+   npm run compact:escrow
    ```
-2. **Toolchain 0.31.1** — `compact update 0.31.1` hit GitHub **API rate limit**;
-   worked around by direct asset download (not a fake compile):
-   `compactc_v0.31.1_x86_64-unknown-linux-musl.zip` →
-   `~/.compact/versions/0.31.1/x86_64-unknown-linux-musl/`.
-3. **`hello-midnight` compile** — full ZK (prover+verifier keys):
-   ```bash
-   compact compile +0.31.1 contracts/hello-midnight/hello.compact contracts/hello-midnight/out
-   ```
-   Outputs: `contract/index.{js,d.ts}`, `zkir/increment.{zkir,bzkir}`, `keys/increment.{prover,verifier}`.
-4. **`agent-escrow` compile** — full ZK, **12 circuits**, ~38MB managed tree:
-   ```bash
-   compact compile +0.31.1 contracts/agent-escrow/src/agent-escrow.compact \
-     contracts/agent-escrow/src/managed/agent-escrow
-   ```
-5. **Source fixes required for Compact 0.23** (pushed in repo):
-   - Uint widen casts: `(a + b) as Uint<64>` etc.
-   - `assertIsApprover`: `disclose(roleCommitment(...))` before OR compare
-     (explicit-disclosure / conditional branch rule).
-6. Lace kit **0.3.0** + connector **4.0.1** unchanged — real connect when extension present.
 
-## What is BLOCKED on this box
+3. **`@kshot/preprod-hello-stub`** — loads **real** `contracts/hello-midnight/out` artifacts:
+   - `check:artifacts` — sizes for contract/keys/zkir (fails if missing)
+   - `offchain` — `Contract({})` + `impureCircuits.increment` → greetings 0→1, proofData present
+   - `preprod:config` — `setNetworkId('preprod')` + official endpoints (**config only**)
+   - vitest: **4/4 pass**
+   ```bash
+   npm run stub:check
+   npm run stub:offchain
+   npm run stub:preprod-config
+   npm run stub:test
+   ```
 
-| Blocker | Detail |
+4. **Podman + proof-server 8.1.0**
+   ```bash
+   sudo apt-get update
+   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+     -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" podman
+   # Note: bare apt can hang on /etc/fuse.conf conffile prompt — use force-confold.
+   podman pull docker.io/midnightntwrk/proof-server:8.1.0
+   podman run -d --name midnight-proof-server -p 6300:6300 \
+     docker.io/midnightntwrk/proof-server:8.1.0 midnight-proof-server -v
+   curl -sS http://127.0.0.1:6300/health   # HTTP 200
+   ```
+   Lace Local → `http://localhost:6300`. Proof server sees witness data in the clear — keep local.
+
+5. **create-mn-app 0.5.1** under Node 22:
+   ```bash
+   npx create-mn-app@0.5.1 --dry-run -y -t hello-world --skip-install --skip-git mn-hello-dry
+   ```
+   Dry-run lists template + “Check Docker availability”. Prefer our thin stub for artifact honesty;
+   full `create-mn-app` scaffold is optional once Docker/Podman is present.
+
+## What is still BLOCKED / NOT claimed
+
+| Item | Detail |
 | --- | --- |
-| **No Docker / Podman** | Cannot run `docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v`. No local proof generation for txs / Lace local mode. |
-| **Node v20.19.2** | `create-mn-app` + official quickstart want **Node 22+**. Not upgraded this pass. |
-| **`compact update` API** | Unauthenticated GitHub API rate limit broke `compact update` / `compact list`; direct release zip still works. Prefer `GITHUB_TOKEN` for update, or pin zip. |
-| **Default compiler marker** | Writing `~/.compact/default` as plain `0.31.1` did **not** satisfy CLI (“No default compiler set”). Always pass **`+0.31.1`** (npm scripts do). |
-| **Pages live** | Workflow still only in `docs/pages.workflow.yml` — needs **workflow**-scoped PAT push + Settings → Pages → Actions. See `docs/PAGES-WORKFLOW-OAUTH.md`. **Do not claim Pages live.** |
-| **On-chain / Preprod deploy** | Not attempted. No proof-server, no faucet funding, no midnight-js deploy client in this pass. |
+| **On-chain Preprod deploy** | Not attempted. Need funded + DUST-registered wallet + `deployContract` providers. |
+| **Pages live** | Workflow still only in `docs/pages.workflow.yml` — needs workflow-scoped PAT. |
+| **`compact update` API** | Unauthenticated GitHub rate limit; use direct zip or `GITHUB_TOKEN`. |
+| **Root engines `>=22`** | Advisory for stub/midnight-js path; Lace kit still declares `>=18`. Activate fnm Node 22 before stub scripts. |
 
 ## Exact next bar (honest)
 
-1. On a Docker host: start proof-server **8.1.0**; Lace → Local `http://localhost:6300`.
-2. Node 22+: optional `npx create-mn-app@latest` undeployed/preprod template, or wire
-   `@midnight-ntwrk/compact-runtime@0.16.0` + midnight-js **4.1.1** witnesses to
-   the generated `Contract` class from `managed/`.
-3. Human: push `.github/workflows/pages.yml` with workflow-scoped PAT.
+1. Fund Preprod wallet (Lace / mnemonic) + register for tDUST generation.
+2. Wire midnight-js **providers** (indexer / node / http proof provider → `:6300`) and call
+   `deployContract` from `@midnight-ntwrk/midnight-js-contracts` against compiled hello.
+3. Optional: `npx create-mn-app@0.5.1 -y -t hello-world` into a sibling dir for upstream parity.
 
-## Commands cheat-sheet (repo)
+## Commands cheat-sheet
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env)" && fnm use 22
+
 npm run compact:hello
-npm run compact:escrow
-# skip keys while iterating:
-npm run compact:hello:skip-zk
-npm run compact:escrow:skip-zk
+npm run stub:offchain
+npm run stub:test
+
+# proof-server (foreground)
+npm run proof-server:podman
+# or detached:
+podman run -d --name midnight-proof-server -p 6300:6300 \
+  docker.io/midnightntwrk/proof-server:8.1.0 midnight-proof-server -v
 ```
 
 ## Non-claims
 
 - No X posts.
 - No fake “deployed to Preprod”.
-- No “proof-server running on the box”.
 - No “Pages is live”.
 - Managed/out artifacts stay gitignored — regenerate locally.
+- Off-chain increment ≠ chain submit.

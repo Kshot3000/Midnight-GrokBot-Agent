@@ -51,10 +51,13 @@ Until then the URL may 404.
 │   └── nocturne-messenger/    # Nocturne Messenger — sealed DMs preview studio
 ├── packages/
 │   ├── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
-│   └── studio-craft/          # Canonical design tokens + donate dock (sync into apps)
+│   ├── studio-craft/          # Canonical design tokens + donate dock (sync into apps)
+│   └── preprod-hello-stub/    # Off-chain Compact artifacts + midnight-js 4.1.1 (NOT a deploy)
 ├── contracts/
-│   ├── hello-midnight/        # Compact counter starter
-│   └── agent-escrow/          # Agent Escrow Compact skeleton (~0.31.1 notes)
+│   ├── hello-midnight/        # Compact counter starter (compile → out/)
+│   └── agent-escrow/          # Agent Escrow Compact skeleton (~0.31.1)
+├── docs/
+│   └── COMPACT-PREPROD-PATH-2026-09-26.md
 ├── BRANDING.md                # Canonical donation address + socials
 ├── LICENSE                    # MIT
 └── README.md
@@ -77,7 +80,8 @@ Until then the URL may 404.
 | `apps/nocturne-messenger` | **LOCAL-TRUE** Nocturne Messenger — localStorage v2, multi-tab sync, export/import, vitest · sealed DMs · not a relay / not on-chain |
 | `packages/lace-midnight-kit` | **v0.3.0** — discover, connect, prefs, reconnect, balance refresh, health watch, capability probe, vitest |
 | `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
-| `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
+| `packages/preprod-hello-stub` | **Off-chain** hello loader — compact-runtime 0.16.0 + midnight-js 4.1.1 · **not a Preprod deploy** |
+| `contracts/hello-midnight` | Compact counter — `npm run compact:hello` (artifacts gitignored) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
 | `BRANDING.md` | Donation address, X handle, NightDream mention |
 
@@ -327,7 +331,22 @@ See [`docs/UPSTREAM-SWEEP-2026-09-25.md`](./docs/UPSTREAM-SWEEP-2026-09-25.md) f
 
 ## Recommended next apps
 
-1. ~~Compile escrow / hello with Compact ~0.31.1~~ **done on lab box** — next: wire witnesses like `example-bboard` + `@midnight-ntwrk/compact-runtime@0.16.0`.
-2. Run `docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v` on a Docker host; point Lace → local proof server.
-3. Scaffold with `npx create-mn-app@latest` on **Node 22+**, or deepen Lace demo with read-only Preprod indexer queries (still no transfer claims until proven).
-4. Follow the official privacy-preserving leaderboard tutorial end-to-end, then adapt patterns here.
+1. ~~Compile escrow / hello with Compact ~0.31.1~~ **done**.
+2. ~~Wire compact-runtime + off-chain circuits~~ **done** — `@kshot/preprod-hello-stub` (`npm run stub:offchain`).
+3. ~~Proof-server 8.1.0~~ **done on lab box via Podman** (`npm run proof-server:podman` / Lace Local `:6300`).
+4. **Next:** fund Preprod wallet + DUST registration, then `deployContract` via midnight-js providers (still no fake deploy claims).
+5. Optional: `npx create-mn-app@0.5.1 -y -t hello-world` on Node 22+ for upstream parity.
+
+## Compact → Preprod (honest lab path)
+
+See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-2026-09-26.md)** for the live works-vs-blocked sheet.
+
+| Step | Command / note |
+| --- | --- |
+| Node 22 (fnm; keeps system Node 20) | `fnm install 22 && fnm use 22` |
+| Compile hello + ZK keys | `npm run compact:hello` |
+| Off-chain stub (real artifacts) | `npm run stub:offchain` / `npm run stub:test` |
+| Proof-server 8.1.0 (Podman) | `npm run proof-server:podman` → Lace Local `http://localhost:6300` |
+
+**Not claimed:** on-chain Preprod deploy, Pages live, X posts.
+
