@@ -16,11 +16,16 @@
  * readable while you install the toolchain. Extend toward witnesses,
  * disclose(), ownership checks, and Maps using the official tutorials
  * (e.g. leaderboard / writing-a-contract guides on docs.midnight.network).
+ *
+ * Preferred live starters (example-counter is archived upstream):
+ *   https://github.com/midnightntwrk/example-bboard
+ *   https://github.com/midnightntwrk/create-mn-app
  */
 
 // Pin to the language version your Compact compiler expects.
-// Check docs / matrix — do not guess if compile fails.
-pragma language_version 0.16;
+// Lab target aligns with agent-escrow / create-mn-app (~0.23 language).
+// If your compiler rejects `>=`, use an exact pin: pragma language_version 0.23;
+pragma language_version >= 0.23;
 
 import CompactStandardLibrary;
 
@@ -40,8 +45,17 @@ export circuit increment(): [] {
 
 /*
  * Next steps (official paths — do not invent APIs):
- * - Add a witness for private client state
+ * - Add a witness for private client state (see example-bboard)
  * - Use disclose() when a private value must become public
- * - Gate privileged circuits with ownership / public-key checks
+ * - Gate privileged circuits with ownership checks derived from witnesses
+ *
+ * Auth warning (MPS-0029):
+ *   NEVER authorize privileged circuits with ownPublicKey() alone.
+ *   ownPublicKey() is prover-supplied and bypassable if you only compare it
+ *   to a stored public key. Prefer witness-derived identity:
+ *     localSecretKey + persistentHash(+ domain separator) role commitments
+ *   Patterns: contracts/agent-escrow in this lab, and midnightntwrk/example-bboard.
+ *
  * - Follow: https://docs.midnight.network/tutorials/leaderboard/overview
+ * - Starters: example-bboard, create-mn-app (not archived example-counter)
  */

@@ -8,6 +8,7 @@ Placeholder / starter Compact contracts for the Midnight GrokBot lab.
 | --- | --- |
 | `hello-midnight/hello.compact` | Well-commented starter skeleton (public counter + notes on private state) |
 | `agent-escrow/` | **Agent Escrow** Compact skeleton (milestone escrow, MPS-0029 auth) + compile notes pinned to Compact **~0.31.1** |
+| `AUDIT-NOTES.md` | Audit-shift findings (archived Counter listing, MPS-0029 reinforcement, Lace `window.midnight`) |
 
 These files are **educational skeletons**. They follow patterns described in the official Compact docs and `example-bboard` / `create-mn-app`. Compile and deploy only after installing the official Midnight toolchain. **No on-chain deploy is claimed by this repo unless a commit explicitly records one.**
 
