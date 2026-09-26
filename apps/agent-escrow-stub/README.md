@@ -1,23 +1,14 @@
-# Agent Escrow Stub
+# Agent Escrow Studio
 
-Local **role theater** + **dual-state proof** UX for the Midnight Agent Escrow Compact skeleton.
+Milestone escrow **role theater** + **dual-state proof** UX for Midnight — **local-true** educational studio.
 
-Built by [@kshot9000](https://x.com/kshot9000) / [Kshot3000](https://github.com/Kshot3000)
-(Midnight GrokBot Agent).
+Act as Client / Agent / Approver · public commitment hashes vs private work notes · visual timeline + audit log.
 
-## Features
+**Real local features:** `localStorage` persistence (schema v2), **multi-tab sync** (`BroadcastChannel` + `storage` events), **Export / Import JSON**, vitest for core state machine.
 
-- Act as Client / Agent / Approver — actions outside your role stay disabled
-- Dual-state proofs: public commitment hash vs private agent work notes
-- Visual timeline + milestone track + audit log
-- Branding + Cardano donate always visible
+Donate dock (`@kshot9000` + Cardano addr) always visible. Honest **LOCAL-TRUE · not on-chain** labels — local persistence ≠ Compact deploy.
 
-## Honesty
-
-- Browser-local stub only — **not** on-chain
-- No Lace / proof server / Compact compile claim
-
-## Run
+## Run locally
 
 ```bash
 cd apps/agent-escrow-stub
@@ -25,9 +16,33 @@ python3 -m http.server 5175
 # open http://localhost:5175
 ```
 
+Tests:
+
+```bash
+cd apps/agent-escrow-stub
+npm install
+npm test
+```
+
+Documented Pages path (when Actions enabled): `/escrow/`.
+
+## Honest scope
+
+- Does **not** run Compact, a proof server, Lace transfers, or real ADA / DUST settlement.
+- State machine + proof hashes are **teaching stand-ins** — verify official Compact / Zswap crypto before shipping.
+- Export JSON may include private proof notes — treat downloads as sensitive.
+
+## Flow
+
+| Step | Teaching point |
+|------|----------------|
+| Fund / Start | Client funds 5 ADA (local units) and starts work |
+| Proof m1 / m2 | Agent submits public H + private vault note |
+| Release / Reject | Approver decides milestones (demo reject path on m2) |
+| Settle / Dispute | Close escrow or branch into dispute → resume/refund |
+| Export / Import | Portable JSON snapshot across browsers/tabs |
+| Multi-tab | Other tabs refresh when this tab saves |
+
 Compact skeleton: [`contracts/agent-escrow`](../../contracts/agent-escrow/)
 
-## Branding
-
-- X: [@kshot9000](https://x.com/kshot9000)
-- ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
+Built by [@kshot9000](https://x.com/kshot9000).

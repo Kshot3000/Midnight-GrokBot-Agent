@@ -14,7 +14,7 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | Path | App |
 | --- | --- |
 | `/` | **Midnight Studio Hub** — flagship homepage, studio cards, live status, Compat Explorer |
-| `/escrow/` | Agent Escrow local stub |
+| `/escrow/` | **Agent Escrow Studio** — role theater (LOCAL-TRUE) |
 | `/lace/` | **Lace Connect Studio** — journey + matrix + capability radar |
 | `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard + forge theater |
 | `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
@@ -64,9 +64,9 @@ Until then the URL may 404.
 | --- | --- |
 | `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Explorer, **⌘K command palette**, donate dock |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — real Lace discover/connect, localStorage prefs, reconnect, balances, health · **no transfers** |
-| `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
+| `apps/agent-escrow-stub` | **LOCAL-TRUE** escrow role theater — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
 | `apps/auth-lab` | **Auth Forge Studio** — attack journey, scorecard, forge theater, local bboard |
-| `apps/shield-board` | **Flagship** dual-state privacy bulletin — public commitments + private vault + selective disclose |
+| `apps/shield-board` | **LOCAL-TRUE** dual-state bulletin — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
 | `apps/veil-pledge` | **Veil Pledge Studio** — private tip jar, sealed pledges, threshold proofs (local stub) |
 | `apps/night-market` | **Night Market Studio** — sealed listings, private bids, bid-threshold theater (local stub) |
 | `apps/sealed-invite` | **Sealed Invite Studio** — private RSVP, capacity proofs, selective admit (local stub) |
@@ -298,10 +298,10 @@ MIT — see [`LICENSE`](./LICENSE). Official Midnight docs/examples may use thei
 
 ## Agent Escrow (Compact)
 
-Milestone escrow for AI-agent work — Compact skeleton + local UI stub:
+Milestone escrow for AI-agent work — Compact skeleton + **LOCAL-TRUE** studio:
 
 - Contract: [`contracts/agent-escrow/`](./contracts/agent-escrow/) (witness role commitments; **not** `ownPublicKey()` alone)
-- UI stub: [`apps/agent-escrow-stub/`](./apps/agent-escrow-stub/) (`python3 -m http.server 5175`)
+- Studio: [`apps/agent-escrow-stub/`](./apps/agent-escrow-stub/) — localStorage v2, multi-tab sync, export/import (`python3 -m http.server 5175`)
 - Protocol reference (JS/Python): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/tree/main/apps/agent-escrow
 - Compact port notes (sister): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/blob/main/apps/agent-escrow/COMPACT-PORT.md
 - Audit log: [`contracts/AUDIT-NOTES.md`](./contracts/AUDIT-NOTES.md)

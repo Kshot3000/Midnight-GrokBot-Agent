@@ -1,0 +1,339 @@
+/**
+ * Agent Escrow — pure state-machine helpers (testable).
+ * Teaching stand-in for Compact milestone escrow. Not on-chain.
+ */
+
+export const DOMAIN = 'agent-escrow:v1';
+export const STORAGE_KEY = 'mn-agent-escrow-v1';
+export const SCHEMA_VERSION = 2;
+export const DONATE_ADDR =
+  'addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v';
+export const EXPORT_KIND = 'midnight-lab.agent-escrow';
+export const L = 1_000_000;
+export const MAIN_PATH = ['created', 'funded', 'in_progress', 'settled'];
+
+export const ROLE_ACTS = {
+  client: ['fund', 'start', 'settle', 'dispute', 'resume', 'refund', 'reset', 'approve1', 'reject2'],
+  agent: ['proof1', 'proof2', 'reset'],
+  approver: ['approve1', 'reject2', 'reset'],
+};
+
+export const WHY_DISABLED = {
+  fund: 'Available only while state is created.',
+  start: 'Fund the escrow first (state must be funded).',
+  proof1: 'Needs in_progress and milestone m1 still pending.',
+  approve1: 'Needs m1 in proof_submitted (agent must submit proof first).',
+  proof2: 'Needs in_progress and milestone m2 still pending.',
+  reject2: 'Needs m2 in proof_submitted (demo path: reject after proof).',
+  settle: 'Needs every milestone released or rejected while in_progress.',
+  dispute: 'Available from funded or in_progress only.',
+  resume: 'Available only while disputed.',
+  refund: 'Available only while disputed.',
+  reset: 'Always available — clears local demo state.',
+};
+
+export const SUCCESS_MSG = {
+  fund: 'Escrow funded with 5 ADA (local).',
+  start: 'Work started — milestones are live.',
+  proof1: 'Agent submitted proof for m1.',
+  approve1: 'Approver released m1.',
+  proof2: 'Agent submitted proof for m2.',
+  reject2: 'Approver rejected m2 (demo path).',
+  settle: 'Escrow settled — remaining balance refunded locally.',
+  dispute: 'Dispute opened.',
+  resume: 'Dispute resolved — resumed in_progress.',
+  refund: 'Dispute refunded remaining balance.',
+  reset: 'Local demo reset.',
+};
+
+export const PROOF_NOTES = {
+  m1: 'Private note: scaffolded Compact layout + witness stubs for role commitments (local only).',
+  m2: 'Private note: app milestone — UI wired to local state machine; CI still red in demo reject path.',
+};
+
+export function freshEscrow() {
+  return {
+    state: 'created',
+    funded: 0,
+    released: 0,
+    refunded: 0,
+    milestones: [
+      { id: 'm1', description: 'scaffold', amount: 1 * L, status: 'pending', proofHash: null, privateNote: null },
+      { id: 'm2', description: 'app', amount: 4 * L, status: 'pending', proofHash: null, privateNote: null },
+    ],
+    audit: [],
+  };
+}
+
+export function emptyStudioState() {
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    escrow: freshEscrow(),
+    activeRole: 'client',
+    updatedAt: null,
+  };
+}
+
+export function balance(escrow) {
+  if (!escrow) return 0;
+  return (Number(escrow.funded) || 0) - (Number(escrow.released) || 0) - (Number(escrow.refunded) || 0);
+}
+
+export function findMilestone(escrow, id) {
+  return (escrow?.milestones || []).find((m) => m.id === id) || null;
+}
+
+function cloneEscrow(escrow) {
+  return {
+    state: escrow.state,
+    funded: escrow.funded,
+    released: escrow.released,
+    refunded: escrow.refunded,
+    milestones: (escrow.milestones || []).map((m) => ({ ...m })),
+    audit: (escrow.audit || []).map((e) => ({ ...e, data: { ...(e.data || {}) } })),
+  };
+}
+
+export function pushAudit(escrow, type, actor, data) {
+  const next = cloneEscrow(escrow);
+  next.audit.push({
+    seq: next.audit.length + 1,
+    type,
+    actor,
+    state: next.state,
+    data: data || {},
+  });
+  return next;
+}
+
+export function roleAllows(role, act) {
+  return (ROLE_ACTS[role] || []).includes(act);
+}
+
+export function stateAllows(escrow, act) {
+  const m1 = findMilestone(escrow, 'm1');
+  const m2 = findMilestone(escrow, 'm2');
+  switch (act) {
+    case 'fund':
+      return escrow.state === 'created';
+    case 'start':
+      return escrow.state === 'funded';
+    case 'proof1':
+      return escrow.state === 'in_progress' && m1?.status === 'pending';
+    case 'approve1':
+      return escrow.state === 'in_progress' && m1?.status === 'proof_submitted';
+    case 'proof2':
+      return escrow.state === 'in_progress' && m2?.status === 'pending';
+    case 'reject2':
+      return escrow.state === 'in_progress' && m2?.status === 'proof_submitted';
+    case 'settle':
+      return (
+        escrow.state === 'in_progress' &&
+        (escrow.milestones || []).every((m) => m.status === 'released' || m.status === 'rejected')
+      );
+    case 'dispute':
+      return escrow.state === 'funded' || escrow.state === 'in_progress';
+    case 'resume':
+    case 'refund':
+      return escrow.state === 'disputed';
+    case 'reset':
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function can(escrow, role, act) {
+  return roleAllows(role, act) && stateAllows(escrow, act);
+}
+
+export function nextAction(escrow, role) {
+  const order = ['fund', 'start', 'proof1', 'approve1', 'proof2', 'reject2', 'settle', 'resume', 'refund'];
+  return order.find((a) => can(escrow, role, a)) || null;
+}
+
+/**
+ * Apply a sync or pre-hashed action. For proof1/proof2, pass { proofHash, privateNote }.
+ * Returns { ok, escrow, error }.
+ */
+export function applyAction(escrow, act, payload = {}) {
+  let s = cloneEscrow(escrow || freshEscrow());
+  try {
+    switch (act) {
+      case 'fund': {
+        if (s.state !== 'created') throw new Error('can only fund in created');
+        s.funded = 5 * L;
+        s.state = 'funded';
+        s = pushAudit(s, 'funded', 'client', { amount: s.funded });
+        break;
+      }
+      case 'start': {
+        if (s.state !== 'funded') throw new Error('can only start in funded');
+        const total = s.milestones.reduce((a, m) => a + m.amount, 0);
+        if (total > s.funded) throw new Error('milestones exceed funded');
+        s.state = 'in_progress';
+        s = pushAudit(s, 'started', 'client', { milestoneTotal: total });
+        break;
+      }
+      case 'proof1':
+      case 'proof2': {
+        const id = act === 'proof1' ? 'm1' : 'm2';
+        if (s.state !== 'in_progress') throw new Error('need in_progress');
+        const m = s.milestones.find((x) => x.id === id);
+        if (!m || m.status !== 'pending') throw new Error(`${id} not pending`);
+        if (!payload.proofHash) throw new Error('proofHash required');
+        m.privateNote = payload.privateNote || PROOF_NOTES[id] || null;
+        m.proofHash = payload.proofHash;
+        m.status = 'proof_submitted';
+        s = pushAudit(s, 'proof_submitted', 'agent', { milestone: id, proofHash: m.proofHash });
+        break;
+      }
+      case 'approve1': {
+        if (s.state !== 'in_progress') throw new Error('need in_progress');
+        const m = s.milestones.find((x) => x.id === 'm1');
+        if (!m || m.status !== 'proof_submitted') throw new Error('m1 needs proof');
+        m.status = 'released';
+        s.released += m.amount;
+        s = pushAudit(s, 'milestone_released', 'approver', { milestone: 'm1', amount: m.amount });
+        break;
+      }
+      case 'reject2': {
+        if (s.state !== 'in_progress') throw new Error('need in_progress');
+        const m = s.milestones.find((x) => x.id === 'm2');
+        if (!m || m.status !== 'proof_submitted') throw new Error('m2 needs proof');
+        m.status = 'rejected';
+        s = pushAudit(s, 'milestone_rejected', 'approver', { milestone: 'm2', reason: 'CI red' });
+        break;
+      }
+      case 'settle': {
+        if (s.state !== 'in_progress') throw new Error('need in_progress');
+        const open = s.milestones.some((m) => m.status !== 'released' && m.status !== 'rejected');
+        if (open) throw new Error('all milestones must be decided');
+        const rem = balance(s);
+        s.refunded += rem;
+        s.state = 'settled';
+        s = pushAudit(s, 'settled', 'client', { refund: rem });
+        break;
+      }
+      case 'dispute': {
+        if (s.state !== 'funded' && s.state !== 'in_progress') throw new Error('cannot dispute now');
+        s.state = 'disputed';
+        s = pushAudit(s, 'disputed', 'client', {});
+        break;
+      }
+      case 'resume': {
+        if (s.state !== 'disputed') throw new Error('not disputed');
+        s.state = 'in_progress';
+        s = pushAudit(s, 'dispute_resolved_resume', 'client', {});
+        break;
+      }
+      case 'refund': {
+        if (s.state !== 'disputed') throw new Error('not disputed');
+        const rem = balance(s);
+        s.refunded += rem;
+        s.state = 'refunded';
+        s = pushAudit(s, 'dispute_resolved_refund', 'client', { refund: rem });
+        break;
+      }
+      case 'reset': {
+        s = freshEscrow();
+        s = pushAudit(s, 'reset', 'ui', {});
+        break;
+      }
+      default:
+        throw new Error(`unknown action: ${act}`);
+    }
+    return { ok: true, escrow: s, error: null };
+  } catch (e) {
+    return { ok: false, escrow: cloneEscrow(escrow || freshEscrow()), error: e.message || String(e) };
+  }
+}
+
+function normalizeMilestone(m) {
+  if (!m || typeof m !== 'object') return null;
+  return {
+    id: String(m.id || ''),
+    description: String(m.description || ''),
+    amount: Number(m.amount) || 0,
+    status: String(m.status || 'pending'),
+    proofHash: m.proofHash ? String(m.proofHash) : null,
+    privateNote: m.privateNote != null ? String(m.privateNote) : null,
+  };
+}
+
+export function normalizeEscrow(raw) {
+  const base = freshEscrow();
+  if (!raw || typeof raw !== 'object') return base;
+  const milestones = Array.isArray(raw.milestones)
+    ? raw.milestones.map(normalizeMilestone).filter((m) => m && m.id)
+    : base.milestones;
+  return {
+    state: String(raw.state || 'created'),
+    funded: Number(raw.funded) || 0,
+    released: Number(raw.released) || 0,
+    refunded: Number(raw.refunded) || 0,
+    milestones: milestones.length ? milestones.slice(0, 8) : base.milestones,
+    audit: Array.isArray(raw.audit) ? raw.audit.filter(Boolean).slice(0, 200) : [],
+  };
+}
+
+export function normalizeStudioState(raw) {
+  const base = emptyStudioState();
+  if (!raw || typeof raw !== 'object') return base;
+  const escrowSrc = raw.escrow && typeof raw.escrow === 'object' ? raw.escrow : raw.state ? raw : null;
+  const role = ['client', 'agent', 'approver'].includes(raw.activeRole) ? raw.activeRole : 'client';
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    escrow: normalizeEscrow(escrowSrc || {}),
+    activeRole: role,
+    updatedAt: raw.updatedAt || null,
+  };
+}
+
+export function buildExportDocument(state, meta = {}) {
+  const normalized = normalizeStudioState(state);
+  return {
+    kind: EXPORT_KIND,
+    schemaVersion: SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    lab: 'Midnight GrokBot Agent · Agent Escrow Studio',
+    note: 'LOCAL educational snapshot — not on-chain. Private proof notes may be present; treat as sensitive.',
+    donate: DONATE_ADDR,
+    handle: '@kshot9000',
+    ...meta,
+    state: normalized,
+  };
+}
+
+export function parseImportDocument(input) {
+  let data = input;
+  if (typeof input === 'string') {
+    try {
+      data = JSON.parse(input);
+    } catch {
+      return { ok: false, state: null, error: 'Invalid JSON' };
+    }
+  }
+  if (!data || typeof data !== 'object') {
+    return { ok: false, state: null, error: 'Import must be an object' };
+  }
+  const candidate =
+    data.kind === EXPORT_KIND && data.state
+      ? data.state
+      : data.escrow || data.state
+        ? data
+        : null;
+  if (!candidate) {
+    return {
+      ok: false,
+      state: null,
+      error: `Expected kind ${EXPORT_KIND} or a raw { escrow, activeRole } snapshot`,
+    };
+  }
+  const state = normalizeStudioState(candidate);
+  // Allow empty/fresh import only if wrapped export (reset-like) — require some signal
+  if (!state.escrow && !state.activeRole) {
+    return { ok: false, state: null, error: 'Import has no escrow payload' };
+  }
+  return { ok: true, state, error: null };
+}

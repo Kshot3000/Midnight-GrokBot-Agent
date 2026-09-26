@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta
     name="description"
-    content="Agent Escrow — role theater + dual-state proof UX for Midnight Compact. Local stub by @kshot9000 / Kshot3000. Not on-chain."
+    content="Agent Escrow Studio — role theater + dual-state proofs. Real localStorage + multi-tab sync + export/import by @kshot9000. Not on-chain."
   />
   <meta name="theme-color" content="#05070f" />
-  <title>Agent Escrow — Role Theater · Midnight GrokBot Lab</title>
+  <title>Agent Escrow Studio — LOCAL-TRUE · Midnight GrokBot Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%237c9cff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23a78bfa'/%3E%3C/svg%3E" />
 </head>
@@ -37,7 +37,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-sim">LOCAL STUB · not on-chain</span>
+    <span class="badge badge-sim" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -68,7 +68,8 @@
     </div>
 
     <div class="banner" role="status">
-      <strong>Stub only — no on-chain deploy.</strong>
+      <strong>LOCAL-TRUE persistence — not on-chain Compact.</strong>
+      Escrow state lives in <code>localStorage</code> (schema v2) with multi-tab sync + JSON export/import.
       Compile with Compact ~0.31.1 before any real circuit work. Auth on Midnight must use
       witness + <code>persistentHash</code>, not <code>ownPublicKey()</code> for authorization (MPS-0029).
     </div>
@@ -168,6 +169,13 @@
 
       <p class="hint" id="nextHint">Next: fund the escrow to leave <strong>created</strong>.</p>
 
+      <div class="persist-toolbar btn-row" style="margin:0.75rem 0 1rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center">
+        <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+        <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+        <span class="muted small">localStorage schema v2 · BroadcastChannel sync · not Compact</span>
+      </div>
+
       <div class="actions" role="group" aria-label="Escrow actions">
         <button type="button" class="primary" data-act="fund" data-label="Fund 5 ADA" title="Client funds the escrow">Fund 5 ADA</button>
         <button type="button" data-act="start" data-label="Start" title="Client starts work">Start</button>
@@ -241,9 +249,9 @@
       <span>Donate ADA:</span>
       <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
     </div>
-    <p class="disclaimer">Stub only — no Lace, proof server, or on-chain Compact deploy claimed.</p>
+    <p class="disclaimer">LOCAL-TRUE — real browser persistence ≠ on-chain Compact. No Lace transfers or proof server claimed.</p>
   </footer>
 
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
