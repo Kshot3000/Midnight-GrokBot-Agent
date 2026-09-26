@@ -238,7 +238,7 @@ Later circuits need **role-matching** secrets (client / agent / approver) that h
 | --- | --- |
 | On-chain Preprod deploy | **no** |
 | Funded tNIGHT / tDUST | **blocked** (faucet captcha) |
-| Full 12-circuit lifecycle smoke | **partial** — initialize only |
+| Full 12-circuit lifecycle smoke | **superseded** — see multi-circuit update below |
 | X posts | **none** |
 
 ### Cheat-sheet add
@@ -249,6 +249,55 @@ eval "$(fnm env)" && fnm use 22
 curl -sS http://127.0.0.1:6300/health
 npm run stub:check-escrow
 npm run prove:escrow-local
+npm run prove:hello-local
+npm run stub:test
+```
+
+---
+
+## Update — Agent-escrow multi-circuit local prove (2026-09-26 ~01:00 CT)
+
+**Real progress:** all **12** impure escrow circuits proved off-chain vs proof-server `:6300` using synthetic **client / agent / approver** role secrets. **No Coin/Zswap** required (`fund` is ledger `Uint` only). **NOT on-chain.**
+
+### What landed
+
+| Item | Detail |
+| --- | --- |
+| Script | `prove:escrow-local` default **path=happy** (7 steps); `--path=` + `prove:escrow-all` |
+| Paths | `initialize` · `happy` · `reject` · `dispute-refund` · `dispute-resume` · `cancel` · `all` |
+| Witness | `makeEscrowLabSecrets` + `makeRoleWitnesses` — `privateState.activeRole` swaps secret |
+| Chaining | `createCircuitContext(addr, zswapLocal, ChargedState, {activeRole})` |
+| Coverage | **12/12** impure circuits; **0** blocked by coin/Zswap |
+| Hub | `#preprod` card **Local prove ready** (hello + escrow) |
+| Tests | vitest: initialize + happy multi-step + cancel (+ optional `ESCROW_PROVE_ALL=1`) |
+
+### Happy path (default)
+
+`initialize → addMilestone → fund → start → submitProof → approve → settle`
+
+Typical proof size **~4508** B / step; total prove wall ~7–9 s on lab box.
+
+### Blocked for local prove
+
+**None** of the 12 impure circuits. Pure helpers (`roleCommitment`, `*Tag`) still have no ZK keys (cannot `/prove`).
+
+### Still NOT claimed
+
+| Item | Status |
+| --- | --- |
+| On-chain Preprod deploy | **no** |
+| Funded tNIGHT / tDUST | **blocked** (faucet captcha) |
+| X posts | **none** |
+
+### Cheat-sheet
+
+```bash
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env)" && fnm use 22
+curl -sS http://127.0.0.1:6300/health
+npm run stub:check-escrow
+npm run prove:escrow-local          # happy (7 circuits)
+npm run prove:escrow-all            # all named paths → 12 circuits
 npm run prove:hello-local
 npm run stub:test
 ```

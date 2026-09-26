@@ -62,19 +62,26 @@ npm run prove:hello-local -w @kshot/preprod-hello-stub
 Success: greetings 0→1, preimage >0 B, proofBytes ≈2940, claim **NOT a Preprod deploy**.
 Exit 3 if proof-server down. Does **not** call `deployContract` / `proveTx`.
 
-## Local ZK prove — agent-escrow (no wallet)
+## Local ZK prove — agent-escrow multi-circuit (no wallet)
 
-Same proof-server path for **`initialize`** with a synthetic `localSecretKey` witness:
+Synthetic **client / agent / approver** secrets + role-swapping `localSecretKey`.
+Default path **`happy`**: initialize → addMilestone → fund → start → submitProof → approve → settle.
 
 ```bash
 curl -sS http://127.0.0.1:6300/health
 npm run check:escrow-artifacts -w @kshot/preprod-hello-stub
-npm run prove:escrow-local -w @kshot/preprod-hello-stub
-# root aliases: npm run stub:check-escrow · npm run prove:escrow-local
+npm run prove:escrow-local -w @kshot/preprod-hello-stub          # path=happy
+node src/prove-escrow-local.mjs --path=initialize                # single step
+node src/prove-escrow-local.mjs --path=cancel                    # initialize→fund→cancel
+npm run prove:escrow-all -w @kshot/preprod-hello-stub            # all named paths → 12 circuits
+# root aliases: npm run stub:check-escrow · prove:escrow-local · prove:escrow-all
 ```
 
-Success: non-empty distinct role commitments, preimage >0 B, proofBytes ≈4508, claim **NOT a Preprod deploy**, `fundedWallet: false`.
-Exit 3 if proof-server down. **Does not** prove the other 11 lifecycle circuits (those need role-matching secrets after initialize — see `ESCROW_WITNESS_REQUIREMENTS` / `contracts/ARTIFACT-CONSUMERS.md`).
+Named paths: `initialize` · `happy` · `reject` · `dispute-refund` · `dispute-resume` · `cancel` · `all`.
+
+Success: each step proofBytes ≈4508, `fundedWallet: false`, claim **NOT a Preprod deploy**.
+`fund()` is a ledger `Uint` in this skeleton — **no Coin/Zswap** required for local prove.
+Exit 3 if proof-server down. On-chain still needs tDUST + wallet providers (see `ESCROW_WITNESS_REQUIREMENTS`).
 
 
 

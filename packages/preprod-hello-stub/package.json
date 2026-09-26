@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Preprod path: hello + agent-escrow Compact artifacts, local prove vs :6300, midnight-js 4.1.1 providers, clear-fail deploy gate. NOT a fake deploy.",
+  "description": "Preprod path: hello + agent-escrow Compact artifacts, multi-circuit local prove vs :6300, midnight-js 4.1.1 providers, clear-fail deploy gate. NOT a fake deploy.",
   "engines": {
     "node": ">=22"
   },
@@ -19,6 +19,7 @@
     "faucet:attempt": "node src/attempt-faucet.mjs",
     "prove:hello-local": "node src/prove-hello-local.mjs",
     "prove:escrow-local": "node src/prove-escrow-local.mjs",
+    "prove:escrow-all": "node src/prove-escrow-local.mjs --path=all",
     "check:escrow-artifacts": "node src/check-escrow-artifacts.mjs"
   },
   "dependencies": {

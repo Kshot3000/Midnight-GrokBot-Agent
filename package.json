@@ -29,6 +29,7 @@
     "prove:hello-local": "npm run prove:hello-local -w @kshot/preprod-hello-stub",
     "artifacts:list": "node contracts/list-compiled-artifacts.mjs",
     "prove:escrow-local": "npm run prove:escrow-local -w @kshot/preprod-hello-stub",
+    "prove:escrow-all": "npm run prove:escrow-all -w @kshot/preprod-hello-stub",
     "stub:check-escrow": "npm run check:escrow-artifacts -w @kshot/preprod-hello-stub"
   },
   "author": "Kshot (@kshot9000)",

@@ -473,7 +473,8 @@
     { name: "Agent Escrow", path: "escrow/", tags: "role theater" },
     { name: "Donate ADA", path: "#donate", tags: "tip support" },
     { name: "Compat Explorer", path: "#compat", tags: "pins matrix" },
-    { name: "Preprod status", path: "#preprod", tags: "compact proof-server tdust deploy" },
+    { name: "Preprod status", path: "#preprod", tags: "compact proof-server local-prove tdust deploy" },
+    { name: "Local prove ready", path: "#preprod", tags: "zk prove hello escrow proof-server" },
   ];
 
   function initCommandPalette() {
@@ -644,7 +645,14 @@
     if (compactPill) {
       compactPill.className = "status-pill is-ok";
       compactPill.textContent = "Compiled";
-      compactPill.title = "contracts/hello-midnight/out present in repo — not on-chain";
+      compactPill.title = "hello + agent-escrow Compact artifacts — not on-chain";
+      if (compactPill.textContent === "Compiled") compactPill.textContent = "hello + escrow";
+    }
+    const provePill = document.getElementById("preprod-prove-pill");
+    if (provePill) {
+      provePill.className = "status-pill is-ok";
+      provePill.textContent = "hello + escrow";
+      provePill.title = "prove:hello-local + prove:escrow-local (multi-circuit) vs :6300 — NOT on-chain";
     }
     const deployPill = document.getElementById("preprod-deploy-pill");
     if (deployPill) {

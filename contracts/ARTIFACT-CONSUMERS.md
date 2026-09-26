@@ -74,23 +74,27 @@ Prints JSON: present/missing trees, file sizes, circuit names, consumer load pat
 | Contract | Script | Circuit | Wallet? |
 | --- | --- | --- | --- |
 | hello-midnight | `npm run prove:hello-local` | `increment` | **no** |
-| agent-escrow | `npm run prove:escrow-local` | `initialize` | **no** (synthetic `localSecretKey`) |
+| agent-escrow | `npm run prove:escrow-local` (default path=happy) | multi-circuit lifecycle | **no** (synthetic role secrets) |
+| agent-escrow | `npm run prove:escrow-all` | all 12 impure via named paths | **no** |
 
 See `@kshot/preprod-hello-stub` (`src/prove-hello-local.mjs`, `src/prove-escrow-local.mjs`).
 
 ## Escrow witness requirements (exact)
 
-| Need | `initialize` local prove | Later impure circuits (`fund`…`settle`) | On-chain deploy |
-| --- | --- | --- | --- |
-| Compact managed artifacts | yes | yes | yes |
-| proof-server `:6300` | yes | yes | yes |
-| Synthetic `localSecretKey` (32 B lab RNG) | **yes** | role-matching secrets | — |
-| Role secrets that hash to registered commitments | client only | client / agent / approver per circuit | yes (app private state) |
-| Funded wallet + tDUST | **no** | **no** | **yes** |
-| `walletProvider` / `midnightProvider` | **no** | **no** | **yes** |
-| `deployContract` / `proveTx` | **no** (circuit `/prove` only) | **no** | **yes** |
+| Need | Local multi-circuit prove | On-chain deploy |
+| --- | --- | --- |
+| Compact managed artifacts | yes | yes |
+| proof-server `:6300` | yes | yes |
+| Synthetic `sk_client` / `sk_agent` / `sk_approver` (32 B lab RNG) | **yes** (role swap via `privateState.activeRole`) | — |
+| Role secrets that hash to registered commitments | yes (lab-generated) | yes (app private state) |
+| Real Zswap / Coin receive | **no** (`fund` is ledger `Uint` in this skeleton) | optional / future |
+| Funded wallet + tDUST | **no** | **yes** |
+| `walletProvider` / `midnightProvider` | **no** | **yes** |
+| `deployContract` / `proveTx` | **no** (circuit `/prove` only) | **yes** |
 
-`prove:escrow-local` proves **`initialize` only** (safe CREATED→registered commitments). A full 12-circuit smoke needs persistent `sk_client` / `sk_agent` / `sk_approver` swapped into the witness between calls — documented in `ESCROW_WITNESS_REQUIREMENTS` inside `prove-escrow-local.mjs`.
+`prove:escrow-local` default path **`happy`** proves 7 lifecycle circuits with synthetic role secrets.
+`prove:escrow-all` covers **all 12** impure circuits across named paths (`happy` / `reject` / `dispute-*` / `cancel`).
+**Blocked for local prove: none.** On-chain still needs faucet/tDUST.
 
 Faucet remains captcha-gated — no automated funding claimed.
 

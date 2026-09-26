@@ -369,7 +369,8 @@ See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-20
 
 ```bash
 npm run prove:hello-local   # hello increment ZK vs http://127.0.0.1:6300 — NOT Preprod deploy
-npm run prove:escrow-local  # agent-escrow initialize ZK + synthetic witness — NOT Preprod deploy
+npm run prove:escrow-local  # agent-escrow multi-circuit (happy) + synthetic roles — NOT Preprod deploy
+npm run prove:escrow-all    # all 12 impure circuits via named paths — NOT Preprod deploy
 npm run artifacts:list      # hello + escrow compiled artifact inventory
 ```
 

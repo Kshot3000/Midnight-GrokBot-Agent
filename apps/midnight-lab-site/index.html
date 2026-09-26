@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain. Honest Preprod status: Compact compiled, proof-server optional, deploy blocked pending tDUST." />
+  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain. Honest Preprod status: Compact compiled, local prove ready (hello+escrow), proof-server optional, deploy blocked pending tDUST." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
   <title>Midnight Studio Hub — Flagship Labs · @kshot9000</title>
@@ -374,7 +374,8 @@
         <h2 id="preprod-heading">Compact · proof-server · Preprod <span class="badge badge-research">honest status</span></h2>
         <p class="muted">
           Offline-readable lab status while faucet captcha blocks funding.
-          <strong>Compiled yes</strong> · proof-server local health optional ·
+          <strong>Compiled yes</strong> · local prove ready (hello + escrow) ·
+          proof-server local health optional ·
           <strong>deploy blocked pending tDUST</strong>. No on-chain claim.
         </p>
       </div>
@@ -382,16 +383,16 @@
       <div class="preprod-grid" role="list">
         <article class="preprod-card" role="listitem" data-preprod-item="compact">
           <div class="preprod-card-top">
-            <h3>Compact hello</h3>
+            <h3>Compact hello + escrow</h3>
             <span class="status-pill is-ok" id="preprod-compact-pill">Compiled</span>
           </div>
           <p class="muted">
-            Real artifacts under <code>contracts/hello-midnight/out</code>
-            (Compact toolchain <strong>0.31.1</strong>). Off-chain
-            <code>stub:offchain</code> exercises <code>increment</code> — not a chain submit.
+            Real artifacts: <code>hello-midnight/out</code> +
+            <code>agent-escrow</code> managed (Compact <strong>0.31.1</strong>,
+            12 impure circuits). Off-chain only — not a chain submit.
           </p>
           <ul class="preprod-meta">
-            <li>CLI: <code>npm run compact:hello</code> / <code>stub:check</code></li>
+            <li>CLI: <code>npm run compact:hello</code> / <code>compact:escrow</code></li>
             <li>Package: <code>@kshot/preprod-hello-stub</code></li>
           </ul>
         </article>
@@ -409,6 +410,26 @@
             <button type="button" class="btn ghost small" id="btn-probe-proof">Probe localhost:6300</button>
             <span class="muted small" id="preprod-proof-detail">Not probed yet</span>
           </div>
+        </article>
+
+
+        <article class="preprod-card" role="listitem" data-preprod-item="local-prove">
+          <div class="preprod-card-top">
+            <h3>Local prove ready</h3>
+            <span class="status-pill is-ok" id="preprod-prove-pill">hello + escrow</span>
+          </div>
+          <p class="muted">
+            Off-chain ZK against proof-server <code>:6300</code> —
+            <strong>hello</strong> <code>increment</code> and
+            <strong>agent-escrow</strong> multi-circuit lifecycle
+            (synthetic client/agent/approver secrets).
+            <strong>Not on-chain.</strong>
+          </p>
+          <ul class="preprod-meta">
+            <li>CLI: <code>npm run prove:hello-local</code></li>
+            <li>CLI: <code>npm run prove:escrow-local</code> (path=happy default)</li>
+            <li>All 12 impure: <code>npm run prove:escrow-all</code></li>
+          </ul>
         </article>
 
         <article class="preprod-card" role="listitem" data-preprod-item="deploy">
@@ -429,7 +450,8 @@
       </div>
 
       <aside class="preprod-honesty" role="note">
-        <strong>Honest bar:</strong> Compact compiled <em>yes</em> · proof-server health
+        <strong>Honest bar:</strong> Compact compiled <em>yes</em> · local prove
+        <em>ready (hello + escrow multi-circuit)</em> · proof-server health
         <em>optional local check</em> · deploy <em>blocked pending tDUST</em>.
         Brand: donate ADA + <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>.
       </aside>

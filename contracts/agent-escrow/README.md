@@ -14,8 +14,9 @@ contract skeleton from the JS/Python reference protocol:
 > **Status:** educational skeleton. **Compiled successfully** with Compact
 > **0.31.1** / language **0.23.0** on the lab box (2026-09-26 CT) — TS
 > bindings + 12 circuit proving keys generated under `src/managed/`
-> (gitignored). Local ZK prove path: `npm run prove:escrow-local` (`initialize` +
-> synthetic `localSecretKey` vs proof-server `:6300`). **Not** an on-chain deploy.
+> (gitignored). Local ZK prove: `npm run prove:escrow-local` (default multi-circuit
+> **happy** path with synthetic client/agent/approver secrets vs `:6300`;
+> `prove:escrow-all` covers all 12 impure). **Not** an on-chain deploy.
 
 ## Layout
 
@@ -125,12 +126,13 @@ Amounts are integer subunits (map to lovelace off-chain). Proof verification is
 
 ```bash
 # requires: npm run compact:escrow + proof-server on :6300
-npm run prove:escrow-local
+npm run prove:escrow-local   # default path=happy (7 circuits, synthetic roles)
+npm run prove:escrow-all     # all named paths → 12/12 impure circuits
 ```
 
-Exercises impure circuit **`initialize`** with a lab RNG witness. See
-[`ARTIFACT-CONSUMERS.md`](../ARTIFACT-CONSUMERS.md) for the other 11 circuits'
-role-secret requirements. **Not** a Preprod deploy.
+Synthetic **client / agent / approver** secrets; `fund()` is ledger `Uint` only
+(no Coin/Zswap needed for local prove). See
+[`ARTIFACT-CONSUMERS.md`](../ARTIFACT-CONSUMERS.md). **Not** a Preprod deploy.
 
 ## Branding
 
