@@ -532,3 +532,48 @@ ul.hints li { margin: 0.4rem 0; }
 }
 .toast { bottom: 4.5rem; }
 
+
+/* —— Kit 0.3 real-session chrome —— */
+.session-banner.is-prefs {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(167, 139, 250, 0.08);
+}
+.session-banner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem 0.85rem;
+}
+.balance-kv .v.mono { font-size: 0.82rem; word-break: break-all; }
+
+/* —— Install guide (Lace missing) —— */
+.install-guide {
+  text-align: left;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+.install-steps {
+  margin: 0.85rem 0 0.5rem;
+  padding-left: 1.25rem;
+  color: var(--text);
+  line-height: 1.65;
+}
+.install-steps li { margin: 0.35rem 0; }
+.install-steps a { font-weight: 600; }
+.pref-hint {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(124, 156, 255, 0.08);
+  font-size: 0.9rem;
+}
+.subhead {
+  margin: 1.1rem 0 0.45rem;
+  font-family: var(--display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.bal-kv { margin-top: 0.35rem; }
+.badge-demo {
+  background: linear-gradient(135deg, rgba(124, 156, 255, 0.22), rgba(34, 211, 238, 0.14));
+  border-color: rgba(124, 156, 255, 0.45);
+}

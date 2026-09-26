@@ -2,10 +2,10 @@
  * @kshot/lace-midnight-kit
  *
  * Browser helpers for Lace / Midnight DApp Connector discovery + connect.
- * Types come from official `@midnight-ntwrk/dapp-connector-api` (pinned 4.0.1).
+ * Types from official `@midnight-ntwrk/dapp-connector-api` (pinned 4.0.1).
  *
- * Safety: this package does not implement or claim mainnet transfers.
- * Demo scope = discover providers, connect, read address/network/status.
+ * Safety: does not implement or claim transfers / submit.
+ * Scope = discover, connect, prefs, reconnect, refresh, capability + balance reads.
  */
 
 import '@midnight-ntwrk/dapp-connector-api';
@@ -49,6 +49,7 @@ export {
   connectMidnightWallet,
   connectWithProvider,
   createDisconnectedSession,
+  refreshSessionAddresses,
   type ConnectOptions,
   type ConnectWithProviderOptions,
   type ConnectedSession,
@@ -101,6 +102,7 @@ export {
   type CapabilityStatus,
   type CapabilityProbeRow,
   type CapabilityProbe,
+  type CapabilityProbeOptions,
 } from './capabilities.js';
 
 export {
@@ -110,6 +112,57 @@ export {
   isDemoSession,
 } from './demoMode.js';
 
+export {
+  LACE_PREF_KEYS,
+  loadLacePreferences,
+  saveNetworkPreference,
+  savePreferredWalletRdns,
+  saveDemoModePreference,
+  clearLacePreferences,
+  pickPreferredProvider,
+  type LacePreferences,
+} from './preferences.js';
+
+export {
+  checkSessionHealth,
+  isSessionAlive,
+  type SessionHealth,
+} from './sessionHealth.js';
+
+export {
+  SESSION_PREFS_STORAGE_KEY,
+  defaultSessionPrefs,
+  loadSessionPrefs,
+  saveSessionPrefs,
+  clearSessionPrefs,
+  snapshotFromSession,
+  rememberSuccessfulConnect,
+  setPreferredNetwork,
+  setPreferredProvider,
+  type SessionAddressSnapshot,
+  type SessionPrefs,
+} from './sessionPrefs.js';
+
+export {
+  resolvePreferredProvider,
+  reconnectFromPrefs,
+  type ReconnectOptions,
+} from './reconnect.js';
+
+export {
+  readBalancesSafely,
+  refreshConnectedSession,
+  type BalanceSnapshot,
+  type RefreshedSession,
+} from './refreshSession.js';
+
+export {
+  watchConnectionStatus,
+  type ConnectionHealthSnapshot,
+  type WatchConnectionOptions,
+  type ConnectionHealthWatcher,
+} from './watchConnectionStatus.js';
+
 /** Lab branding constants (canonical — also in BRANDING.md). */
 export const LAB_BRANDING = {
   donationAddressAda:
@@ -118,7 +171,12 @@ export const LAB_BRANDING = {
   xUrl: 'https://x.com/kshot9000',
   nightDreamUrl: 'https://nightdream.io',
   repoUrl: 'https://github.com/Kshot3000/Midnight-GrokBot-Agent',
+  laceInstallUrl: 'https://www.lace.io/',
+  laceChromeUrl:
+    'https://chromewebstore.google.com/detail/lace/gafhhkghbfjjkeiendhlofajokpaflmk',
+  officialConnectGuideUrl:
+    'https://docs.midnight.network/guides/react-wallet-connect',
 } as const;
 
 /** Kit semver for UI badges. */
-export const KIT_VERSION = '0.2.0';
+export const KIT_VERSION = '0.3.0';

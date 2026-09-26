@@ -23,6 +23,14 @@ export type CapabilityProbe = {
   scopeNote: string;
 };
 
+export type CapabilityProbeOptions = {
+  /**
+   * Also probe balance read methods (getUnshieldedBalances / getShieldedBalances / getDustBalance).
+   * Default true. Still never calls makeTransfer.
+   */
+  includeBalances?: boolean;
+};
+
 const SCOPE =
   'Read-only probe. makeTransfer / submit are intentionally not called — a green connect is not proof transfers work.';
 
@@ -54,7 +62,9 @@ async function tryMethod(
  */
 export async function probeSessionCapabilities(
   api: ConnectedAPI,
+  options: CapabilityProbeOptions = {},
 ): Promise<CapabilityProbe> {
+  const includeBalances = options.includeBalances !== false;
   const generatedAt = new Date().toISOString();
   const rows: CapabilityProbeRow[] = [];
 
@@ -82,12 +92,43 @@ export async function probeSessionCapabilities(
     ),
   );
 
+  if (includeBalances) {
+    rows.push(
+      await tryMethod(
+        'bal-unshielded',
+        'Unshielded balances',
+        'getUnshieldedBalances',
+        () => api.getUnshieldedBalances(),
+      ),
+    );
+    rows.push(
+      await tryMethod(
+        'bal-shielded',
+        'Shielded balances',
+        'getShieldedBalances',
+        () => api.getShieldedBalances(),
+      ),
+    );
+    rows.push(
+      await tryMethod('bal-dust', 'Dust balance', 'getDustBalance', () =>
+        api.getDustBalance(),
+      ),
+    );
+  }
+
   rows.push({
     id: 'transfer',
     label: 'Transfers',
     method: 'makeTransfer',
     status: 'skipped',
     detail: 'Not probed by this kit — demo scope is discovery + connect only.',
+  });
+  rows.push({
+    id: 'submit',
+    label: 'Submit tx',
+    method: 'submitTransaction',
+    status: 'skipped',
+    detail: 'Not probed — would mutate chain state.',
   });
 
   const okCount = rows.filter((r) => r.status === 'ok').length;

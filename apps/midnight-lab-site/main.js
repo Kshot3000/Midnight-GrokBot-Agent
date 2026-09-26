@@ -40,7 +40,7 @@
       key: "DApp Connector",
       val: "4.0.1",
       cat: "wallet",
-      note: "DApp Connector API pin used by Lace Connect Studio + lace-midnight-kit 0.2.0. Discovery + connect only in this lab.",
+      note: "DApp Connector API pin used by Lace Connect Studio + lace-midnight-kit 0.3.0. Discovery + connect only in this lab.",
     },
     {
       key: "proof-server",

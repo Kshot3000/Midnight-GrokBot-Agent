@@ -80,21 +80,31 @@ export function createDemoSession(
 export function createDemoCapabilityProbe(): CapabilityProbe {
   return {
     generatedAt: new Date().toISOString(),
-    okCount: 5,
+    okCount: 8,
     scopeNote:
-      'SIMULATED probe — Lace is not connected. makeTransfer is never called in demo mode either.',
+      'SIMULATED probe — Lace is not connected. makeTransfer / submit are never called in demo mode either.',
     rows: [
       { id: 'status', label: 'Connection status', method: 'getConnectionStatus', status: 'ok', detail: 'Simulated ok' },
       { id: 'unshielded', label: 'Unshielded address', method: 'getUnshieldedAddress', status: 'ok', detail: 'Simulated ok' },
       { id: 'shielded', label: 'Shielded address', method: 'getShieldedAddresses', status: 'ok', detail: 'Simulated ok' },
       { id: 'dust', label: 'Dust address', method: 'getDustAddress', status: 'ok', detail: 'Simulated ok' },
       { id: 'config', label: 'Configuration', method: 'getConfiguration', status: 'ok', detail: 'Simulated ok' },
+      { id: 'bal-unshielded', label: 'Unshielded balances', method: 'getUnshieldedBalances', status: 'ok', detail: 'Simulated ok' },
+      { id: 'bal-shielded', label: 'Shielded balances', method: 'getShieldedBalances', status: 'ok', detail: 'Simulated ok' },
+      { id: 'bal-dust', label: 'Dust balance', method: 'getDustBalance', status: 'ok', detail: 'Simulated ok' },
       {
         id: 'transfer',
         label: 'Transfers',
         method: 'makeTransfer',
         status: 'skipped',
         detail: 'Not probed — discovery + connect scope only.',
+      },
+      {
+        id: 'submit',
+        label: 'Submit tx',
+        method: 'submitTransaction',
+        status: 'skipped',
+        detail: 'Not probed — would mutate chain state.',
       },
     ],
   };

@@ -1,6 +1,8 @@
 /**
- * Lace Midnight Connect Studio — discovery + connect journey + capability probe.
- * Does NOT perform or claim mainnet / Preprod transfers.
+ * Lace Midnight Connect Studio — production-quality discover + connect app.
+ * Real Lace via @kshot/lace-midnight-kit: discover, connect, prefs, reconnect,
+ * session refresh (addresses + balances), connection health watch.
+ * Does NOT call makeTransfer / submit. Transfers are out of scope on purpose.
  */
 import './style.css';
 import {
@@ -20,18 +22,30 @@ import {
   formatInjectionKey,
   isDemoSession,
   journeyStepIndex,
+  loadSessionPrefs,
   normalizeConnectorError,
   probeSessionCapabilities,
   probeStatusMatrix,
+  reconnectFromPrefs,
+  refreshConnectedSession,
+  rememberSuccessfulConnect,
+  resolvePreferredProvider,
   safeIconUrl,
   safeWalletLabel,
+  setPreferredNetwork,
+  setPreferredProvider,
   userHintForError,
+  watchConnectionStatus,
   watchMidnightInjection,
+  type BalanceSnapshot,
   type CapabilityProbe,
   type ConnectJourneyState,
+  type ConnectionHealthSnapshot,
+  type ConnectionHealthWatcher,
   type ConnectedSession,
   type DiscoveredProvider,
   type InjectionWatcher,
+  type SessionPrefs,
   type StatusMatrix,
 } from '@kshot/lace-midnight-kit';
 
@@ -62,7 +76,6 @@ const NETWORKS = [
   },
 ] as const;
 
-const LS_NETWORK = 'midnight-lab.lace.networkId';
 const LS_DEMO = 'midnight-lab.lace.demoMode';
 
 type AppState = {
@@ -78,17 +91,11 @@ type AppState = {
   log: string[];
   announce: string;
   connecting: boolean;
+  prefs: SessionPrefs;
+  balances: BalanceSnapshot | null;
+  health: ConnectionHealthSnapshot | null;
+  refreshing: boolean;
 };
-
-function loadNetwork(): string {
-  try {
-    const v = localStorage.getItem(LS_NETWORK);
-    if (v && NETWORKS.some((n) => n.id === v)) return v;
-  } catch {
-    /* ignore */
-  }
-  return MidnightNetworkIds.Preprod;
-}
 
 function loadDemoFlag(): boolean {
   try {
@@ -98,10 +105,15 @@ function loadDemoFlag(): boolean {
   }
 }
 
+const bootPrefs = loadSessionPrefs();
+const bootNetwork = NETWORKS.some((n) => n.id === bootPrefs.networkId)
+  ? bootPrefs.networkId
+  : MidnightNetworkIds.Preprod;
+
 const state: AppState = {
   providers: [],
   selectedKey: null,
-  networkId: loadNetwork(),
+  networkId: bootNetwork,
   session: null,
   matrix: null,
   journey: createConnectJourney('idle'),
@@ -111,10 +123,52 @@ const state: AppState = {
   log: [],
   announce: '',
   connecting: false,
+  prefs: bootPrefs,
+  balances: null,
+  health: null,
+  refreshing: false,
 };
 
 let watcher: InjectionWatcher | null = null;
+let healthWatcher: ConnectionHealthWatcher | null = null;
 let focusRestore: string | null = null;
+
+function stopHealthWatch(): void {
+  healthWatcher?.stop();
+  healthWatcher = null;
+  state.health = null;
+}
+
+function startHealthWatch(session: ConnectedSession): void {
+  stopHealthWatch();
+  if (isDemoSession(session)) return;
+  healthWatcher = watchConnectionStatus(
+    session,
+    (snap) => {
+      state.health = snap;
+      if (!snap.ok) {
+        log(`Connection health: ${snap.errorMessage || 'not connected'}`);
+        announce('Wallet connection lost — reconnect when ready');
+        state.session = null;
+        state.capabilities = null;
+        state.balances = null;
+        setJourney(
+          state.providers.length ? 'ready_to_connect' : 'idle',
+          'Connection lost — prefs kept for reconnect',
+        );
+        stopHealthWatch();
+        render();
+      } else {
+        const el = document.getElementById('health-pill');
+        if (el) {
+          el.textContent = 'healthy';
+          el.className = 'status-pill on';
+        }
+      }
+    },
+    { intervalMs: 4000, immediate: true },
+  );
+}
 
 function log(line: string): void {
   const stamp = new Date().toLocaleTimeString();
@@ -227,8 +281,20 @@ function refreshDiscovery(silent = false): void {
     const result = discoverProviders({ apiVersionRange: '^4.0.0' });
     state.providers =
       result.compatible.length > 0 ? result.compatible : result.providers;
-    if (state.providers.length && !state.selectedKey) {
-      state.selectedKey = state.providers[0]!.injectionKey;
+    if (state.providers.length) {
+      const stillThere = state.selectedKey
+        ? state.providers.some((p) => p.injectionKey === state.selectedKey)
+        : false;
+      if (!stillThere) {
+        try {
+          const preferred = resolvePreferredProvider(state.prefs, {
+            apiVersionRange: '^4.0.0',
+          });
+          state.selectedKey = preferred.injectionKey;
+        } catch {
+          state.selectedKey = state.providers[0]!.injectionKey;
+        }
+      }
     }
     if (state.providers.length === 0) {
       state.selectedKey = null;
@@ -286,10 +352,59 @@ function stopWatcher(): void {
   state.watching = false;
 }
 
+const CONNECT_HINTS = [
+  'getConnectionStatus',
+  'getUnshieldedAddress',
+  'getShieldedAddresses',
+  'getDustAddress',
+  'getConfiguration',
+  'getUnshieldedBalances',
+  'getShieldedBalances',
+  'getDustBalance',
+] as const;
+
+async function afterLiveConnect(session: ConnectedSession): Promise<void> {
+  state.session = session;
+  state.prefs = rememberSuccessfulConnect(session);
+  try {
+    state.capabilities = await probeSessionCapabilities(session.api, { includeBalances: true });
+    log(
+      `Capability probe: ${state.capabilities.okCount}/${state.capabilities.rows.length} read methods ok.`,
+    );
+  } catch (err) {
+    const e = normalizeConnectorError(err);
+    log(`Capability probe partial: ${e.message}`);
+    state.capabilities = null;
+  }
+  try {
+    const refreshed = await refreshConnectedSession(session, { includeBalances: true });
+    state.session = refreshed;
+    state.balances = refreshed.balances;
+    const dust = refreshed.balances.dust;
+    log(
+      dust
+        ? `Balances refreshed · dust=${dust.balance} (cap ${dust.cap})`
+        : `Balances refreshed · errors=${refreshed.balances.errors.join('; ') || 'none'}`,
+    );
+  } catch (err) {
+    const e = normalizeConnectorError(err);
+    log(`Balance refresh skipped: ${e.message}`);
+    state.balances = null;
+  }
+  startHealthWatch(state.session);
+  setJourney('connected', `Connected on ${state.session.networkId}`);
+  log(
+    `Connected. status=${state.session.status.status} network=${state.session.networkId} unshielded=${state.session.addresses.unshieldedAddress ?? 'n/a'}`,
+  );
+  announce(`Connected on ${state.session.networkId}`);
+}
+
 async function handleConnect(): Promise<void> {
   if (state.demoMode) {
+    stopHealthWatch();
     state.session = createDemoSession(state.networkId);
     state.capabilities = createDemoCapabilityProbe();
+    state.balances = null;
     setJourney('connected', DEMO_MODE_LABEL);
     log(`Demo mode session on ${state.networkId} — ${DEMO_MODE_LABEL}`);
     announce('Simulated session ready — not a real Lace connection');
@@ -306,6 +421,7 @@ async function handleConnect(): Promise<void> {
   }
 
   state.connecting = true;
+  stopHealthWatch();
   setJourney('awaiting_wallet', `Approve in ${safeWalletLabel(provider.api)}…`);
   log(`Connecting to ${safeWalletLabel(provider.api)} on networkId=${state.networkId}…`);
   announce(`Connecting on ${state.networkId}`);
@@ -316,29 +432,10 @@ async function handleConnect(): Promise<void> {
     const session = await connectWithProvider(provider, {
       networkId: state.networkId,
       assertNetworkMatch: true,
-      hintUsage: [
-        'getConnectionStatus',
-        'getUnshieldedAddress',
-        'getConfiguration',
-      ],
+      hintUsage: [...CONNECT_HINTS],
     });
     setJourney('reading_addresses');
-    state.session = session;
-    try {
-      state.capabilities = await probeSessionCapabilities(session.api);
-      log(
-        `Capability probe: ${state.capabilities.okCount}/${state.capabilities.rows.length} read methods ok.`,
-      );
-    } catch (err) {
-      const e = normalizeConnectorError(err);
-      log(`Capability probe partial: ${e.message}`);
-      state.capabilities = null;
-    }
-    setJourney('connected', `Connected on ${session.networkId}`);
-    log(
-      `Connected. status=${session.status.status} network=${session.networkId} unshielded=${session.addresses.unshieldedAddress ?? 'n/a'}`,
-    );
-    announce(`Connected on ${session.networkId}`);
+    await afterLiveConnect(session);
   } catch (err) {
     const e = normalizeConnectorError(err);
     setJourney('error', userHintForError(e));
@@ -347,8 +444,74 @@ async function handleConnect(): Promise<void> {
     announce(`Connect failed: ${e.code}`);
     state.session = null;
     state.capabilities = null;
+    state.balances = null;
   } finally {
     state.connecting = false;
+    render();
+  }
+}
+
+async function handleReconnect(): Promise<void> {
+  if (state.demoMode) {
+    announce('Turn off Demo mode to reconnect to real Lace');
+    return;
+  }
+  state.connecting = true;
+  stopHealthWatch();
+  setJourney('awaiting_wallet', 'Reconnecting from saved prefs…');
+  log('Reconnect from prefs — real Lace connect()…');
+  announce('Reconnecting');
+  render();
+  try {
+    const { session, provider } = await reconnectFromPrefs({
+      networkId: state.networkId,
+      apiVersionRange: '^4.0.0',
+      assertNetworkMatch: true,
+      hintUsage: [...CONNECT_HINTS],
+    });
+    state.selectedKey = provider.injectionKey;
+    setJourney('reading_addresses');
+    await afterLiveConnect(session);
+  } catch (err) {
+    const e = normalizeConnectorError(err);
+    setJourney('error', userHintForError(e));
+    log(`Reconnect failed: [${e.code}] ${e.message}`);
+    log(`Hint: ${userHintForError(e)}`);
+    announce(`Reconnect failed: ${e.code}`);
+  } finally {
+    state.connecting = false;
+    render();
+  }
+}
+
+async function handleRefreshSession(): Promise<void> {
+  if (!state.session || isDemoSession(state.session)) {
+    announce('Refresh needs a live Lace session');
+    return;
+  }
+  state.refreshing = true;
+  render();
+  try {
+    const refreshed = await refreshConnectedSession(state.session, {
+      includeBalances: true,
+    });
+    state.session = refreshed;
+    state.balances = refreshed.balances;
+    state.prefs = rememberSuccessfulConnect(refreshed);
+    log('Session refreshed (status + addresses + balances).');
+    announce('Session refreshed');
+  } catch (err) {
+    const e = normalizeConnectorError(err);
+    log(`Refresh failed: ${e.message}`);
+    announce(`Refresh failed: ${e.code}`);
+    if (e.code === 'ConnectionLost' || e.code === 'Disconnected') {
+      state.session = null;
+      state.balances = null;
+      stopHealthWatch();
+      setJourney('ready_to_connect', 'Connection lost during refresh');
+    }
+  } finally {
+    state.refreshing = false;
     render();
   }
 }
@@ -449,9 +612,51 @@ function renderCapabilities(probe: CapabilityProbe | null): string {
   `;
 }
 
+function renderBalances(balances: BalanceSnapshot | null): string {
+  if (!balances) {
+    return `<p class="muted small">Balances appear after a live connect / refresh.</p>`;
+  }
+  const dust = balances.dust
+    ? `balance=${balances.dust.balance} · cap=${balances.dust.cap}`
+    : '(unavailable)';
+  const uCount = balances.unshielded ? Object.keys(balances.unshielded).length : 0;
+  const sCount = balances.shielded ? Object.keys(balances.shielded).length : 0;
+  const err =
+    balances.errors.length > 0
+      ? `<p class="muted small">Balance notes: ${escapeHtml(balances.errors.join(' · '))}</p>`
+      : '';
+  return `
+    <div class="kv balance-kv" style="margin-top:0.85rem">
+      <div><span class="k">Unshielded tokens</span><span class="v">${uCount} type(s)</span></div>
+      <div><span class="k">Shielded tokens</span><span class="v">${sCount} type(s)</span></div>
+      <div><span class="k">Dust</span><span class="v mono">${escapeHtml(dust)}</span></div>
+    </div>
+    ${err}
+  `;
+}
+
+function renderLastPrefs(): string {
+  const last = state.prefs.lastSession;
+  if (!last) {
+    return `<p class="muted">Not connected. Install Lace, pick a network, Connect — prefs will remember the wallet for one-click reconnect.</p>`;
+  }
+  return `
+    <div class="session-banner is-prefs" role="status">
+      <strong>Last live session saved</strong> —
+      ${escapeHtml(last.walletName)} · ${escapeHtml(last.networkId)} ·
+      ${escapeHtml(new Date(last.connectedAt).toLocaleString())}
+      <span class="muted small"> (snapshot only — click Reconnect for a real connect())</span>
+    </div>
+    <div class="kv">
+      <div><span class="k">rdns</span><span class="v mono">${escapeHtml(last.rdns || '—')}</span></div>
+      <div><span class="k">Unshielded</span><span class="v mono">${escapeHtml(formatAddress(last.addresses.unshieldedAddress))}</span></div>
+    </div>
+  `;
+}
+
 function renderSession(session: ConnectedSession | null): string {
   if (!session) {
-    return `<p class="muted">Not connected. Pick a network, select a wallet, then Connect — or enable Demo mode for a simulated session.</p>`;
+    return renderLastPrefs();
   }
   const st = session.status;
   const statusText =
@@ -459,6 +664,14 @@ function renderSession(session: ConnectedSession | null): string {
       ? `connected · networkId=${st.networkId}`
       : 'disconnected';
   const demo = isDemoSession(session);
+  const health =
+    state.health?.ok
+      ? '<span class="status-pill on" id="health-pill">healthy</span>'
+      : state.health
+        ? `<span class="status-pill off" id="health-pill">${escapeHtml(state.health.errorMessage || 'check')}</span>`
+        : demo
+          ? ''
+          : '<span class="status-pill on" id="health-pill">watching…</span>';
   const addrs = [
     { id: 'unshielded', label: 'Unshielded', value: session.addresses.unshieldedAddress },
     { id: 'shielded', label: 'Shielded', value: session.addresses.shieldedAddress },
@@ -466,7 +679,12 @@ function renderSession(session: ConnectedSession | null): string {
   ];
   return `
     <div class="session-banner ${demo ? 'is-demo' : 'is-live'}" role="status">
-      ${demo ? `<strong>${escapeHtml(DEMO_MODE_LABEL)}</strong> — placeholders only.` : '<strong>Live Lace session</strong> — still connect-only; no transfers.'}
+      ${
+        demo
+          ? `<strong>${escapeHtml(DEMO_MODE_LABEL)}</strong> — placeholders only. Turn off Demo mode for real Lace.`
+          : '<strong>Live Lace session</strong> — real connect() · read APIs · no transfers.'
+      }
+      ${health}
     </div>
     <div class="addr-grid">
       ${addrs
@@ -489,6 +707,7 @@ function renderSession(session: ConnectedSession | null): string {
       <div><span class="k">Wallet</span><span class="v">${escapeHtml(safeWalletLabel(session.provider.api))} (${escapeHtml(session.provider.api.rdns)})</span></div>
       <div><span class="k">Indexer</span><span class="v">${escapeHtml(session.configuration?.indexerUri ?? '(config unavailable)')}</span></div>
     </div>
+    ${demo ? '' : renderBalances(state.balances)}
   `;
 }
 
@@ -520,7 +739,7 @@ function render(): void {
         <a href="${LAB_BRANDING.repoUrl}" rel="noopener noreferrer">Repo</a>
         <a href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>
       </nav>
-      <span class="badge badge-demo" title="Connect-only scope">LOCAL STUB · CONNECT ONLY · kit ${escapeHtml(KIT_VERSION)}</span>
+      <span class="badge badge-demo" title="Real Lace discover/connect — no transfers">CONNECT ONLY · needs Lace · kit ${escapeHtml(KIT_VERSION)}</span>
     </header>
 
     <aside class="donate-dock" aria-label="Always-visible donate">
@@ -550,11 +769,11 @@ function render(): void {
           <a class="btn ghost" href="#donate">Donate ADA</a>
         </div>
         <div class="honesty" role="note">
-          <strong>Honest capabilities:</strong> discovery + <code>connect(networkId)</code> + status / addresses / config.
-          Does <strong>not</strong> call <code>makeTransfer</code>, balance, or submit.
-          A green connect is <strong>not</strong> proof that mainnet (or any) transfers work.
-          Prefer <strong>preprod / preview</strong>. Lace is <strong>browser-only</strong>.
-          ${state.demoMode ? `<br/><strong>Demo mode ON</strong> — ${escapeHtml(DEMO_MODE_LABEL)}.` : ''}
+          <strong>Real function:</strong> enumerates <code>window.midnight</code>, calls Lace <code>connect(networkId)</code>,
+          persists prefs in <code>localStorage</code>, reconnects, refreshes addresses + balances, watches connection health.
+          Does <strong>not</strong> call <code>makeTransfer</code> or submit — a green connect is <strong>not</strong> proof transfers work.
+          Prefer <strong>preprod / preview</strong>. Browser-only (Lace extension).
+          ${state.demoMode ? `<br/><strong>Demo mode ON</strong> — ${escapeHtml(DEMO_MODE_LABEL)} (optional UI fallback).` : ''}
         </div>
       </section>
 
@@ -567,7 +786,7 @@ function render(): void {
         <div class="row" style="margin-top:0.85rem;margin-bottom:0">
           <label class="toggle">
             <input type="checkbox" id="chk-demo" ${state.demoMode ? 'checked' : ''} />
-            <span>Demo mode (simulated session — no Lace required)</span>
+            <span>Optional demo mode (simulated — prefer real Lace)</span>
           </label>
           <label class="toggle">
             <input type="checkbox" id="chk-watch" ${state.watching ? 'checked' : ''} />
@@ -620,13 +839,21 @@ function render(): void {
                   </li>`;
                 })
                 .join('')}</ul>`
-            : `<div class="empty-state" role="status">
+            : `<div class="empty-state install-guide" role="status">
                 <div class="empty-art" aria-hidden="true">⬡</div>
                 <h3>Lace not detected</h3>
                 <p class="muted">
-                  Install <a href="https://www.lace.io/" rel="noopener noreferrer">Lace</a>,
-                  enable Midnight, refresh this tab, then click Refresh discovery —
-                  or turn on <strong>Demo mode</strong> above to explore the UI with a simulated session.
+                  This studio enumerates <code>window.midnight</code>. No providers means Lace is missing, disabled, or not injected yet — we will <strong>not</strong> fake a connected wallet.
+                </p>
+                <ol class="install-steps">
+                  <li>Install <a href="${LAB_BRANDING.laceInstallUrl}" rel="noopener noreferrer">Lace</a> (or the <a href="${LAB_BRANDING.laceChromeUrl}" rel="noopener noreferrer">Chrome Web Store build</a>).</li>
+                  <li>Enable <strong>Midnight</strong> in Lace and finish sync.</li>
+                  <li>Refresh this tab (extensions often inject after first paint — Watch injection helps).</li>
+                  <li>Click <strong>Refresh discovery</strong>, pick the wallet, choose <strong>preprod</strong>, then <strong>Connect with Lace</strong>.</li>
+                </ol>
+                <p class="muted">
+                  Optional Demo mode explores UI chrome only — labeled <em>${escapeHtml(DEMO_MODE_LABEL)}</em>, never a real session.
+                  Guide: <a href="${LAB_BRANDING.officialConnectGuideUrl}" rel="noopener noreferrer">React wallet connect</a>.
                 </p>
               </div>`
         }
@@ -648,9 +875,15 @@ function render(): void {
         </div>
         <div class="row" style="margin-top:0.85rem">
           <button type="button" id="btn-connect" ${hasLace || state.demoMode ? '' : 'disabled'} ${state.connecting ? 'aria-busy="true"' : ''}>
-            ${state.connecting ? 'Connecting…' : state.demoMode ? 'Start demo session' : 'Connect'}
+            ${state.connecting ? 'Connecting…' : state.demoMode ? 'Start demo session' : 'Connect with Lace'}
           </button>
-          <button type="button" class="ghost" id="btn-disconnect" ${connected ? '' : 'disabled'}>Clear session</button>
+          <button type="button" class="ghost" id="btn-reconnect" ${!state.demoMode && (hasLace || state.prefs.lastSession) ? '' : 'disabled'} ${state.connecting ? 'aria-busy="true"' : ''} title="Real connect() using saved prefs">
+            Reconnect
+          </button>
+          <button type="button" class="ghost" id="btn-refresh-session" ${connected && !state.demoMode ? '' : 'disabled'} ${state.refreshing ? 'aria-busy="true"' : ''}>
+            ${state.refreshing ? 'Refreshing…' : 'Refresh session'}
+          </button>
+          <button type="button" class="ghost" id="btn-disconnect" ${connected ? '' : 'disabled'}>Disconnect</button>
         </div>
         <div id="session-panel">${renderSession(state.session)}</div>
       </section>
@@ -759,14 +992,22 @@ function bindEvents(app: HTMLElement): void {
     void handleConnect();
   });
 
+  document.getElementById('btn-reconnect')?.addEventListener('click', () => {
+    void handleReconnect();
+  });
+  document.getElementById('btn-refresh-session')?.addEventListener('click', () => {
+    void handleRefreshSession();
+  });
   document.getElementById('btn-disconnect')?.addEventListener('click', () => {
+    stopHealthWatch();
     state.session = null;
     state.capabilities = null;
+    state.balances = null;
     setJourney(
       state.providers.length ? 'ready_to_connect' : 'idle',
-      'Cleared local session (connector has no global disconnect)',
+      'Cleared local session (connector has no global disconnect — prefs kept)',
     );
-    log('Cleared local session (connector has no global disconnect).');
+    log('Cleared local session (prefs retained for Reconnect).');
     announce('Session cleared');
     render();
   });
@@ -805,12 +1046,8 @@ function bindEvents(app: HTMLElement): void {
       const id = btn.getAttribute('data-network');
       if (!id) return;
       state.networkId = id;
-      try {
-        localStorage.setItem(LS_NETWORK, id);
-      } catch {
-        /* ignore */
-      }
-      log(`Network set to ${id}`);
+      state.prefs = setPreferredNetwork(id as typeof MidnightNetworkIds.Preprod);
+      log(`Network set to ${id} (persisted)`);
       render();
     });
   });
@@ -819,7 +1056,15 @@ function bindEvents(app: HTMLElement): void {
   walletList?.querySelectorAll('li').forEach((li) => {
     li.addEventListener('click', () => {
       state.selectedKey = li.getAttribute('data-key');
-      log(`Selected provider key=${formatInjectionKey(state.selectedKey || '')}`);
+      const provider = state.providers.find((p) => p.injectionKey === state.selectedKey);
+      if (provider) {
+        state.prefs = setPreferredProvider({
+          injectionKey: provider.injectionKey,
+          rdns: provider.api.rdns,
+          walletName: safeWalletLabel(provider.api),
+        });
+      }
+      log(`Selected provider key=${formatInjectionKey(state.selectedKey || '')} (persisted)`);
       render();
     });
     li.addEventListener('keydown', (ev) => {
@@ -864,8 +1109,13 @@ refreshDiscovery();
 refreshMatrix();
 if (state.demoMode) {
   setJourney('idle', `Demo mode armed — ${DEMO_MODE_LABEL}`);
+} else if (state.prefs.lastSession) {
+  setJourney(
+    state.providers.length ? 'ready_to_connect' : 'idle',
+    `Prefs ready — last ${state.prefs.lastSession.walletName} on ${state.prefs.lastSession.networkId}`,
+  );
 }
 startWatcher();
 initStarfield();
 render();
-log(`Lace Connect Studio ready · kit ${KIT_VERSION}`);
+log(`Lace Connect Studio ready · kit ${KIT_VERSION} · prefs network=${state.prefs.networkId}`);

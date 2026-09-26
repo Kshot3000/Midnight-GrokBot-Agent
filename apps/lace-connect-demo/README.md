@@ -1,27 +1,28 @@
-# Lace Midnight Connect Studio
+# Lace Connect Studio
 
-Flagship **Vite + TypeScript** page that uses [`packages/lace-midnight-kit`](../../packages/lace-midnight-kit) **0.2.0** to:
+Production-quality **browser Lace** discover + connect app for Midnight, powered by
+[`@kshot/lace-midnight-kit@0.3.0`](../../packages/lace-midnight-kit) and official
+`@midnight-ntwrk/dapp-connector-api@4.0.1`.
 
-1. **Connect journey** — labeled phases (idle → discover → ready → approve → status → addresses → connected)
-2. **Injection watch** — poll `window.midnight` for late Lace inject
-3. **Connect status matrix** — enumeration vs legacy `mnLace`, `^4.0.0` compat, duplicate `rdns`
-4. **Discover + connect** — UUID / rdns providers, network pills (default **preprod**)
-5. **Capability radar** — read-only post-connect probe (`makeTransfer` listed as skipped)
-6. **Demo mode** — simulated session for UX review without Lace (honestly labeled)
+## What works (real function)
 
-## Safety label
+| Flow | Behavior |
+| --- | --- |
+| Discover | Enumerates `window.midnight` (UUID keys — never hardcode `mnLace`) |
+| Connect | Calls Lace `connect(networkId)` on the selected provider |
+| Prefs | Persists network + preferred wallet + last session snapshot in `localStorage` |
+| Reconnect | One-click real `connect()` from saved prefs |
+| Refresh | Re-reads status, addresses, and balances |
+| Health | Polls `getConnectionStatus`; clears session if Lace disconnects |
+| Capability radar | Read-only probe including balances; `makeTransfer` / submit skipped |
 
-**Discovery + connect only.** This studio does **not** call `makeTransfer`, balance, or submit.
-A green “connected” state is **not** proof that mainnet (or testnet) transfers work.
-Demo mode is **SIMULATED** — never claim it is a real Lace wallet.
+## What it does **not** do
 
-## Prerequisites
+- Call `makeTransfer` or submit transactions
+- Claim mainnet transfers work after a green connect
+- Run outside the browser (Lace injects into the page)
 
-- Node 18+
-- **For live connect:** [Lace](https://www.lace.io/) browser extension with Midnight enabled
-- Without Lace: page loads, matrix warns, Demo mode explores the UI
-
-## Run
+## Run locally
 
 ```bash
 # from repo root
@@ -30,15 +31,14 @@ npm run dev:lace-demo
 # open http://localhost:5174
 ```
 
-Vite aliases the kit to `packages/lace-midnight-kit/src` for local iteration.
+Install [Lace](https://www.lace.io/) with Midnight enabled for a live session.
+Optional **Demo mode** simulates a session for UI exploration without Lace.
 
 ## Branding
 
-- ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
+- Donate ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
 - X: [@kshot9000](https://x.com/kshot9000)
 
-## Official links
+## Pages path
 
-- https://docs.midnight.network/guides/react-wallet-connect
-- https://github.com/midnightntwrk/midnight-dapp-connector-api
-- https://www.lace.io/
+When Actions / workflow scope enabled: `/lace/`.

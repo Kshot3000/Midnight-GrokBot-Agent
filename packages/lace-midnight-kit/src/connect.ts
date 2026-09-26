@@ -56,7 +56,7 @@ export type ConnectedSession = {
   };
 };
 
-async function readAddressesSafely(api: ConnectedAPI): Promise<ConnectedSession['addresses']> {
+export async function refreshSessionAddresses(api: ConnectedAPI): Promise<ConnectedSession['addresses']> {
   const addresses: ConnectedSession['addresses'] = {
     unshieldedAddress: null,
     shieldedAddress: null,
@@ -203,7 +203,7 @@ export async function connectWithProvider(
     }
   }
 
-  const addresses = await readAddressesSafely(api);
+  const addresses = await refreshSessionAddresses(api);
 
   return {
     provider,
@@ -219,7 +219,9 @@ export async function connectWithProvider(
 /**
  * Soft disconnect for demos: drop local references.
  * The connector API does not define a global disconnect(); clearing app state is enough.
+ * Pass the previous session's api through checkSessionHealth if you need to confirm Lace still reports connected.
  */
 export function createDisconnectedSession(): null {
   return null;
 }
+

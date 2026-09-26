@@ -1,4 +1,4 @@
-# `@kshot/lace-midnight-kit`
+# `@kshot/lace-midnight-kit` (v0.3.0)
 
 Reusable **browser** helpers for connecting a DApp to **Lace Midnight** via the official
 [`@midnight-ntwrk/dapp-connector-api`](https://www.npmjs.com/package/@midnight-ntwrk/dapp-connector-api) **4.0.1** types.
@@ -19,9 +19,14 @@ Built for the [Midnight GrokBot Agent](https://github.com/Kshot3000/Midnight-Gro
 | Connect journey phases (`createConnectJourney`) | ✅ |
 | Injection watch (`watchMidnightInjection`) | ✅ |
 | Capability probe (`probeSessionCapabilities`) | ✅ read-only |
-| Demo / simulated session (`createDemoSession`) | ✅ labeled SIMULATED |
+| Demo / simulated session (`createDemoSession`) | ✅ labeled SIMULATED (optional) |
+| Session prefs (`loadSessionPrefs` / `rememberSuccessfulConnect`) | ✅ localStorage |
+| Reconnect from prefs (`reconnectFromPrefs`) | ✅ real `connect()` |
+| Session refresh + balances (`refreshConnectedSession`) | ✅ read-only |
+| Connection health watch (`watchConnectionStatus`) | ✅ |
 | Address format helpers | ✅ |
-| Mainnet / Preprod **transfers** (`makeTransfer`) | ❌ **not claimed** — not in demo |
+| Unit tests (vitest) | ✅ |
+| Mainnet / Preprod **transfers** (`makeTransfer`) | ❌ **not claimed** — never called |
 
 ## What it does **not** do
 

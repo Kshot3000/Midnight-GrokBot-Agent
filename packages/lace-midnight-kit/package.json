@@ -1,7 +1,7 @@
 {
   "name": "@kshot/lace-midnight-kit",
-  "version": "0.2.0",
-  "description": "Reusable Lace / Midnight DApp connector helpers \u2014 discover, connect journey, injection watch, capability probe, demo mode. Types from @midnight-ntwrk/dapp-connector-api.",
+  "version": "0.3.0",
+  "description": "Reusable Lace / Midnight DApp connector helpers \u2014 discover, connect journey, injection watch, capability probe (incl. balances), preferences, session health, demo mode. Types from @midnight-ntwrk/dapp-connector-api.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -20,7 +20,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:node": "npm run build && node --test test/*.test.js",
+    "test:all": "npm run test && npm run test:node",
+    "test:watch": "vitest"
   },
   "keywords": [
     "midnight",
@@ -40,7 +44,9 @@
     "@midnight-ntwrk/dapp-connector-api": "4.0.1"
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "happy-dom": "^17.6.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "@midnight-ntwrk/dapp-connector-api": "^4.0.1"

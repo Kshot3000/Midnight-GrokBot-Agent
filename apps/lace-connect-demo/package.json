@@ -1,8 +1,8 @@
 {
   "name": "@kshot/lace-connect-demo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Minimal Vite demo: Lace Midnight discovery + connect using @kshot/lace-midnight-kit. No transfer claims.",
+  "description": "Lace Midnight Connect Studio \u2014 real window.midnight discover/connect, prefs, reconnect, capability + balance probe. No transfer claims.",
   "type": "module",
   "scripts": {
     "dev": "vite",
