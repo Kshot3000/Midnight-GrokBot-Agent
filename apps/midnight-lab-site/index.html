@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Midnight GrokBot Agent — 24/7 build lab for Compact, privacy DApps, and Cardano partner-chain development." />
+  <meta name="description" content="Midnight Studio Hub — flagship homepage for Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, and Agent Escrow. Dual-state privacy studios by @kshot9000. Local stubs — not on-chain." />
   <meta name="theme-color" content="#05070f" />
-  <title>Midnight GrokBot Agent — Build Lab</title>
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Midnight Studio Hub — Flagship Labs · @kshot9000</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%237c9cff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23a78bfa'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%237c9cff' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='%23a78bfa' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%2322d3ee'/%3E%3C/svg%3E" />
 </head>
 <body>
   <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
     <div class="bg-aurora"></div>
     <div class="bg-aurora bg-aurora-2"></div>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
     <div class="bg-grid"></div>
     <div class="bg-noise"></div>
     <div class="orb orb-a"></div>
@@ -24,87 +28,104 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header" id="site-header">
-    <a class="logo" href="#top">Midnight<span>Lab</span></a>
+    <a class="logo" href="#top" aria-label="Midnight Studio Hub home">Midnight<span>Hub</span></a>
     <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
     <nav id="site-nav" aria-label="Primary">
-      <a href="#apps">Apps</a>
+      <a href="#studios">Studios</a>
+      <a href="#compat">Compat</a>
       <a href="#about">About</a>
       <a href="#stack">Stack</a>
-      <a href="#compat">Compat</a>
       <a href="#tokens">NIGHT / DUST</a>
       <a href="#start">Start</a>
-      <a href="#links">Docs</a>
       <a href="#donate">Donate</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
+    <span class="badge badge-hub" title="Flagship homepage">Studio Hub</span>
   </header>
 
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
   <main id="main">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
     <section class="hero" id="top">
       <div class="hero-shell">
-        <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Cardano partner chain · programmable privacy</p>
-        <h1>24/7 Midnight build lab</h1>
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Flagship · programmable privacy · Cardano partner chain</p>
+        <h1>Midnight Studio Hub</h1>
         <p class="lede">
-          Scaffolding, Compact starters, and a polished landing pad for building
-          privacy-preserving DApps on <strong>Midnight</strong> — without inventing APIs.
+          The flagship homepage for this 24/7 build lab — six polished
+          <strong>Studio</strong> experiences teaching Midnight’s dual-state model,
+          Lace connect UX, MPS-0029 auth, and sealed marketplace patterns.
           Curated by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>,
           creator of <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.
         </p>
         <div class="cta-row">
-          <a class="btn primary" href="#apps">Explore apps</a>
+          <a class="btn primary" href="#studios">Explore studios</a>
+          <a class="btn ghost" href="#compat">Compat explorer</a>
           <a class="btn ghost" href="https://docs.midnight.network/" rel="noopener noreferrer">Official docs</a>
-          <a class="btn ghost" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">GitHub repo</a>
           <a class="btn ghost" href="#donate">Donate ADA</a>
         </div>
+        <div class="honesty" role="note">
+          <strong>Honest scope:</strong> educational local HTML/JS studios.
+          Do <strong>not</strong> assume GitHub Pages is live (Actions need <code>workflow</code> scope).
+          Do <strong>not</strong> assume Compact runtime, proof server, Lace settlement, or real ADA / DUST from these UIs.
+          Badges below say <strong>LOCAL STUB</strong> on purpose.
+        </div>
+        <dl class="hub-stats" aria-label="Hub snapshot">
+          <div class="stat">
+            <dt>Studios</dt>
+            <dd id="stat-studios">6</dd>
+          </div>
+          <div class="stat">
+            <dt>Reachable locally</dt>
+            <dd id="stat-reachable">—</dd>
+          </div>
+          <div class="stat">
+            <dt>Compat pins</dt>
+            <dd id="stat-pins">7</dd>
+          </div>
+          <div class="stat">
+            <dt>On-chain?</dt>
+            <dd class="stat-warn">No</dd>
+          </div>
+        </dl>
       </div>
     </section>
 
-    <section id="apps" class="apps-section reveal">
+    <section id="studios" class="apps-section reveal" aria-labelledby="studios-heading">
       <div class="section-head">
-        <h2>Apps gallery</h2>
-        <p class="muted">Live demos and stubs from this lab — open them on GitHub Pages or run locally.</p>
+        <h2 id="studios-heading">Studio gallery</h2>
+        <p class="muted">Beautiful cards for every shipped studio. Status probes sibling paths when you serve the assembled site — otherwise they stay honest about local-only.</p>
       </div>
-      <div class="apps-grid">
-        <article class="app-card app-card-live reveal">
-          <div class="app-card-top">
-            <div class="icon" aria-hidden="true">◈</div>
-            <span class="badge badge-live">Live</span>
-          </div>
-          <h3>Lab Site</h3>
-          <p>This polished landing page — Midnight concepts, tooling links, donation branding, and the apps gallery.</p>
-          <div class="app-card-meta">
-            <span>Static HTML/CSS/JS</span>
-          </div>
-          <div class="app-card-actions">
-            <a class="btn primary small" href="./">Open lab</a>
-            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/midnight-lab-site" rel="noopener noreferrer">Source</a>
-          </div>
-        </article>
 
-        <article class="app-card app-card-live reveal">
-          <div class="app-card-top">
-            <div class="icon" aria-hidden="true">◎</div>
-            <span class="badge badge-flagship">Flagship</span>
-          </div>
-          <h3>Shield Board</h3>
-          <p>Dual-state privacy bulletin — public commitments on a simulated ledger, private bodies in a local vault, selective disclose, and MPS-0029-safe take-down. Nebula / starfield studio.</p>
-          <div class="app-card-meta">
-            <span>Local dual-state · educational</span>
-          </div>
-          <div class="app-card-actions">
-            <a class="btn primary small" href="board/">Open studio</a>
-            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/shield-board" rel="noopener noreferrer">Source</a>
-          </div>
-        </article>
+      <div class="filter-bar" role="toolbar" aria-label="Filter studios">
+        <button type="button" class="chip is-active" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" class="chip" data-filter="studio" aria-pressed="false">Studio</button>
+        <button type="button" class="chip" data-filter="connect" aria-pressed="false">Connect</button>
+        <button type="button" class="chip" data-filter="dual" aria-pressed="false">Dual-state</button>
+        <button type="button" class="chip" data-filter="stub" aria-pressed="false">Stub</button>
+        <button type="button" class="chip ghost-chip" id="btn-probe-status">Probe status</button>
+      </div>
 
-        <article class="app-card app-card-live reveal">
+      <div class="apps-grid" id="studios-grid">
+        <article class="app-card app-card-flagship reveal" data-tags="studio connect" data-path="lace/" data-id="lace">
           <div class="app-card-top">
             <div class="icon" aria-hidden="true">⬡</div>
-            <span class="badge badge-flagship">Studio</span>
+            <div class="badge-stack">
+              <span class="badge badge-flagship">Studio</span>
+              <span class="badge badge-stub" title="Educational local stub">LOCAL STUB</span>
+            </div>
           </div>
           <h3>Lace Connect Studio</h3>
-          <p>Flagship connect UX — journey stepper, injection watch, status matrix, capability radar, and Demo mode. Kit 0.2.0 + connector API 4.0.1. Discovery + connect only — no transfer claims.</p>
+          <p>Journey stepper, injection watch, status matrix, capability radar, Demo mode. Kit 0.2.0 + connector API 4.0.1 — discovery + connect only.</p>
           <div class="app-card-meta">
             <span>Vite · kit 0.2.0 · connect-only</span>
+            <span class="status-pill" data-status-for="lace" aria-live="polite">Unchecked</span>
           </div>
           <div class="app-card-actions">
             <a class="btn primary small" href="lace/">Open studio</a>
@@ -112,65 +133,19 @@
           </div>
         </article>
 
-        <article class="app-card app-card-stub reveal">
-          <div class="app-card-top">
-            <div class="icon" aria-hidden="true">✦</div>
-            <span class="badge badge-stub">Stub</span>
-          </div>
-          <h3>Agent Escrow Stub</h3>
-          <p>Role theater (Client / Agent / Approver) + dual-state proof panes — public commitment vs private work notes. Visual timeline. Stub only — not on-chain.</p>
-          <div class="app-card-meta">
-            <span>Role theater · dual-state UX</span>
-          </div>
-          <div class="app-card-actions">
-            <a class="btn primary small" href="escrow/">Open stub</a>
-            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/agent-escrow-stub" rel="noopener noreferrer">Source</a>
-          </div>
-        </article>
-
-
-
-        <article class="app-card app-card-flagship reveal">
-          <div class="app-card-top">
-            <div class="icon" aria-hidden="true">▣</div>
-            <span class="badge badge-flagship">Studio</span>
-          </div>
-          <h3>Night Market Studio</h3>
-          <p>Sealed listings &amp; private bids — public titles + commitment hashes, reserves and bid amounts in a local vault, bid-threshold theater (prove bid ≥ reserve without revealing either). Starfield + donate dock. Educational local stub — not on-chain.</p>
-          <div class="app-card-meta">
-            <span>Studio · dual-state · marketplace</span>
-          </div>
-          <div class="app-card-actions">
-            <a class="btn primary small" href="market/">Open studio</a>
-            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/night-market" rel="noopener noreferrer">Source</a>
-          </div>
-        </article>
-
-        <article class="app-card app-card-flagship reveal">
-          <div class="app-card-top">
-            <div class="icon" aria-hidden="true">✧</div>
-            <span class="badge badge-flagship">Studio</span>
-          </div>
-          <h3>Veil Pledge Studio</h3>
-          <p>Private tip jar &amp; pledge board — seal amounts, commit public hashes, prove thresholds without revealing exact tips. Starfield + donate dock. Educational local stub — not on-chain.</p>
-          <div class="app-card-meta">
-            <span>Studio · dual-state · tip jar</span>
-          </div>
-          <div class="app-card-actions">
-            <a class="btn primary small" href="pledge/">Open studio</a>
-            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/veil-pledge" rel="noopener noreferrer">Source</a>
-          </div>
-        </article>
-
-        <article class="app-card app-card-flagship reveal">
+        <article class="app-card app-card-flagship reveal" data-tags="studio dual" data-path="auth/" data-id="auth">
           <div class="app-card-top">
             <div class="icon" aria-hidden="true">⚑</div>
-            <span class="badge badge-flagship">Studio</span>
+            <div class="badge-stack">
+              <span class="badge badge-flagship">Studio</span>
+              <span class="badge badge-stub">LOCAL STUB</span>
+            </div>
           </div>
           <h3>Auth Forge Studio</h3>
-          <p>Flagship MPS-0029 lab — attack journey, dual-rail threat meters, auth scorecard, forge theater, and local bboard stub. Starfield + donate dock. Educational local stub — not on-chain.</p>
+          <p>MPS-0029 attack journey, dual-rail threat meters, auth scorecard, forge theater, local bboard stub. Starfield + donate dock.</p>
           <div class="app-card-meta">
             <span>Studio · journey · scorecard</span>
+            <span class="status-pill" data-status-for="auth" aria-live="polite">Unchecked</span>
           </div>
           <div class="app-card-actions">
             <a class="btn primary small" href="auth/">Open studio</a>
@@ -178,23 +153,117 @@
           </div>
         </article>
 
+        <article class="app-card app-card-flagship reveal" data-tags="studio dual" data-path="board/" data-id="board">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">◎</div>
+            <div class="badge-stack">
+              <span class="badge badge-flagship">Studio</span>
+              <span class="badge badge-stub">LOCAL STUB</span>
+            </div>
+          </div>
+          <h3>Shield Board</h3>
+          <p>Dual-state privacy bulletin — public commitments on a simulated ledger, private bodies in a local vault, selective disclose, MPS-0029-safe take-down.</p>
+          <div class="app-card-meta">
+            <span>Local dual-state · educational</span>
+            <span class="status-pill" data-status-for="board" aria-live="polite">Unchecked</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="board/">Open studio</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/shield-board" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
+
+        <article class="app-card app-card-flagship reveal" data-tags="studio dual" data-path="pledge/" data-id="pledge">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">✧</div>
+            <div class="badge-stack">
+              <span class="badge badge-flagship">Studio</span>
+              <span class="badge badge-stub">LOCAL STUB</span>
+            </div>
+          </div>
+          <h3>Veil Pledge Studio</h3>
+          <p>Private tip jar &amp; pledge board — seal amounts, commit public hashes, prove thresholds without revealing exact tips.</p>
+          <div class="app-card-meta">
+            <span>Studio · dual-state · tip jar</span>
+            <span class="status-pill" data-status-for="pledge" aria-live="polite">Unchecked</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="pledge/">Open studio</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/veil-pledge" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
+
+        <article class="app-card app-card-flagship reveal" data-tags="studio dual" data-path="market/" data-id="market">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">▣</div>
+            <div class="badge-stack">
+              <span class="badge badge-flagship">Studio</span>
+              <span class="badge badge-stub">LOCAL STUB</span>
+            </div>
+          </div>
+          <h3>Night Market Studio</h3>
+          <p>Sealed listings &amp; private bids — public titles + commitment hashes; reserves and bid amounts in a vault; prove bid ≥ reserve without revealing either.</p>
+          <div class="app-card-meta">
+            <span>Studio · dual-state · marketplace</span>
+            <span class="status-pill" data-status-for="market" aria-live="polite">Unchecked</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="market/">Open studio</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/night-market" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
+
+        <article class="app-card app-card-stub reveal" data-tags="stub dual" data-path="escrow/" data-id="escrow">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">✦</div>
+            <div class="badge-stack">
+              <span class="badge badge-stub">Stub</span>
+              <span class="badge badge-stub">LOCAL STUB</span>
+            </div>
+          </div>
+          <h3>Agent Escrow Stub</h3>
+          <p>Role theater (Client / Agent / Approver) + dual-state proof panes — public commitment vs private work notes. Visual timeline. Not on-chain.</p>
+          <div class="app-card-meta">
+            <span>Role theater · dual-state UX</span>
+            <span class="status-pill" data-status-for="escrow" aria-live="polite">Unchecked</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="escrow/">Open stub</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/agent-escrow-stub" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
       </div>
+      <p class="muted status-legend" id="status-legend">
+        Status = HTTP probe of sibling paths on <em>this</em> origin (assembled Pages build or multi-app local serve).
+        Serving only <code>midnight-lab-site/</code> will correctly show Not found — that is honest, not broken.
+      </p>
     </section>
 
-    <section id="compat" class="panel compat-panel reveal">
+    <section id="compat" class="panel compat-panel reveal" aria-labelledby="compat-heading">
       <div class="section-head tight">
-        <h2>Compat matrix <span class="badge badge-research">Sep 2026 research</span></h2>
-        <p class="muted">Lab pins from research — <strong>verify against the official Midnight compatibility matrix</strong> before deploying.</p>
+        <h2 id="compat-heading">Compat Matrix Explorer <span class="badge badge-research">Sep 2026 research</span></h2>
+        <p class="muted">Interactive pins from lab research — <strong>always verify</strong> against the official Midnight compatibility matrix before deploying.</p>
       </div>
-      <div class="compat-grid" role="list">
-        <div class="compat-item" role="listitem"><span class="compat-key">Compact toolchain</span><span class="compat-val">0.31.1</span></div>
-        <div class="compat-item" role="listitem"><span class="compat-key">Compact language</span><span class="compat-val">~0.23</span></div>
-        <div class="compat-item" role="listitem"><span class="compat-key">Runtime</span><span class="compat-val">0.16.0</span></div>
-        <div class="compat-item" role="listitem"><span class="compat-key">midnight-js</span><span class="compat-val">4.1.1</span></div>
-        <div class="compat-item" role="listitem"><span class="compat-key">wallet-sdk</span><span class="compat-val">1.2.0</span></div>
-        <div class="compat-item" role="listitem"><span class="compat-key">DApp Connector</span><span class="compat-val">4.0.1</span></div>
-        <div class="compat-item" role="listitem"><span class="compat-key">proof-server</span><span class="compat-val">8.1.0</span></div>
+
+      <div class="compat-controls">
+        <label class="compat-search-label" for="compat-search">
+          <span class="sr-only">Search pins</span>
+          <input type="search" id="compat-search" placeholder="Filter pins (e.g. compact, wallet, proof)…" autocomplete="off" />
+        </label>
+        <div class="filter-bar compact-filters" role="toolbar" aria-label="Compat categories">
+          <button type="button" class="chip is-active" data-compat-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-compat-filter="toolchain" aria-pressed="false">Toolchain</button>
+          <button type="button" class="chip" data-compat-filter="runtime" aria-pressed="false">Runtime</button>
+          <button type="button" class="chip" data-compat-filter="wallet" aria-pressed="false">Wallet</button>
+        </div>
       </div>
+
+      <div class="compat-grid" id="compat-grid" role="list"></div>
+
+      <aside class="compat-detail" id="compat-detail" aria-live="polite">
+        <p class="muted">Select a pin to see notes. These are <strong>research pins</strong>, not a substitute for docs.midnight.network.</p>
+      </aside>
+
       <p class="muted compat-note">
         Source of truth:
         <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">installation / matrix docs</a>
@@ -245,9 +314,9 @@
       </article>
       <article class="card reveal">
         <div class="icon" aria-hidden="true">✦</div>
-        <h3>This lab</h3>
+        <h3>This hub</h3>
         <p>
-          Repo layout under <code>apps/</code> and <code>contracts/</code> — polished static demos plus
+          Repo layout under <code>apps/</code> and <code>contracts/</code> — flagship Studio Hub plus
           commented Compact skeletons. Compile only after installing the official toolchain.
         </p>
         <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Open repo →</a>
@@ -289,7 +358,7 @@
         <li>
           Install Compact + proof server from the
           <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">official installation guide</a>
-          (pin versions from the compatibility matrix — see <a href="#compat">our research pins</a>).
+          (pin versions from the compatibility matrix — see <a href="#compat">Compat Explorer</a>).
         </li>
         <li>
           Install <a href="https://www.lace.io/" rel="noopener noreferrer">Lace</a>, select the Midnight network
@@ -301,37 +370,32 @@
           <a href="https://docs.midnight.network/tutorials/leaderboard/overview" rel="noopener noreferrer">privacy-preserving leaderboard DApp</a>.
         </li>
         <li>
-          Open the live lab on
-          <a href="https://kshot3000.github.io/Midnight-GrokBot-Agent/">GitHub Pages</a>
-          or serve locally:
+          Serve this Studio Hub locally:
           <code>cd apps/midnight-lab-site &amp;&amp; python3 -m http.server 5173</code>
         </li>
         <li>
-          Try the Lace connect demo:
-          <a href="lace/">Pages /lace/</a>
-          or <code>npm run dev:lace-demo</code> → http://localhost:5174
+          <strong>Lace Connect</strong> — <code>npm run dev:lace-demo</code> → http://localhost:5174
+          (Pages path <code>/lace/</code> when Actions enabled).
         </li>
         <li>
-          Walk the Agent Escrow stub:
-          <a href="escrow/">Pages /escrow/</a>
-          or <code>cd apps/agent-escrow-stub &amp;&amp; python3 -m http.server 5175</code>
+          <strong>Auth Forge</strong> — <code>cd apps/auth-lab &amp;&amp; python3 -m http.server 5176</code>
         </li>
         <li>
-          <strong>Auth Lab</strong> —
-          <a href="auth/">Pages /auth/</a>
-          or <code>cd apps/auth-lab &amp;&amp; python3 -m http.server 5176</code>
+          <strong>Shield Board</strong> — <code>cd apps/shield-board &amp;&amp; python3 -m http.server 5177</code>
         </li>
         <li>
-          <strong>Shield Board</strong> (flagship) —
-          <a href="board/">Pages /board/</a>
-          or <code>cd apps/shield-board &amp;&amp; python3 -m http.server 5177</code>
+          <strong>Veil Pledge</strong> — <code>cd apps/veil-pledge &amp;&amp; python3 -m http.server 5179</code>
         </li>
         <li>
-          <strong>Night Market</strong> —
-          <a href="market/">Pages /market/</a>
-          or <code>cd apps/night-market &amp;&amp; python3 -m http.server 5180</code>
+          <strong>Night Market</strong> — <code>cd apps/night-market &amp;&amp; python3 -m http.server 5180</code>
+        </li>
+        <li>
+          <strong>Agent Escrow</strong> — <code>cd apps/agent-escrow-stub &amp;&amp; python3 -m http.server 5175</code>
         </li>
       </ol>
+      <p class="muted">
+        GitHub Pages URL is documented for when Actions are enabled — this hub does <strong>not</strong> claim it is live today.
+      </p>
     </section>
 
     <section id="links" class="panel links reveal">
@@ -348,11 +412,12 @@
 
     <section id="donate" class="panel donate reveal">
       <h2>Support the lab</h2>
-      <p>Cardano (ADA) donations keep the 24/7 Midnight build lab going.</p>
+      <p>Cardano (ADA) donations keep the 24/7 Midnight Studio Hub going.</p>
       <div class="addr-box">
         <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
         <button type="button" id="copy-addr" class="btn ghost small">Copy</button>
       </div>
+      <p class="status-line" id="donate-status" role="status"></p>
       <p class="muted">
         Follow <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> on X
         · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
@@ -362,10 +427,10 @@
 
   <footer class="site-footer">
     <div>
-      <strong>Midnight GrokBot Agent</strong>
+      <strong>Midnight Studio Hub</strong>
       <span> · MIT · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a></span>
       <span> · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a></span>
-      <span> · <a href="https://kshot3000.github.io/Midnight-GrokBot-Agent/">Live Pages</a></span>
+      <span> · <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">GitHub</a></span>
     </div>
     <div class="footer-donate">
       <span>Donate ADA:</span>
@@ -373,6 +438,7 @@
     </div>
     <p class="disclaimer">
       Not affiliated with the Midnight Foundation. Facts link to official docs; verify versions before mainnet use.
+      Local educational stubs — not on-chain. Pages may 404 until workflow scope is enabled.
     </p>
   </footer>
 

@@ -1,28 +1,91 @@
 (function () {
-  const btn = document.getElementById("copy-addr");
-  const addr = document.getElementById("donation-addr");
-  if (btn && addr) {
-    btn.addEventListener("click", async () => {
-      const text = addr.textContent.trim();
-      try {
-        await navigator.clipboard.writeText(text);
-        const prev = btn.textContent;
-        btn.textContent = "Copied";
-        btn.style.borderColor = "var(--ok)";
-        setTimeout(() => {
-          btn.textContent = prev;
-          btn.style.borderColor = "";
-        }, 1600);
-      } catch {
-        btn.textContent = "Select & copy";
-      }
-    });
+  "use strict";
+
+  const DONATE_ADDR =
+    "addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v";
+
+  /** @type {{ key: string, val: string, cat: string, note: string }[]} */
+  const COMPAT_PINS = [
+    {
+      key: "Compact toolchain",
+      val: "0.31.1",
+      cat: "toolchain",
+      note: "Lab research pin for the Compact compiler / CLI. Confirm against the official Midnight installation matrix before any deploy.",
+    },
+    {
+      key: "Compact language",
+      val: "~0.23",
+      cat: "toolchain",
+      note: "Language pragma band used in this repo’s Compact skeletons. Prefer the version required by your toolchain release notes.",
+    },
+    {
+      key: "Runtime",
+      val: "0.16.0",
+      cat: "runtime",
+      note: "Midnight runtime pin from Sep 2026 research notes. Pair with matching proof-server and midnight-js.",
+    },
+    {
+      key: "midnight-js",
+      val: "4.1.1",
+      cat: "runtime",
+      note: "JS client libraries research pin. Check peer dependency ranges in official packages.",
+    },
+    {
+      key: "wallet-sdk",
+      val: "1.2.0",
+      cat: "wallet",
+      note: "Wallet SDK research pin for browser wallet integration patterns. Not a Lace API claim.",
+    },
+    {
+      key: "DApp Connector",
+      val: "4.0.1",
+      cat: "wallet",
+      note: "DApp Connector API pin used by Lace Connect Studio + lace-midnight-kit 0.2.0. Discovery + connect only in this lab.",
+    },
+    {
+      key: "proof-server",
+      val: "8.1.0",
+      cat: "runtime",
+      note: "Local proof-server research pin. Studios here do not start a proof server — install via official docs.",
+    },
+  ];
+
+  function announce(msg) {
+    const el = document.getElementById("live-region");
+    if (el) el.textContent = msg;
   }
 
-  const header = document.getElementById("site-header");
-  const toggle = document.getElementById("nav-toggle");
-  const nav = document.getElementById("site-nav");
-  if (header && toggle && nav) {
+  function setDonateStatus(msg, ok) {
+    const el = document.getElementById("donate-status");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.classList.toggle("is-fail", ok === false);
+  }
+
+  async function copyDonate(btnId) {
+    try {
+      await navigator.clipboard.writeText(DONATE_ADDR);
+      announce("Donation address copied");
+      setDonateStatus("Address copied.", true);
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        const prev = btn.textContent;
+        btn.textContent = btnId === "dock-copy-addr" ? "Copied!" : "Copied";
+        setTimeout(() => {
+          btn.textContent = prev;
+        }, 1600);
+      }
+    } catch {
+      setDonateStatus("Copy failed — select the address manually.", false);
+      announce("Copy failed");
+    }
+  }
+
+  function initNav() {
+    const header = document.getElementById("site-header");
+    const toggle = document.getElementById("nav-toggle");
+    const nav = document.getElementById("site-nav");
+    if (!header || !toggle || !nav) return;
     const closeNav = () => {
       header.classList.remove("nav-open");
       toggle.setAttribute("aria-expanded", "false");
@@ -45,22 +108,290 @@
     });
   }
 
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const reveals = document.querySelectorAll(".reveal");
-  if (!reduceMotion && reveals.length && "IntersectionObserver" in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-    );
-    reveals.forEach((el) => io.observe(el));
-  } else {
-    reveals.forEach((el) => el.classList.add("in"));
+  function initReveal() {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reveals = document.querySelectorAll(".reveal");
+    if (!reduceMotion && reveals.length && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      );
+      reveals.forEach((el) => io.observe(el));
+    } else {
+      reveals.forEach((el) => el.classList.add("in"));
+    }
   }
+
+  function initStarfield() {
+    const canvas = /** @type {HTMLCanvasElement | null} */ (document.getElementById("starfield"));
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /** @type {{ x: number, y: number, r: number, a: number, s: number }[]} */
+    let stars = [];
+    let raf = 0;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.floor((window.innerWidth * window.innerHeight) / 8500);
+      stars = Array.from({ length: Math.max(48, Math.min(count, 180)) }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: Math.random() * 1.5 + 0.25,
+        a: Math.random() * 0.65 + 0.18,
+        s: Math.random() * 0.28 + 0.04,
+      }));
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      for (const st of stars) {
+        if (!reduced) {
+          st.y += st.s;
+          if (st.y > window.innerHeight) {
+            st.y = 0;
+            st.x = Math.random() * window.innerWidth;
+          }
+        }
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(199, 210, 254, ${st.a})`;
+        ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (!reduced) raf = requestAnimationFrame(draw);
+    }
+
+    resize();
+    draw();
+    window.addEventListener("resize", () => {
+      cancelAnimationFrame(raf);
+      resize();
+      draw();
+    });
+  }
+
+  function initFilters() {
+    const chips = document.querySelectorAll(".filter-bar [data-filter]");
+    const cards = document.querySelectorAll("#studios-grid .app-card");
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const filter = chip.getAttribute("data-filter") || "all";
+        chips.forEach((c) => {
+          const on = c === chip;
+          c.classList.toggle("is-active", on);
+          c.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        cards.forEach((card) => {
+          const tags = (card.getAttribute("data-tags") || "").split(/\s+/);
+          const show = filter === "all" || tags.includes(filter);
+          card.classList.toggle("is-hidden", !show);
+        });
+        announce(filter === "all" ? "Showing all studios" : `Filtered to ${filter}`);
+      });
+    });
+  }
+
+  /**
+   * Probe sibling studio paths on this origin.
+   * file:// and hub-only local serves correctly report Not found — honest, not a bug.
+   */
+  async function probeStatuses() {
+    const cards = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll("#studios-grid .app-card"));
+    let reachable = 0;
+    const total = cards.length;
+    const isFile = location.protocol === "file:";
+
+    for (const card of cards) {
+      const id = card.getAttribute("data-id") || "";
+      const path = card.getAttribute("data-path") || "";
+      const pill = card.querySelector(`[data-status-for="${id}"]`);
+      if (!pill) continue;
+
+      pill.textContent = "Checking…";
+      pill.className = "status-pill is-checking";
+
+      if (isFile) {
+        pill.textContent = "Local file";
+        pill.className = "status-pill is-miss";
+        pill.title = "Open via http.server (assembled site) to probe sibling paths";
+        continue;
+      }
+
+      try {
+        const url = new URL(path, location.href).href;
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 3500);
+        const res = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          signal: ctrl.signal,
+          headers: { Accept: "text/html" },
+        });
+        clearTimeout(t);
+        if (res.ok) {
+          pill.textContent = "Reachable";
+          pill.className = "status-pill is-ok";
+          pill.title = `HTTP ${res.status} at ${path}`;
+          reachable += 1;
+        } else {
+          pill.textContent = `HTTP ${res.status}`;
+          pill.className = "status-pill is-miss";
+          pill.title = `Not found at ${path} on this origin — serve assembled Pages artifact or sibling folders`;
+        }
+      } catch {
+        pill.textContent = "Not found";
+        pill.className = "status-pill is-miss";
+        pill.title = `Could not reach ${path} — honest when only midnight-lab-site is served`;
+      }
+    }
+
+    const stat = document.getElementById("stat-reachable");
+    if (stat) {
+      if (isFile) stat.textContent = "n/a";
+      else stat.textContent = `${reachable}/${total}`;
+    }
+    announce(
+      isFile
+        ? "Status: open via local HTTP server to probe sibling studios"
+        : `Status probe: ${reachable} of ${total} reachable on this origin`
+    );
+  }
+
+  function initCompatExplorer() {
+    const grid = document.getElementById("compat-grid");
+    const detail = document.getElementById("compat-detail");
+    const search = /** @type {HTMLInputElement | null} */ (document.getElementById("compat-search"));
+    const chips = document.querySelectorAll("[data-compat-filter]");
+    if (!grid || !detail) return;
+
+    let activeCat = "all";
+    let query = "";
+    /** @type {string | null} */
+    let selectedKey = null;
+
+    function renderDetail(pin) {
+      if (!pin) {
+        detail.innerHTML =
+          '<p class="muted">Select a pin to see notes. These are <strong>research pins</strong>, not a substitute for docs.midnight.network.</p>';
+        return;
+      }
+      detail.innerHTML = `
+        <h3>${escapeHtml(pin.key)} · <code>${escapeHtml(pin.val)}</code></h3>
+        <p>${escapeHtml(pin.note)}</p>
+        <p class="muted" style="margin-top:0.55rem">
+          Verify:
+          <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">official installation / matrix</a>
+        </p>`;
+    }
+
+    function apply() {
+      const q = query.trim().toLowerCase();
+      grid.querySelectorAll(".compat-item").forEach((btn) => {
+        const key = (btn.getAttribute("data-key") || "").toLowerCase();
+        const cat = btn.getAttribute("data-cat") || "";
+        const val = (btn.getAttribute("data-val") || "").toLowerCase();
+        const catOk = activeCat === "all" || cat === activeCat;
+        const qOk = !q || key.includes(q) || val.includes(q) || cat.includes(q);
+        btn.classList.toggle("is-hidden", !(catOk && qOk));
+      });
+    }
+
+    COMPAT_PINS.forEach((pin) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "compat-item";
+      btn.setAttribute("role", "listitem");
+      btn.setAttribute("data-key", pin.key);
+      btn.setAttribute("data-cat", pin.cat);
+      btn.setAttribute("data-val", pin.val);
+      btn.innerHTML = `
+        <span class="compat-key">${escapeHtml(pin.key)}</span>
+        <span class="compat-val">${escapeHtml(pin.val)}</span>
+        <span class="compat-cat">${escapeHtml(pin.cat)}</span>`;
+      btn.addEventListener("click", () => {
+        selectedKey = pin.key;
+        grid.querySelectorAll(".compat-item").forEach((el) => {
+          el.classList.toggle("is-selected", el.getAttribute("data-key") === pin.key);
+        });
+        renderDetail(pin);
+        announce(`Selected ${pin.key} ${pin.val}`);
+      });
+      grid.appendChild(btn);
+    });
+
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        activeCat = chip.getAttribute("data-compat-filter") || "all";
+        chips.forEach((c) => {
+          const on = c === chip;
+          c.classList.toggle("is-active", on);
+          c.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        apply();
+        announce(activeCat === "all" ? "Showing all compat pins" : `Compat category: ${activeCat}`);
+      });
+    });
+
+    search?.addEventListener("input", () => {
+      query = search.value || "";
+      apply();
+    });
+
+    renderDetail(null);
+    apply();
+
+    // Restore selection helper for keyboard users after filter
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && selectedKey) {
+        selectedKey = null;
+        grid.querySelectorAll(".compat-item").forEach((el) => el.classList.remove("is-selected"));
+        renderDetail(null);
+      }
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function bind() {
+    document.getElementById("copy-addr")?.addEventListener("click", () => copyDonate("copy-addr"));
+    document.getElementById("dock-copy-addr")?.addEventListener("click", () => copyDonate("dock-copy-addr"));
+    document.getElementById("btn-probe-status")?.addEventListener("click", () => {
+      probeStatuses().catch(() => announce("Status probe failed"));
+    });
+  }
+
+  function boot() {
+    initNav();
+    initReveal();
+    initStarfield();
+    initFilters();
+    initCompatExplorer();
+    bind();
+    // Auto-probe once after paint — honest results either way
+    requestAnimationFrame(() => {
+      probeStatuses().catch(() => {});
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();

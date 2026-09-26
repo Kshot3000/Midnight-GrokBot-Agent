@@ -6,13 +6,14 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 
 > This repo does **not** invent Midnight APIs. Prefer official docs and examples linked below.
 
-## Live site (GitHub Pages)
+## GitHub Pages (when Actions enabled)
 
+Documented URL (may 404 until workflow scope + Pages source are set):
 **https://kshot3000.github.io/Midnight-GrokBot-Agent/**
 
 | Path | App |
 | --- | --- |
-| `/` | Lab site (landing + apps gallery + compat matrix) |
+| `/` | **Midnight Studio Hub** — flagship homepage, studio cards, live status, Compat Explorer |
 | `/escrow/` | Agent Escrow local stub |
 | `/lace/` | **Lace Connect Studio** — journey + matrix + capability radar |
 | `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard + forge theater |
@@ -29,7 +30,7 @@ Until then the URL may 404.
 ```
 .
 ├── apps/
-│   ├── midnight-lab-site/     # Static marketing / dev landing site
+│   ├── midnight-lab-site/     # Midnight Studio Hub (flagship homepage)
 │   ├── lace-connect-demo/     # Lace Connect Studio (journey, matrix, capabilities)
 │   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
 │   ├── auth-lab/              # Auth Forge Studio (MPS-0029 journey + scorecard)
@@ -48,7 +49,7 @@ Until then the URL may 404.
 
 | Path | Role |
 | --- | --- |
-| `apps/midnight-lab-site` | Zero-dependency HTML/CSS/JS site about Midnight + this lab |
+| `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Matrix Explorer, donate dock |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — journey stepper, injection watch, matrix, capability radar · **discovery + connect only** |
 | `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
 | `apps/auth-lab` | **Auth Forge Studio** — attack journey, scorecard, forge theater, local bboard |
@@ -60,9 +61,10 @@ Until then the URL may 404.
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
 | `BRANDING.md` | Donation address, X handle, NightDream mention |
 
-## Quick start — landing site
+## Quick start — Studio Hub (flagship homepage)
 
-**Live:** https://kshot3000.github.io/Midnight-GrokBot-Agent/
+Documented Pages URL (may 404 until Actions / workflow scope enabled):
+https://kshot3000.github.io/Midnight-GrokBot-Agent/
 
 No npm required for local preview. From the repo root:
 
