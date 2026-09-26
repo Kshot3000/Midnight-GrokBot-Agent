@@ -58,12 +58,23 @@ export {
 export {
   LaceMidnightKitError,
   KitErrorCodes,
+  ERROR_CATALOG,
+  listErrorCatalog,
+  findErrorCatalogEntry,
   isAPIError,
   isLaceMidnightKitError,
   normalizeConnectorError,
   userHintForError,
   type KitErrorCode,
+  type ErrorCatalogEntry,
 } from './errors.js';
+
+export {
+  LACE_INSTALL_GUIDE,
+  formatInstallGuideMarkdown,
+  type InstallGuide,
+  type InstallGuideStep,
+} from './installGuide.js';
 
 export {
   LACE_MIDNIGHT_WORKAROUNDS,
@@ -179,4 +190,4 @@ export const LAB_BRANDING = {
 } as const;
 
 /** Kit semver for UI badges. */
-export const KIT_VERSION = '0.3.0';
+export const KIT_VERSION = '0.3.1';

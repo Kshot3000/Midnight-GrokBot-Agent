@@ -1,7 +1,7 @@
 # Lace Connect Studio
 
 Production-quality **browser Lace** discover + connect app for Midnight, powered by
-[`@kshot/lace-midnight-kit@0.3.0`](../../packages/lace-midnight-kit) and official
+[`@kshot/lace-midnight-kit@0.3.1`](../../packages/lace-midnight-kit) and official
 `@midnight-ntwrk/dapp-connector-api@4.0.1`.
 
 ## What works (real function)
@@ -15,12 +15,23 @@ Production-quality **browser Lace** discover + connect app for Midnight, powered
 | Refresh | Re-reads status, addresses, and balances |
 | Health | Polls `getConnectionStatus`; clears session if Lace disconnects |
 | Capability radar | Read-only probe including balances; `makeTransfer` / submit skipped |
+| Install guide | Structured empty-state steps from `LACE_INSTALL_GUIDE` |
+| Error codes | In-app `ERROR_CATALOG` table (kit + connector codes, recoverable flags) |
 
 ## What it does **not** do
 
 - Call `makeTransfer` or submit transactions
 - Claim mainnet transfers work after a green connect
 - Run outside the browser (Lace injects into the page)
+
+## Install Lace (quick)
+
+1. Install from [lace.io](https://www.lace.io/) or the [Chrome Web Store](https://chromewebstore.google.com/detail/lace/gafhhkghbfjjkeiendhlofajokpaflmk).
+2. Enable **Midnight** and wait until Synced.
+3. Pick **Preprod** for lab work (mainnet = connect/status only here).
+4. Refresh this tab → **Refresh discovery** → Connect.
+
+See also kit `LACE_INSTALL_GUIDE` / `WORKAROUNDS.md`.
 
 ## Run locally
 
@@ -31,7 +42,6 @@ npm run dev:lace-demo
 # open http://localhost:5174
 ```
 
-Install [Lace](https://www.lace.io/) with Midnight enabled for a live session.
 Optional **Demo mode** simulates a session for UI exploration without Lace.
 
 ## Branding

@@ -12,6 +12,7 @@ Brand: donate `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y
 - Preprod endpoints / `setNetworkId('preprod')` + **providers assembly** (indexer / zk / proof)
 - Scripts that **exit non-zero** without wallet keys (no pretend deploy)
 - Throwaway wallet generator (secrets → `.secrets/`, never commit)
+- Human-scannable CLI banners + JSON reports on every command
 
 ## What this is NOT
 
@@ -19,24 +20,72 @@ Brand: donate `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y
 - Not a captcha-free faucet (browser required)
 - Not a substitute for local proof-server on `:6300`
 
-## Commands (Node 22+)
+## Quick start (Node 22+)
 
 ```bash
 export PATH="$HOME/.local/share/fnm:$PATH"
 eval "$(fnm env)" && fnm use 22
 
+# 1) Confirm Compact artifacts
 npm run check:artifacts -w @kshot/preprod-hello-stub
+
+# 2) Off-chain increment (local circuit)
 npm run offchain -w @kshot/preprod-hello-stub
+
+# 3) Print Preprod endpoints
 npm run preprod:config -w @kshot/preprod-hello-stub
+
+# 4) Assemble providers + live probes (indexer / node / :6300)
 npm run preprod:providers -w @kshot/preprod-hello-stub
-npm run preprod:require-wallet -w @kshot/preprod-hello-stub   # exits 2 without keys
-npm run wallet:gen -w @kshot/preprod-hello-stub
-npm run faucet:attempt -w @kshot/preprod-hello-stub            # fails without captcha
-npm run preprod:deploy -w @kshot/preprod-hello-stub            # clear gates
+
+# 5) Wallet gate (exits 2 without keys)
+npm run preprod:require-wallet -w @kshot/preprod-hello-stub
+
+# 6) Deploy gate (honest stops — see exit codes)
+npm run preprod:deploy -w @kshot/preprod-hello-stub
+
 npm test -w @kshot/preprod-hello-stub
 ```
 
 Root aliases: `stub:check`, `stub:offchain`, `stub:preprod-config`, `stub:providers`, `stub:require-wallet`, `stub:wallet-gen`, `stub:faucet-attempt`, `stub:deploy-preprod`, `stub:test`.
+
+## CLI output
+
+Every command prints:
+
+1. A banner stating the **honest claim** (not a deploy)
+2. Key/value sections (`networkId`, probes, artifact sizes…)
+3. The same payload as **JSON** for scripting
+4. Brand donate + `@kshot9000` footer
+
+Example:
+
+```
+════════════════════════════════════════════════════════════════
+  preprod-hello-stub · providers
+  wiring + probes — NOT a Preprod deploy
+════════════════════════════════════════════════════════════════
+
+▸ Wiring
+  networkId          preprod
+  …
+▸ Live probes
+  proof-server       ok · …
+  indexer            ok · height …
+  node               ok · Midnight Preprod
+```
+
+## Exit codes (deploy / wallet gates)
+
+| Code | Meaning |
+| --- | --- |
+| 0 | OK (advisory warnings may still print) |
+| 1 | Unexpected / artifact / runtime failure |
+| 2 | Missing or invalid wallet credentials |
+| 3 | Proof-server unhealthy (submit refused) |
+| 4 | Preprod indexer/node probe failed |
+| 5 | Credentials + infra OK; `MIDNIGHT_PREPROD_ALLOW_SUBMIT` not set |
+| 6 | Allow set but funded-wallet harness not enabled (tDUST pending) |
 
 ## Env
 
@@ -45,7 +94,7 @@ cp .env.preprod.example .env.preprod   # from repo root
 # set MIDNIGHT_WALLET_MNEMONIC or MIDNIGHT_WALLET_SEED (one only)
 ```
 
-See `docs/PREPROD-FUNDING.md`.
+See [`docs/PREPROD-FUNDING.md`](../../docs/PREPROD-FUNDING.md).
 
 ## Proof-server
 
@@ -55,3 +104,13 @@ Reuse healthy local server:
 curl -sS http://127.0.0.1:6300/health
 # or: npm run proof-server:podman
 ```
+
+## Status (honest)
+
+| Item | State |
+| --- | --- |
+| Compact hello compiled | **yes** (`contracts/hello-midnight/out`) |
+| Providers wiring | **yes** (wallet slots null until funded) |
+| Proof-server | local `:6300` — optional health probe |
+| Faucet / tDUST | **blocked** on captcha / funding |
+| On-chain deploy | **no** — refuse to claim |

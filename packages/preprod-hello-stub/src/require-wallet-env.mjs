@@ -7,6 +7,7 @@
 import { pathToFileURL } from 'node:url';
 import { loadPreprodEnv } from './load-env.mjs';
 import { PREPROD, BRAND } from './preprod-config.mjs';
+import { banner, brandLine, printExitLegend, ok, printJson } from './cli-format.mjs';
 
 loadPreprodEnv();
 
@@ -61,7 +62,9 @@ export function requireWalletOrExit() {
   const creds = readWalletCredentials();
   if (creds.ok) return creds;
 
-  console.error('ERROR: Preprod wallet keys required — refusing to pretend deploy.');
+  console.error('════════════════════════════════════════════════════════════════');
+  console.error('  ERROR: Preprod wallet keys required — refusing to pretend deploy.');
+  console.error('════════════════════════════════════════════════════════════════');
   console.error(`  code: ${creds.code}`);
   console.error(`  ${creds.message}`);
   console.error('');
@@ -84,6 +87,12 @@ export function requireWalletOrExit() {
 const isMain =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
+  banner('preprod-hello-stub · require wallet', {
+    claim: 'credentials check only — NOT a deploy',
+  });
   const c = requireWalletOrExit();
-  console.log(JSON.stringify({ ok: true, kind: c.kind, claim: 'credentials present — NOT a deploy' }, null, 2));
+  ok(`credentials present (${c.kind})`);
+  printJson({ ok: true, kind: c.kind, claim: 'credentials present — NOT a deploy' });
+  printExitLegend([2]);
+  brandLine();
 }

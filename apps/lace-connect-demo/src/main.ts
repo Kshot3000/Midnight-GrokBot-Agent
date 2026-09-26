@@ -10,7 +10,9 @@ import {
   DEMO_MODE_LABEL,
   KIT_VERSION,
   LAB_BRANDING,
+  LACE_INSTALL_GUIDE,
   LACE_MIDNIGHT_WORKAROUNDS,
+  ERROR_CATALOG,
   MidnightNetworkIds,
   advanceConnectJourney,
   connectWithProvider,
@@ -841,16 +843,22 @@ function render(): void {
                 .join('')}</ul>`
             : `<div class="empty-state install-guide" role="status">
                 <div class="empty-art" aria-hidden="true">⬡</div>
-                <h3>Lace not detected</h3>
-                <p class="muted">
-                  This studio enumerates <code>window.midnight</code>. No providers means Lace is missing, disabled, or not injected yet — we will <strong>not</strong> fake a connected wallet.
-                </p>
+                <h3>${escapeHtml(LACE_INSTALL_GUIDE.title)}</h3>
+                <p class="muted">${escapeHtml(LACE_INSTALL_GUIDE.subtitle)}</p>
                 <ol class="install-steps">
-                  <li>Install <a href="${LAB_BRANDING.laceInstallUrl}" rel="noopener noreferrer">Lace</a> (or the <a href="${LAB_BRANDING.laceChromeUrl}" rel="noopener noreferrer">Chrome Web Store build</a>).</li>
-                  <li>Enable <strong>Midnight</strong> in Lace and finish sync.</li>
-                  <li>Refresh this tab (extensions often inject after first paint — Watch injection helps).</li>
-                  <li>Click <strong>Refresh discovery</strong>, pick the wallet, choose <strong>preprod</strong>, then <strong>Connect with Lace</strong>.</li>
+                  ${LACE_INSTALL_GUIDE.steps
+                    .map((s) => {
+                      const link =
+                        s.id === 'install'
+                          ? ` <a href="${LAB_BRANDING.laceInstallUrl}" rel="noopener noreferrer">lace.io</a> · <a href="${LAB_BRANDING.laceChromeUrl}" rel="noopener noreferrer">Chrome Web Store</a>`
+                          : s.href
+                            ? ` <a href="${escapeAttr(s.href)}" rel="noopener noreferrer">link</a>`
+                            : '';
+                      return `<li><strong>${escapeHtml(s.title)}</strong> — ${escapeHtml(s.detail)}${link}</li>`;
+                    })
+                    .join('')}
                 </ol>
+                <p class="muted small"><strong>After install:</strong> ${escapeHtml(LACE_INSTALL_GUIDE.afterInstall[0] ?? '')}</p>
                 <p class="muted">
                   Optional Demo mode explores UI chrome only — labeled <em>${escapeHtml(DEMO_MODE_LABEL)}</em>, never a real session.
                   Guide: <a href="${LAB_BRANDING.officialConnectGuideUrl}" rel="noopener noreferrer">React wallet connect</a>.
@@ -899,6 +907,30 @@ function render(): void {
       <section class="panel reveal" id="log-panel" aria-labelledby="log-heading">
         <h2 id="log-heading">Activity log</h2>
         <pre class="log" id="log" tabindex="0">${escapeHtml(state.log.join('\n') || 'Ready.')}</pre>
+      </section>
+
+      <section class="panel reveal" id="error-codes" aria-labelledby="err-heading">
+        <div class="section-head">
+          <h2 id="err-heading">Error codes reference</h2>
+          <p class="muted">Stable kit + connector codes from <code>ERROR_CATALOG</code> (kit 0.3.1). Recoverable = retry after user action.</p>
+        </div>
+        <div class="error-catalog" role="table" aria-label="Error codes">
+          <div class="error-catalog-head" role="row">
+            <span role="columnheader">Code</span>
+            <span role="columnheader">Source</span>
+            <span role="columnheader">Retry?</span>
+            <span role="columnheader">Hint</span>
+          </div>
+          ${ERROR_CATALOG.map(
+            (e) =>
+              `<div class="error-catalog-row" role="row">
+                <code role="cell">${escapeHtml(e.code)}</code>
+                <span role="cell" class="muted">${escapeHtml(e.source)}</span>
+                <span role="cell">${e.recoverable ? 'yes' : 'no'}</span>
+                <span role="cell">${escapeHtml(e.hint)}</span>
+              </div>`,
+          ).join('')}
+        </div>
       </section>
 
       <section class="panel reveal" id="workarounds" aria-labelledby="wa-heading">

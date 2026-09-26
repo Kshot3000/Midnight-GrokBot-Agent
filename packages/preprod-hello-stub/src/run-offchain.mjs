@@ -7,11 +7,17 @@
 import { pathToFileURL } from 'node:url';
 import * as RT from '@midnight-ntwrk/compact-runtime';
 import { HELLO_CONTRACT } from './paths.mjs';
-import './check-artifacts.mjs'; // exits 1 if artifacts missing
+import { requireHelloArtifactsOrExit } from './check-artifacts.mjs';
+import { banner, section, kv, ok, brandLine, printJson } from './cli-format.mjs';
+
+requireHelloArtifactsOrExit();
+
+banner('preprod-hello-stub · off-chain increment', {
+  claim: 'Local circuit only — NOT a Preprod deploy',
+});
 
 const { Contract, ledger } = await import(pathToFileURL(HELLO_CONTRACT).href);
 
-// hello.compact declares no witnesses — empty object is correct
 const contract = new Contract({});
 const COIN = '0'.repeat(64);
 const ADDR = RT.sampleContractAddress();
@@ -32,7 +38,14 @@ const report = {
   publicTranscriptLen: call.proofData?.publicTranscript?.length ?? 0,
   gasCostDefined: call.gasCost !== undefined,
 };
-console.log(JSON.stringify(report, null, 2));
+
+section('Result');
+kv('greetings', `${report.greetings.before} → ${report.greetings.after}`);
+kv('proofData', report.hasProofData ? 'present (local)' : 'absent');
+kv('transcript', report.publicTranscriptLen);
+ok('increment transition matched (+1)');
+printJson(report);
+brandLine();
 
 if (after.greetings !== before.greetings + 1n) {
   console.error('Unexpected counter transition');

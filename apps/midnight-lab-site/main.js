@@ -40,7 +40,7 @@
       key: "DApp Connector",
       val: "4.0.1",
       cat: "wallet",
-      note: "DApp Connector API pin used by Lace Connect Studio + lace-midnight-kit 0.3.0. Discovery + connect only in this lab.",
+      note: "DApp Connector API pin used by Lace Connect Studio + lace-midnight-kit 0.3.1. Discovery + connect only in this lab.",
     },
     {
       key: "proof-server",
@@ -473,6 +473,7 @@
     { name: "Agent Escrow", path: "escrow/", tags: "role theater" },
     { name: "Donate ADA", path: "#donate", tags: "tip support" },
     { name: "Compat Explorer", path: "#compat", tags: "pins matrix" },
+    { name: "Preprod status", path: "#preprod", tags: "compact proof-server tdust deploy" },
   ];
 
   function initCommandPalette() {
@@ -593,6 +594,69 @@
   }
 
 
+
+  /**
+   * Optional browser probe of local proof-server.
+   * Honest: may fail on Pages / CORS / non-local hosts — that is not a deploy claim.
+   */
+  async function probeProofServerOptional() {
+    const pill = document.getElementById("preprod-proof-pill");
+    const detail = document.getElementById("preprod-proof-detail");
+    if (!pill || !detail) return;
+    pill.className = "status-pill is-checking";
+    pill.textContent = "Checking…";
+    detail.textContent = "Fetching http://127.0.0.1:6300/health …";
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 2500);
+    try {
+      const res = await fetch("http://127.0.0.1:6300/health", {
+        signal: ctrl.signal,
+        mode: "cors",
+        cache: "no-store",
+      });
+      clearTimeout(timer);
+      if (res.ok) {
+        let body = "";
+        try { body = (await res.text()).slice(0, 120); } catch { /* ignore */ }
+        pill.className = "status-pill is-ok";
+        pill.textContent = "Healthy";
+        detail.textContent = body ? `OK · ${body}` : "OK · HTTP " + res.status;
+        announce("Proof-server health OK on localhost:6300");
+      } else {
+        pill.className = "status-pill is-miss";
+        pill.textContent = "HTTP " + res.status;
+        detail.textContent = "Reached :6300 but non-OK status — check proof-server logs.";
+        announce("Proof-server returned HTTP " + res.status);
+      }
+    } catch (err) {
+      clearTimeout(timer);
+      pill.className = "status-pill is-miss";
+      pill.textContent = "Unreachable";
+      const reason = err && err.name === "AbortError" ? "timeout" : (err && err.message) || "blocked";
+      detail.textContent =
+        "Optional check failed (" + reason + "). Expected on GitHub Pages / CORS. On the build box: curl -sS http://127.0.0.1:6300/health or npm run proof-server:podman";
+      announce("Proof-server optional probe failed — not a deploy claim");
+    }
+  }
+
+  function initPreprodPanel() {
+    const compactPill = document.getElementById("preprod-compact-pill");
+    if (compactPill) {
+      compactPill.className = "status-pill is-ok";
+      compactPill.textContent = "Compiled";
+      compactPill.title = "contracts/hello-midnight/out present in repo — not on-chain";
+    }
+    const deployPill = document.getElementById("preprod-deploy-pill");
+    if (deployPill) {
+      deployPill.className = "status-pill is-miss";
+      deployPill.textContent = "Blocked · tDUST";
+      deployPill.title = "Faucet captcha / tDUST pending — no on-chain deploy claimed";
+    }
+    document.getElementById("btn-probe-proof")?.addEventListener("click", () => {
+      probeProofServerOptional().catch(() => {});
+    });
+  }
+
   function bind() {
     document.getElementById("copy-addr")?.addEventListener("click", () => copyDonate("copy-addr"));
     document.getElementById("dock-copy-addr")?.addEventListener("click", () => copyDonate("dock-copy-addr"));
@@ -601,6 +665,7 @@
     });
   }
 
+
   function boot() {
     initNav();
     initReveal();
@@ -608,6 +673,7 @@
     initFilters();
     initCompatExplorer();
     initCommandPalette();
+    initPreprodPanel();
     bind();
     // Auto-probe once after paint — honest results either way
     requestAnimationFrame(() => {

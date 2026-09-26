@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain." />
+  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain. Honest Preprod status: Compact compiled, proof-server optional, deploy blocked pending tDUST." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
   <title>Midnight Studio Hub — Flagship Labs · @kshot9000</title>
@@ -32,6 +32,7 @@
     <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
     <nav id="site-nav" aria-label="Primary">
       <a href="#studios">Studios</a>
+      <a href="#preprod">Preprod</a>
       <a href="#compat">Compat</a>
       <a href="#about">About</a>
       <a href="#stack">Stack</a>
@@ -365,6 +366,73 @@
         Status = HTTP probe of sibling paths on <em>this</em> origin (assembled Pages build or multi-app local serve).
         Serving only <code>midnight-lab-site/</code> will correctly show Not found — that is honest, not broken.
       </p>
+    </section>
+
+
+    <section id="preprod" class="panel preprod-panel reveal" aria-labelledby="preprod-heading">
+      <div class="section-head tight">
+        <h2 id="preprod-heading">Compact · proof-server · Preprod <span class="badge badge-research">honest status</span></h2>
+        <p class="muted">
+          Offline-readable lab status while faucet captcha blocks funding.
+          <strong>Compiled yes</strong> · proof-server local health optional ·
+          <strong>deploy blocked pending tDUST</strong>. No on-chain claim.
+        </p>
+      </div>
+
+      <div class="preprod-grid" role="list">
+        <article class="preprod-card" role="listitem" data-preprod-item="compact">
+          <div class="preprod-card-top">
+            <h3>Compact hello</h3>
+            <span class="status-pill is-ok" id="preprod-compact-pill">Compiled</span>
+          </div>
+          <p class="muted">
+            Real artifacts under <code>contracts/hello-midnight/out</code>
+            (Compact toolchain <strong>0.31.1</strong>). Off-chain
+            <code>stub:offchain</code> exercises <code>increment</code> — not a chain submit.
+          </p>
+          <ul class="preprod-meta">
+            <li>CLI: <code>npm run compact:hello</code> / <code>stub:check</code></li>
+            <li>Package: <code>@kshot/preprod-hello-stub</code></li>
+          </ul>
+        </article>
+
+        <article class="preprod-card" role="listitem" data-preprod-item="proof">
+          <div class="preprod-card-top">
+            <h3>Proof-server</h3>
+            <span class="status-pill is-checking" id="preprod-proof-pill">Optional check</span>
+          </div>
+          <p class="muted">
+            Local <code>:6300</code> (image <strong>8.1.0</strong>). Browser probe is optional and
+            may fail on Pages / CORS / remote hosts — that does <em>not</em> mean the box server is down.
+          </p>
+          <div class="preprod-actions">
+            <button type="button" class="btn ghost small" id="btn-probe-proof">Probe localhost:6300</button>
+            <span class="muted small" id="preprod-proof-detail">Not probed yet</span>
+          </div>
+        </article>
+
+        <article class="preprod-card" role="listitem" data-preprod-item="deploy">
+          <div class="preprod-card-top">
+            <h3>Preprod deploy</h3>
+            <span class="status-pill is-miss" id="preprod-deploy-pill">Blocked</span>
+          </div>
+          <p class="muted">
+            Providers wiring + clear-fail gate landed (<code>stub:providers</code> /
+            <code>stub:deploy-preprod</code>). Faucet captcha blocks tNIGHT → tDUST.
+            <strong>No on-chain deploy claimed.</strong>
+          </p>
+          <ul class="preprod-meta">
+            <li>Faucet (captcha): <a href="https://midnight-tmnight-preprod.nethermind.dev/" rel="noopener noreferrer">Nethermind preprod faucet</a></li>
+            <li>Docs: <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/blob/main/docs/PREPROD-FUNDING.md" rel="noopener noreferrer">PREPROD-FUNDING.md</a></li>
+          </ul>
+        </article>
+      </div>
+
+      <aside class="preprod-honesty" role="note">
+        <strong>Honest bar:</strong> Compact compiled <em>yes</em> · proof-server health
+        <em>optional local check</em> · deploy <em>blocked pending tDUST</em>.
+        Brand: donate ADA + <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>.
+      </aside>
     </section>
 
     <section id="compat" class="panel compat-panel reveal" aria-labelledby="compat-heading">

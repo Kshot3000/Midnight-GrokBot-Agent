@@ -1,4 +1,4 @@
-# `@kshot/lace-midnight-kit` (v0.3.0)
+# `@kshot/lace-midnight-kit` (v0.3.1)
 
 Reusable **browser** helpers for connecting a DApp to **Lace Midnight** via the official
 [`@midnight-ntwrk/dapp-connector-api`](https://www.npmjs.com/package/@midnight-ntwrk/dapp-connector-api) **4.0.1** types.
@@ -84,6 +84,14 @@ console.log(session.networkId, session.addresses.unshieldedAddress);
 - React wallet connect guide: https://docs.midnight.network/guides/react-wallet-connect
 - DApp connector API: https://docs.midnight.network/api-reference/dapp-connector
 - Spec / types source: https://github.com/midnightntwrk/midnight-dapp-connector-api
+
+## Install guide + error codes
+
+Export `LACE_INSTALL_GUIDE` / `formatInstallGuideMarkdown()` for empty-state install steps
+(Chrome / lace.io, enable Midnight, Preprod, refresh, connect).
+
+Export `ERROR_CATALOG` / `listErrorCatalog()` for a stable kit + connector error-code table
+with recoverable flags and user hints (surfaced in Lace Connect Studio).
 
 ## Lace workarounds (summary)
 

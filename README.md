@@ -82,7 +82,9 @@ Until then the URL may 404.
 | `apps/nocturne-messenger` | **LOCAL-TRUE** Nocturne Messenger — localStorage v2, multi-tab sync, export/import, vitest · sealed DMs · not a relay / not on-chain |
 | `packages/lace-midnight-kit` | **v0.3.0** — discover, connect, prefs, reconnect, balance refresh, health watch, capability probe, vitest |
 | `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
-| `packages/preprod-hello-stub` | Preprod path — off-chain hello + **providers wiring** + clear-fail deploy gate · **not a confirmed Preprod deploy** |
+| `packages/preprod-hello-stub` | Preprod path — off-chain hello + **providers wiring** + clear-fail deploy gate · banners + exit-code legend · **not a confirmed Preprod deploy** |
+| Hub `#preprod` panel | Honest Compact / proof-server / deploy status (compiled yes · proof optional · blocked pending tDUST) |
+| `@kshot/lace-midnight-kit` | **0.3.1** — install guide + `ERROR_CATALOG` surfaced in Lace Connect Studio |
 | `contracts/hello-midnight` | Compact counter — `npm run compact:hello` (artifacts gitignored) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
 | `BRANDING.md` | Donation address, X handle, NightDream mention |

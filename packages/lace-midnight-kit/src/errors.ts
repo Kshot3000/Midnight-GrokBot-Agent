@@ -117,6 +117,8 @@ export function userHintForError(error: LaceMidnightKitError): string {
       return 'This kit only runs in a browser (Lace injects window.midnight).';
     case KitErrorCodes.NoProviders:
       return 'No Midnight wallet found. Install Lace with Midnight enabled, then refresh.';
+    case KitErrorCodes.ProviderNotFound:
+      return 'Selected injection key / rdns is no longer on window.midnight. Re-discover.';
     case KitErrorCodes.IncompatibleApiVersion:
       return 'Wallet API version is outside the range this DApp supports.';
     case KitErrorCodes.DuplicateRdns:
@@ -140,4 +142,118 @@ export function userHintForError(error: LaceMidnightKitError): string {
     default:
       return error.message;
   }
+}
+
+
+/** One row in the Connect Studio error-code reference. */
+export type ErrorCatalogEntry = {
+  code: string;
+  source: 'kit' | 'connector';
+  recoverable: boolean;
+  hint: string;
+};
+
+/**
+ * Stable catalog of kit + common connector codes for UI help panels.
+ * Hints match userHintForError where applicable.
+ */
+export const ERROR_CATALOG: readonly ErrorCatalogEntry[] = [
+  {
+    code: KitErrorCodes.NoWindow,
+    source: 'kit',
+    recoverable: false,
+    hint: 'This kit only runs in a browser (Lace injects window.midnight).',
+  },
+  {
+    code: KitErrorCodes.NoProviders,
+    source: 'kit',
+    recoverable: true,
+    hint: 'No Midnight wallet found. Install Lace with Midnight enabled, then refresh.',
+  },
+  {
+    code: KitErrorCodes.ProviderNotFound,
+    source: 'kit',
+    recoverable: true,
+    hint: 'Selected injection key / rdns is no longer on window.midnight. Re-discover.',
+  },
+  {
+    code: KitErrorCodes.IncompatibleApiVersion,
+    source: 'kit',
+    recoverable: false,
+    hint: 'Wallet API version is outside the range this DApp supports.',
+  },
+  {
+    code: KitErrorCodes.DuplicateRdns,
+    source: 'kit',
+    recoverable: true,
+    hint: 'Multiple wallets share the same rdns — choose carefully; one may be spoofed.',
+  },
+  {
+    code: KitErrorCodes.UserCancelled,
+    source: 'kit',
+    recoverable: true,
+    hint: 'Connection or action was cancelled in the wallet.',
+  },
+  {
+    code: KitErrorCodes.ConnectionLost,
+    source: 'kit',
+    recoverable: true,
+    hint: 'Wallet connection was lost. Reconnect.',
+  },
+  {
+    code: KitErrorCodes.NetworkMismatch,
+    source: 'kit',
+    recoverable: true,
+    hint: 'Connected network id does not match the network you requested.',
+  },
+  {
+    code: KitErrorCodes.WalletUnavailable,
+    source: 'kit',
+    recoverable: true,
+    hint: 'Lace reported the wallet unavailable after connect. Wait for sync, restart extension, see WORKAROUNDS.md.',
+  },
+  {
+    code: KitErrorCodes.Unknown,
+    source: 'kit',
+    recoverable: false,
+    hint: 'Unrecognized wallet / connector error — check Lace sync and the activity log.',
+  },
+  {
+    code: ErrorCodes.Rejected,
+    source: 'connector',
+    recoverable: true,
+    hint: 'Connection or action was cancelled in the wallet.',
+  },
+  {
+    code: ErrorCodes.PermissionRejected,
+    source: 'connector',
+    recoverable: true,
+    hint: 'Wallet denied permission for this action for the session.',
+  },
+  {
+    code: ErrorCodes.Disconnected,
+    source: 'connector',
+    recoverable: true,
+    hint: 'Wallet connection was lost. Reconnect.',
+  },
+  {
+    code: ErrorCodes.InvalidRequest,
+    source: 'connector',
+    recoverable: false,
+    hint: 'Wallet rejected the request as invalid.',
+  },
+  {
+    code: ErrorCodes.InternalError,
+    source: 'connector',
+    recoverable: true,
+    hint: 'Wallet internal error. Check Lace sync / network status.',
+  },
+] as const;
+
+export function listErrorCatalog(): readonly ErrorCatalogEntry[] {
+  return ERROR_CATALOG;
+}
+
+export function findErrorCatalogEntry(code: string): ErrorCatalogEntry | undefined {
+  return ERROR_CATALOG.find((e) => e.code === code);
 }
