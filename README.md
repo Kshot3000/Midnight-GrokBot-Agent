@@ -19,13 +19,13 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard + forge theater |
 | `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
 | `/pledge/` | **Veil Pledge Studio** — private tip jar & pledge board |
-| `/market/` | **Night Market Studio** — sealed listings & private bids |
-| `/invite/` | **Sealed Invite Studio** — private RSVP & sealed invites |
+| `/market/` | **Night Market Studio** — sealed listings & bids (LOCAL-TRUE) |
+| `/invite/` | **Sealed Invite Studio** — private RSVP (LOCAL-TRUE) |
 | `/proof/` | **Proof Playground** — visual ZK / circuit explainer |
 | `/ballot/` | **Private Ballot Studio** — sealed polls & private votes |
 | `/passport/` | **Veil Passport Studio** — confidential credentials & selective disclosure |
 | `/atelier/` | **Compact Atelier** — editable Compact snippets + explain panel |
-| `/nocturne/` | **Nocturne Messenger** — private sealed DMs preview studio |
+| `/nocturne/` | **Nocturne Messenger Studio** — sealed DMs (LOCAL-TRUE) |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -68,13 +68,13 @@ Until then the URL may 404.
 | `apps/auth-lab` | **Auth Forge Studio** — attack journey, scorecard, forge theater, local bboard |
 | `apps/shield-board` | **LOCAL-TRUE** dual-state bulletin — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
 | `apps/veil-pledge` | **Veil Pledge Studio** — private tip jar, sealed pledges, threshold proofs (local stub) |
-| `apps/night-market` | **Night Market Studio** — sealed listings, private bids, bid-threshold theater (local stub) |
-| `apps/sealed-invite` | **Sealed Invite Studio** — private RSVP, capacity proofs, selective admit (local stub) |
+| `apps/night-market` | **LOCAL-TRUE** Night Market — localStorage v2, multi-tab sync, export/import, vitest · sealed listings & bids · not on-chain |
+| `apps/sealed-invite` | **LOCAL-TRUE** Sealed Invite — localStorage v2, multi-tab sync, export/import, vitest · private RSVP · not on-chain |
 | `apps/proof-playground` | **Proof Playground** — visual ZK circuits, witness→gate→prove theater (local stub) |
 | `apps/private-ballot` | **LOCAL-TRUE** sealed polls — localStorage v2, multi-tab sync, export/import, vitest · educational hashes only |
 | `apps/veil-passport` | **Veil Passport Studio** — confidential credentials, selective disclose, predicate theater (local stub) |
 | `apps/compact-atelier` | **Compact Atelier** — editable Compact snippets, explain panel, lint theater (local stub) |
-| `apps/nocturne-messenger` | **Nocturne Messenger Studio** — sealed DMs, envelope veil, selective reveal (local stub) |
+| `apps/nocturne-messenger` | **LOCAL-TRUE** Nocturne Messenger — localStorage v2, multi-tab sync, export/import, vitest · sealed DMs · not a relay / not on-chain |
 | `packages/lace-midnight-kit` | **v0.3.0** — discover, connect, prefs, reconnect, balance refresh, health watch, capability probe, vitest |
 | `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
@@ -254,7 +254,7 @@ python3 -m http.server 5186
 # open http://localhost:5186
 ```
 
-Pages path (when Actions enabled): `/nocturne/`. Local stub only — not a relay, Lace, Compact compiler, or on-chain messaging.
+Pages path (when Actions enabled): `/nocturne/`. **LOCAL-TRUE** — localStorage v2, multi-tab sync, export/import; not a relay, Lace, Compact compiler, or on-chain messaging.
 
 ## Compact / Midnight toolchain (official)
 

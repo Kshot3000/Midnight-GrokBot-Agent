@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Nocturne Messenger Studio — private sealed DMs preview for Midnight. Envelope veil, public commitments, selective reveal. Educational local stub by @kshot9000. Not a relay. Not on-chain." />
+  <meta name="description" content="Nocturne Messenger Studio — sealed DMs with real localStorage, multi-tab sync, export/import by @kshot9000. LOCAL-TRUE educational — not a relay, not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
-  <title>Nocturne Messenger Studio — Sealed DMs · Midnight Lab</title>
+  <title>LOCAL-TRUE · Nocturne Messenger Studio — Sealed DMs · Midnight Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M14 20c0-3 2.5-6 8-6h20c5.5 0 8 3 8 6v18c0 3-2.5 6-8 6H28l-8 8v-8c-5.5 0-6-3-6-6V20z' fill='none' stroke='%22a78bfa' stroke-width='2.2' stroke-linejoin='round'/%3E%3Ccircle cx='28' cy='30' r='2' fill='%2322d3ee'/%3E%3Ccircle cx='36' cy='30' r='2' fill='%2322d3ee'/%3E%3Ccircle cx='44' cy='30' r='2' fill='%2322d3ee'/%3E%3C/svg%3E" />
 </head>
@@ -40,7 +40,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-stub" title="Educational local stub — not a relay">LOCAL STUB · not a relay</span>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not a relay / not on-chain">LOCAL-TRUE · not a relay · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -151,7 +151,7 @@
     <section id="identity" class="panel reveal" aria-labelledby="identity-heading">
       <div class="section-head">
         <h2 id="identity-heading">Local identity</h2>
-        <p class="muted">Handle + device commitment stay in this browser. Press <kbd style="font-family:var(--mono)">I</kbd>. No passphrase leaves the box; no relay stores your key.</p>
+        <p class="muted">Handle + device commitment stay in this browser (schema v2 localStorage · BroadcastChannel sync · JSON export/import). Press <kbd style="font-family:var(--mono)">I</kbd>. No passphrase leaves the box; no relay. LOCAL-TRUE ≠ on-chain.</p>
       </div>
       <div class="identity-grid">
         <form id="identity-form" class="identity-form" autocomplete="off">
@@ -165,7 +165,10 @@
           <div class="btn-row" style="margin-top:0.85rem">
             <button type="submit" class="btn primary" id="btn-claim">Claim identity</button>
             <button type="button" class="btn ghost" id="btn-seed-demo">Seed demo (Shift+N)</button>
-            <button type="button" class="btn ghost" id="btn-reset-id">Reset local</button>
+            <button type="button" class="btn ghost" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+            <button type="button" class="btn ghost" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+            <input type="file" id="import-file" accept="application/json,.json" hidden />
+            <button type="button" class="btn ghost" id="btn-reset-id">Reset studio</button>
           </div>
         </form>
         <aside class="identity-card" aria-labelledby="id-card-heading">
@@ -343,7 +346,7 @@ export circuit postSealed(threadTag: Bytes&lt;32&gt;): [] {
     <footer class="site-footer">
       <p>
         <strong>Nocturne Messenger Studio</strong>
-        · LOCAL STUB · not a relay · not on-chain ·
+        · LOCAL-TRUE · not a relay · not on-chain ·
         <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Midnight-GrokBot-Agent</a>
         · <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
       </p>
@@ -351,6 +354,6 @@ export circuit postSealed(threadTag: Bytes&lt;32&gt;): [] {
     </footer>
   </main>
 
-  <script src="main.js" defer></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
