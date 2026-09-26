@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Midnight Studio Hub — flagship homepage for Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, and Agent Escrow. Dual-state privacy studios by @kshot9000. Local stubs — not on-chain." />
+  <meta name="description" content="Midnight Studio Hub — flagship homepage for Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. Local stubs — not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
   <title>Midnight Studio Hub — Flagship Labs · @kshot9000</title>
@@ -79,7 +79,7 @@
         <dl class="hub-stats" aria-label="Hub snapshot">
           <div class="stat">
             <dt>Studios</dt>
-            <dd id="stat-studios">9</dd>
+            <dd id="stat-studios">10</dd>
           </div>
           <div class="stat">
             <dt>Reachable locally</dt>
@@ -235,6 +235,27 @@
             <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/private-ballot" rel="noopener noreferrer">Source</a>
           </div>
         </article>
+
+        <article class="app-card app-card-flagship reveal" data-tags="studio dual" data-path="passport/" data-id="passport">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">◈</div>
+            <div class="badge-stack">
+              <span class="badge badge-flagship">Studio</span>
+              <span class="badge badge-stub">LOCAL STUB</span>
+            </div>
+          </div>
+          <h3>Veil Passport Studio</h3>
+          <p>Confidential credentials &amp; selective disclosure — seal claims into a commit, present a public surface, disclose only what a verifier needs, prove age ≥ N or membership ∈ set without revealing raw values.</p>
+          <div class="app-card-meta">
+            <span>Studio · dual-state · credentials</span>
+            <span class="status-pill" data-status-for="passport" aria-live="polite">Unchecked</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="passport/">Open studio</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/veil-passport" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
+
 
         <article class="app-card app-card-flagship reveal" data-tags="studio dual" data-path="proof/" data-id="proof">
           <div class="app-card-top">
@@ -457,6 +478,9 @@
         </li>
         <li>
           <strong>Private Ballot</strong> — <code>cd apps/private-ballot &amp;&amp; python3 -m http.server 5183</code>
+        </li>
+        <li>
+          <strong>Veil Passport</strong> — <code>cd apps/veil-passport &amp;&amp; python3 -m http.server 5184</code>
         </li>
 
         <li>
