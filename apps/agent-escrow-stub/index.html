@@ -14,24 +14,30 @@
 </head>
 <body>
   <div class="bg-scene" aria-hidden="true">
+    <div class="bg-aurora"></div>
     <div class="bg-grid"></div>
     <div class="orb orb-a"></div>
     <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
   </div>
 
-  <header class="site-header">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" id="site-header">
     <a class="logo" href="./">Agent<span>Escrow</span></a>
-    <nav>
-      <a href="../../contracts/agent-escrow/README.md">Compact README</a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="../">Lab site</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/contracts/agent-escrow" rel="noopener noreferrer">Compact README</a>
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
       <a href="https://nightdream.io" rel="noopener noreferrer">NightDream</a>
     </nav>
   </header>
 
-  <main>
+  <main id="main">
     <div class="hero-block">
-      <p class="eyebrow">Midnight Compact · UI stub</p>
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Midnight Compact · UI stub</p>
       <h1>Agent Escrow — local stub</h1>
       <p class="lede">
         Walk the milestone escrow state machine in the browser. This page does
@@ -42,9 +48,9 @@
     </div>
 
     <div class="banner" role="status">
-      Stub only — no on-chain deploy. Compile with Compact ~0.31.1 before any
-      real circuit work. Auth on Midnight must use witness + <code>persistentHash</code>,
-      not <code>ownPublicKey()</code> for authorization.
+      <strong>Stub only — no on-chain deploy.</strong>
+      Compile with Compact ~0.31.1 before any real circuit work. Auth on Midnight must use
+      witness + <code>persistentHash</code>, not <code>ownPublicKey()</code> for authorization (MPS-0029).
     </div>
 
     <div class="grid">
@@ -65,23 +71,34 @@
       </div>
     </div>
 
-    <section class="panel">
-      <h2>State machine</h2>
-      <pre class="machine">created ──fund──▶ funded ──start──▶ in_progress ──settle──▶ settled
-                   │    │               │  │
-                   │    └───cancel──────┘  └──dispute──▶ disputed
-                   │                             │
-                   └────────────cancel───────────┘
-                                         ┌──────┴──────┐
-                                     refund           resume
-                                         │             │
-                                      refunded    in_progress
-
-per milestone: pending → proof_submitted → released | rejected</pre>
+    <section class="panel" aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading">Escrow timeline</h2>
+      <p class="muted timeline-intro">Visual stepper for the escrow state (not ASCII). Branches for dispute are shown below the main path.</p>
+      <ol class="stepper" id="escrowStepper" aria-label="Escrow state timeline">
+        <li class="step" data-state="created"><span class="step-dot"></span><span class="step-label">Created</span></li>
+        <li class="step" data-state="funded"><span class="step-dot"></span><span class="step-label">Funded</span></li>
+        <li class="step" data-state="in_progress"><span class="step-dot"></span><span class="step-label">In progress</span></li>
+        <li class="step" data-state="settled"><span class="step-dot"></span><span class="step-label">Settled</span></li>
+      </ol>
+      <div class="branch-row" aria-label="Dispute branch">
+        <div class="branch-chip" data-branch="disputed">
+          <span class="branch-label">Disputed</span>
+          <span class="branch-hint">from funded / in progress</span>
+        </div>
+        <div class="branch-chip" data-branch="refunded">
+          <span class="branch-label">Refunded</span>
+          <span class="branch-hint">dispute → refund</span>
+        </div>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>Local demo controls</h2>
+    <section class="panel" aria-labelledby="milestone-heading">
+      <h2 id="milestone-heading">Milestone progress</h2>
+      <div class="milestone-track" id="milestoneTrack" aria-live="polite"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="controls-heading">
+      <h2 id="controls-heading">Local demo controls</h2>
       <div class="status-row">
         <span>State: <span id="statePill" class="pill">created</span></span>
         <span>Funded: <code id="funded">0</code> L</span>
@@ -89,20 +106,26 @@ per milestone: pending → proof_submitted → released | rejected</pre>
         <span>Refunded: <code id="refunded">0</code> L</span>
         <span>Balance: <code id="balance">0</code> L</span>
       </div>
-      <div class="actions">
-        <button type="button" class="primary" data-act="fund">Fund 5 ADA</button>
-        <button type="button" data-act="start">Start</button>
-        <button type="button" data-act="proof1">Agent: proof m1</button>
-        <button type="button" data-act="approve1">Approver: release m1</button>
-        <button type="button" data-act="proof2">Agent: proof m2</button>
-        <button type="button" data-act="reject2">Approver: reject m2</button>
-        <button type="button" data-act="settle">Settle</button>
-        <button type="button" data-act="dispute">Dispute</button>
-        <button type="button" data-act="resume">Resume</button>
-        <button type="button" data-act="refund">Dispute refund</button>
-        <button type="button" class="danger" data-act="reset">Reset</button>
+
+      <p class="hint" id="nextHint">Next: fund the escrow to leave <strong>created</strong>.</p>
+
+      <div class="actions" role="group" aria-label="Escrow actions">
+        <button type="button" class="primary" data-act="fund" data-label="Fund 5 ADA" title="Client funds the escrow">Fund 5 ADA</button>
+        <button type="button" data-act="start" data-label="Start" title="Client starts work">Start</button>
+        <button type="button" data-act="proof1" data-label="Agent: proof m1" title="Agent submits proof for m1">Agent: proof m1</button>
+        <button type="button" data-act="approve1" data-label="Approver: release m1" title="Approver releases m1">Approver: release m1</button>
+        <button type="button" data-act="proof2" data-label="Agent: proof m2" title="Agent submits proof for m2">Agent: proof m2</button>
+        <button type="button" data-act="reject2" data-label="Approver: reject m2" title="Approver rejects m2 (demo path)">Approver: reject m2</button>
+        <button type="button" data-act="settle" data-label="Settle" title="Client settles when all milestones decided">Settle</button>
+        <button type="button" data-act="dispute" data-label="Dispute" title="Client opens a dispute">Dispute</button>
+        <button type="button" data-act="resume" data-label="Resume" title="Resume after dispute">Resume</button>
+        <button type="button" data-act="refund" data-label="Dispute refund" title="Refund remaining after dispute">Dispute refund</button>
+        <button type="button" class="danger" data-act="reset" data-label="Reset" title="Reset local demo state">Reset</button>
       </div>
+      <p class="disabled-help" id="disabledHelp" aria-live="polite"></p>
       <div id="err" class="banner error" style="display:none" role="alert"></div>
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
       <div class="table-wrap">
         <table>
           <thead>
@@ -121,7 +144,7 @@ per milestone: pending → proof_submitted → released | rejected</pre>
     <section class="panel">
       <h2>Next steps</h2>
       <ol>
-        <li>Read <a href="../../contracts/agent-escrow/README.md">contracts/agent-escrow/README.md</a> (Compact ~0.31.1 pin + MPS-0029).</li>
+        <li>Read <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/contracts/agent-escrow" rel="noopener noreferrer">contracts/agent-escrow</a> (Compact ~0.31.1 pin + MPS-0029).</li>
         <li>Install Compact from the <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">official install guide</a>.</li>
         <li><code>cd contracts/agent-escrow && npm run compact</code></li>
         <li>Follow <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a> / <a href="https://github.com/midnightntwrk/create-mn-app" rel="noopener noreferrer">create-mn-app</a> for witnesses + UI wiring.</li>
@@ -132,6 +155,7 @@ per milestone: pending → proof_submitted → released | rejected</pre>
   <footer class="site-footer">
     <div>
       Midnight GrokBot Agent lab ·
+      <a href="../">Lab site</a> ·
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> ·
       <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
     </div>

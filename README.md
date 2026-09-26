@@ -6,6 +6,18 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 
 > This repo does **not** invent Midnight APIs. Prefer official docs and examples linked below.
 
+## Live site (GitHub Pages)
+
+**https://kshot3000.github.io/Midnight-GrokBot-Agent/**
+
+| Path | App |
+| --- | --- |
+| `/` | Lab site (landing + apps gallery + compat matrix) |
+| `/escrow/` | Agent Escrow local stub |
+| `/lace/` | Lace connect demo (discovery + connect only) |
+
+Deployed automatically from `main` via [`.github/workflows/pages.yml`](./.github/workflows/pages.yml). If the URL 404s, enable Pages: **Settings → Pages → Source: GitHub Actions**.
+
 ## What’s inside
 
 ```
@@ -36,7 +48,9 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 
 ## Quick start — landing site
 
-No npm required. From the repo root:
+**Live:** https://kshot3000.github.io/Midnight-GrokBot-Agent/
+
+No npm required for local preview. From the repo root:
 
 ```bash
 cd apps/midnight-lab-site
@@ -44,7 +58,7 @@ python3 -m http.server 5173
 # open http://localhost:5173
 ```
 
-Or open `apps/midnight-lab-site/index.html` directly in a browser.
+Or open `apps/midnight-lab-site/index.html` directly in a browser. Sibling demos on Pages: [`/escrow/`](https://kshot3000.github.io/Midnight-GrokBot-Agent/escrow/), [`/lace/`](https://kshot3000.github.io/Midnight-GrokBot-Agent/lace/).
 
 ## Quick start — Lace connect demo
 
