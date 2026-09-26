@@ -20,6 +20,7 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | `/board/` | **Shield Board** flagship — dual-state privacy bulletin |
 | `/pledge/` | **Veil Pledge Studio** — private tip jar & pledge board |
 | `/market/` | **Night Market Studio** — sealed listings & private bids |
+| `/invite/` | **Sealed Invite Studio** — private RSVP & sealed invites |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -36,7 +37,8 @@ Until then the URL may 404.
 │   ├── auth-lab/              # Auth Forge Studio (MPS-0029 journey + scorecard)
 │   ├── shield-board/          # Flagship dual-state privacy bulletin studio
 │   ├── veil-pledge/           # Veil Pledge Studio — private tip jar & pledge board
-│   └── night-market/          # Night Market Studio — sealed listings & private bids
+│   ├── night-market/          # Night Market Studio — sealed listings & private bids
+│   └── sealed-invite/         # Sealed Invite Studio — private RSVP & sealed invites
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
 ├── contracts/
@@ -56,6 +58,7 @@ Until then the URL may 404.
 | `apps/shield-board` | **Flagship** dual-state privacy bulletin — public commitments + private vault + selective disclose |
 | `apps/veil-pledge` | **Veil Pledge Studio** — private tip jar, sealed pledges, threshold proofs (local stub) |
 | `apps/night-market` | **Night Market Studio** — sealed listings, private bids, bid-threshold theater (local stub) |
+| `apps/sealed-invite` | **Sealed Invite Studio** — private RSVP, capacity proofs, selective admit (local stub) |
 | `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
@@ -125,6 +128,18 @@ python3 -m http.server 5180
 ```
 
 Pages path (when Actions enabled): `/market/`. Local stub only — no on-chain Compact deploy, no real settlement from this UI.
+
+## Quick start — Sealed Invite Studio
+
+Private RSVP: public event titles + commitments, capacity and guest identities in a vault, prove seats remain without revealing who.
+
+```bash
+cd apps/sealed-invite
+python3 -m http.server 5181
+# open http://localhost:5181
+```
+
+Pages path (when Actions enabled): `/invite/`. Local stub only — no on-chain Compact deploy, no real guest-list custody from this UI.
 
 ## Compact / Midnight toolchain (official)
 
