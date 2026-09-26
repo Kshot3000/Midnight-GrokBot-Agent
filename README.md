@@ -112,6 +112,10 @@ Milestone escrow for AI-agent work — Compact skeleton + local UI stub:
 
 Pin Compact compiler **~0.31.1** (create-mn-app / example-bboard matrix). This lab has **not** deployed the escrow contract on-chain in the scaffold commit.
 
+## Upstream sweep log
+
+See [`docs/UPSTREAM-SWEEP-2026-09-25.md`](./docs/UPSTREAM-SWEEP-2026-09-25.md) for PRs/issues landed from this lab.
+
 ## Recommended next apps
 
 1. Compile `contracts/agent-escrow` with Compact ~0.31.1, then wire witnesses like `example-bboard`.

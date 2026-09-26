@@ -12,18 +12,25 @@
 <body>
   <div class="bg-scene" aria-hidden="true">
     <div class="bg-aurora"></div>
+    <div class="bg-aurora bg-aurora-2"></div>
     <div class="bg-grid"></div>
+    <div class="bg-noise"></div>
     <div class="orb orb-a"></div>
     <div class="orb orb-b"></div>
     <div class="orb orb-c"></div>
+    <div class="orb orb-d"></div>
   </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header" id="site-header">
     <a class="logo" href="#top">Midnight<span>Lab</span></a>
-    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">☰</button>
-    <nav id="site-nav">
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#apps">Apps</a>
       <a href="#about">About</a>
       <a href="#stack">Stack</a>
+      <a href="#compat">Compat</a>
       <a href="#tokens">NIGHT / DUST</a>
       <a href="#start">Start</a>
       <a href="#links">Docs</a>
@@ -31,23 +38,101 @@
     </nav>
   </header>
 
-  <main id="top">
-    <section class="hero">
+  <main id="main">
+    <section class="hero" id="top">
       <div class="hero-shell">
         <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Cardano partner chain · programmable privacy</p>
         <h1>24/7 Midnight build lab</h1>
         <p class="lede">
-          Scaffolding, Compact starters, and a clean landing pad for building
+          Scaffolding, Compact starters, and a polished landing pad for building
           privacy-preserving DApps on <strong>Midnight</strong> — without inventing APIs.
           Curated by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>,
           creator of <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>.
         </p>
         <div class="cta-row">
-          <a class="btn primary" href="https://docs.midnight.network/" rel="noopener noreferrer">Official docs</a>
+          <a class="btn primary" href="#apps">Explore apps</a>
+          <a class="btn ghost" href="https://docs.midnight.network/" rel="noopener noreferrer">Official docs</a>
           <a class="btn ghost" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">GitHub repo</a>
           <a class="btn ghost" href="#donate">Donate ADA</a>
         </div>
       </div>
+    </section>
+
+    <section id="apps" class="apps-section reveal">
+      <div class="section-head">
+        <h2>Apps gallery</h2>
+        <p class="muted">Live demos and stubs from this lab — open them on GitHub Pages or run locally.</p>
+      </div>
+      <div class="apps-grid">
+        <article class="app-card app-card-live reveal">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">◈</div>
+            <span class="badge badge-live">Live</span>
+          </div>
+          <h3>Lab Site</h3>
+          <p>This polished landing page — Midnight concepts, tooling links, donation branding, and the apps gallery.</p>
+          <div class="app-card-meta">
+            <span>Static HTML/CSS/JS</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="./">Open lab</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/midnight-lab-site" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
+
+        <article class="app-card app-card-demo reveal">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">⬡</div>
+            <span class="badge badge-demo">Demo</span>
+          </div>
+          <h3>Lace Connect Demo</h3>
+          <p>Discover and connect Lace Midnight via the official DApp connector. Discovery + connect only — no transfer claims.</p>
+          <div class="app-card-meta">
+            <span>Vite · connector API 4.0.1</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="lace/">Open demo</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/lace-connect-demo" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
+
+        <article class="app-card app-card-stub reveal">
+          <div class="app-card-top">
+            <div class="icon" aria-hidden="true">✦</div>
+            <span class="badge badge-stub">Stub</span>
+          </div>
+          <h3>Agent Escrow Stub</h3>
+          <p>Local milestone escrow state machine with a visual timeline. Stub only — not on-chain; MPS-0029 auth notes included.</p>
+          <div class="app-card-meta">
+            <span>Browser state machine</span>
+          </div>
+          <div class="app-card-actions">
+            <a class="btn primary small" href="escrow/">Open stub</a>
+            <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/agent-escrow-stub" rel="noopener noreferrer">Source</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="compat" class="panel compat-panel reveal">
+      <div class="section-head tight">
+        <h2>Compat matrix <span class="badge badge-research">Sep 2026 research</span></h2>
+        <p class="muted">Lab pins from research — <strong>verify against the official Midnight compatibility matrix</strong> before deploying.</p>
+      </div>
+      <div class="compat-grid" role="list">
+        <div class="compat-item" role="listitem"><span class="compat-key">Compact toolchain</span><span class="compat-val">0.31.1</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">Compact language</span><span class="compat-val">~0.23</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">Runtime</span><span class="compat-val">0.16.0</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">midnight-js</span><span class="compat-val">4.1.1</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">wallet-sdk</span><span class="compat-val">1.2.0</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">DApp Connector</span><span class="compat-val">4.0.1</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">proof-server</span><span class="compat-val">8.1.0</span></div>
+      </div>
+      <p class="muted compat-note">
+        Source of truth:
+        <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">installation / matrix docs</a>
+        · Never treat these pins as a substitute for the official matrix.
+      </p>
     </section>
 
     <section id="about" class="panel reveal">
@@ -95,8 +180,8 @@
         <div class="icon" aria-hidden="true">✦</div>
         <h3>This lab</h3>
         <p>
-          Repo layout under <code>apps/</code> and <code>contracts/</code> — a static site plus a
-          commented Compact skeleton. Compile only after installing the official toolchain.
+          Repo layout under <code>apps/</code> and <code>contracts/</code> — polished static demos plus
+          commented Compact skeletons. Compile only after installing the official toolchain.
         </p>
         <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Open repo →</a>
       </article>
@@ -137,7 +222,7 @@
         <li>
           Install Compact + proof server from the
           <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">official installation guide</a>
-          (pin versions from the compatibility matrix).
+          (pin versions from the compatibility matrix — see <a href="#compat">our research pins</a>).
         </li>
         <li>
           Install <a href="https://www.lace.io/" rel="noopener noreferrer">Lace</a>, select the Midnight network
@@ -149,17 +234,20 @@
           <a href="https://docs.midnight.network/tutorials/leaderboard/overview" rel="noopener noreferrer">privacy-preserving leaderboard DApp</a>.
         </li>
         <li>
-          Serve this site locally:
+          Open the live lab on
+          <a href="https://kshot3000.github.io/Midnight-GrokBot-Agent/">GitHub Pages</a>
+          or serve locally:
           <code>cd apps/midnight-lab-site &amp;&amp; python3 -m http.server 5173</code>
         </li>
         <li>
-          Try the Lace connect demo (discovery + connect only):
-          <code>npm run dev:lace-demo</code> → http://localhost:5174
-          (see <code>apps/lace-connect-demo</code>).
+          Try the Lace connect demo:
+          <a href="lace/">Pages /lace/</a>
+          or <code>npm run dev:lace-demo</code> → http://localhost:5174
         </li>
         <li>
-          Walk the Agent Escrow state machine stub:
-          <code>cd apps/agent-escrow-stub &amp;&amp; python3 -m http.server 5175</code>
+          Walk the Agent Escrow stub:
+          <a href="escrow/">Pages /escrow/</a>
+          or <code>cd apps/agent-escrow-stub &amp;&amp; python3 -m http.server 5175</code>
         </li>
       </ol>
     </section>
@@ -195,6 +283,7 @@
       <strong>Midnight GrokBot Agent</strong>
       <span> · MIT · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a></span>
       <span> · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a></span>
+      <span> · <a href="https://kshot3000.github.io/Midnight-GrokBot-Agent/">Live Pages</a></span>
     </div>
     <div class="footer-donate">
       <span>Donate ADA:</span>

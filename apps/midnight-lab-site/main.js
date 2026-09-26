@@ -29,17 +29,25 @@
       toggle.setAttribute("aria-label", "Open menu");
       toggle.textContent = "☰";
     };
+    const openNav = () => {
+      header.classList.add("nav-open");
+      toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute("aria-label", "Close menu");
+      toggle.textContent = "✕";
+    };
     toggle.addEventListener("click", () => {
-      const open = header.classList.toggle("nav-open");
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-      toggle.textContent = open ? "✕" : "☰";
+      if (header.classList.contains("nav-open")) closeNav();
+      else openNav();
     });
     nav.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeNav));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeNav();
+    });
   }
 
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const reveals = document.querySelectorAll(".reveal");
-  if (reveals.length && "IntersectionObserver" in window) {
+  if (!reduceMotion && reveals.length && "IntersectionObserver" in window) {
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
