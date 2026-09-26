@@ -11,9 +11,11 @@ contract skeleton from the JS/Python reference protocol:
 - Auth pattern: bulletin-board + leaderboard tutorials (witness secret →
   `persistentHash` commitment) — **not** `ownPublicKey()` alone (**MPS-0029**)
 
-> **Status:** educational skeleton only. This commit does **not** claim an
-> on-chain deploy. Compile and test against a local proof server / Preprod
-> before any deployment.
+> **Status:** educational skeleton. **Compiled successfully** with Compact
+> **0.31.1** / language **0.23.0** on the lab box (2026-09-26 CT) — TS
+> bindings + 12 circuit proving keys generated under `src/managed/`
+> (gitignored). This commit still does **not** claim an on-chain deploy or
+> a running proof server. Wire witnesses + proof-server before Preprod.
 
 ## Layout
 
@@ -43,18 +45,29 @@ Language reference: https://docs.midnight.network/compact/reference/compact-refe
 Bboard tutorial: https://docs.midnight.network/examples/dapps/bboard  
 Leaderboard contract: https://docs.midnight.network/tutorials/leaderboard/smart-contract
 
-### Compile (after Compact is on your `PATH`)
+### Compile (after Compact 0.31.1 is installed)
 
 ```bash
-# From this directory — same shape as example-bboard's npm run compact
+# From repo root
+npm run compact:escrow
+# From this directory
 npm run compact
 # equivalent:
-#   compact compile src/agent-escrow.compact ./src/managed/agent-escrow
+#   compact compile +0.31.1 src/agent-escrow.compact ./src/managed/agent-escrow
 ```
 
-Artifacts land under `src/managed/agent-escrow/` (ZKIR, keys, TS bindings) once
-the official toolchain runs successfully. That output is gitignored until you
-intentionally vendor it.
+Artifacts land under `src/managed/agent-escrow/` (ZKIR, keys, TS bindings).
+Gitignored. Lab verification (2026-09-26 CT): **12 circuits** compiled with
+prover/verifier keys (~38MB managed tree).
+
+### Compact 0.23 fixes applied so this skeleton compiles
+
+1. **Uint widening** — `(a + b) as Uint<64>` / `(a - b) as Uint<64>` on
+   `milestoneTotal`, `released`, `refunded`, and refund balance locals
+   (Compact addition widens beyond `Uint<64>`).
+2. **Explicit disclosure on dual-role OR** — `assertIsApprover` discloses
+   derived role commitments before `clientPk == … || approverPk == …`
+   (see Midnight explicit-disclosure docs). Secret key stays private.
 
 ## Auth: MPS-0029 (do not use `ownPublicKey()` alone)
 

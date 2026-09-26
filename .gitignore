@@ -28,3 +28,7 @@ keys/
 
 # Compact compiler managed output
 **/managed/
+
+# Hello Compact compile outputs (regenerate with compact compile)
+contracts/hello-midnight/out/
+contracts/hello-midnight/out-zk/

@@ -10,7 +10,11 @@
   "scripts": {
     "build:kit": "npm run build -w @kshot/lace-midnight-kit",
     "dev:lace-demo": "npm run build -w @kshot/lace-midnight-kit && npm run dev -w @kshot/lace-connect-demo",
-    "build:lace-demo": "npm run build -w @kshot/lace-midnight-kit && npm run build -w @kshot/lace-connect-demo"
+    "build:lace-demo": "npm run build -w @kshot/lace-midnight-kit && npm run build -w @kshot/lace-connect-demo",
+    "compact:hello": "compact compile +0.31.1 contracts/hello-midnight/hello.compact contracts/hello-midnight/out",
+    "compact:hello:skip-zk": "compact compile +0.31.1 --skip-zk contracts/hello-midnight/hello.compact contracts/hello-midnight/out",
+    "compact:escrow": "npm run compact --prefix contracts/agent-escrow",
+    "compact:escrow:skip-zk": "npm run compact:skip-zk --prefix contracts/agent-escrow"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",

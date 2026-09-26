@@ -1,3 +1,7 @@
+# Copy to .github/workflows/pages.yml with a workflow-scoped PAT.
+# Setup steps: docs/PAGES-WORKFLOW-OAUTH.md
+# Do NOT claim Pages live until Settings → Pages shows a successful deploy.
+
 name: Deploy GitHub Pages
 
 on:

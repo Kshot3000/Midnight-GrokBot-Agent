@@ -3,10 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Agent Escrow Compact skeleton — Midnight GrokBot Agent lab (@kshot9000)",
+  "description": "Agent Escrow Compact skeleton \u2014 Midnight GrokBot Agent lab (@kshot9000)",
   "scripts": {
-    "compact": "compact compile src/agent-escrow.compact ./src/managed/agent-escrow",
-    "compile": "npm run compact"
+    "compact": "compact compile +0.31.1 src/agent-escrow.compact ./src/managed/agent-escrow",
+    "compile": "npm run compact",
+    "compact:skip-zk": "compact compile +0.31.1 --skip-zk src/agent-escrow.compact ./src/managed/agent-escrow"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",

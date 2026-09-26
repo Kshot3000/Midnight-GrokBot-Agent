@@ -22,16 +22,44 @@ These files are **educational skeletons**. They follow patterns described in the
 5. Fund with faucet **tNIGHT**, then register / generate **tDUST** for fees — see:  
    https://docs.midnight.network/guides/acquire-tokens
 
-## Compile (after Compact is installed)
+## Compile (verified on this lab — 2026-09-26 CT)
+
+Lab box successfully installed **Compact CLI 0.5.2** + toolchain **0.31.1** (language **0.23.0**, ledger **8.0.2**, runtime **0.16.0**) and compiled both skeletons with proving keys.
 
 ```bash
-# Hello starter
-compact compile contracts/hello-midnight/hello.compact contracts/hello-midnight/out/
+# 1) Install Compact CLI (needs xz-utils on Debian/Ubuntu)
+#    https://docs.midnight.network/getting-started/installation
+curl --proto '=https' --tlsv1.2 -LsSf \
+  https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+compact --version   # expect compact 0.5.x
 
-# Agent Escrow (preferred: npm script in that package)
-cd contracts/agent-escrow && npm run compact
-# → compact compile src/agent-escrow.compact ./src/managed/agent-escrow
+# 2) Install / pin toolchain 0.31.1
+compact update 0.31.1
+# If GitHub API rate-limits `compact update`, download the musl zip directly and unpack to:
+#   ~/.compact/versions/0.31.1/x86_64-unknown-linux-musl/
+# Asset: compactc_v0.31.1_x86_64-unknown-linux-musl.zip from midnightntwrk/compact releases
+
+# 3) Compile (pin +0.31.1 explicitly)
+compact compile +0.31.1 --version            # → 0.31.1
+compact compile +0.31.1 --language-version   # → 0.23.0
+
+# Hello starter (full ZK keys)
+npm run compact:hello
+# → contracts/hello-midnight/out/{contract,compiler,zkir,keys}/
+
+# Agent Escrow (full ZK keys; 12 circuits)
+npm run compact:escrow
+# → contracts/agent-escrow/src/managed/agent-escrow/{contract,compiler,zkir,keys}/
+
+# Faster iteration (skip proving keys):
+npm run compact:hello:skip-zk
+npm run compact:escrow:skip-zk
 ```
+
+Artifacts under `**/managed/` and `contracts/hello-midnight/out*` are **gitignored**. Re-run compile locally. **No on-chain deploy** is claimed.
+
+Still blocked on this box for the *full* DApp loop: **no Docker** → cannot run `midnightntwrk/proof-server:8.1.0`; Node is **v20** while `create-mn-app` wants **Node 22+**.
 
 Exact CLI flags and output layout can change between Compact releases — always prefer the current docs:
 

@@ -16,8 +16,9 @@
  * here uses witness-derived commitments:
  *   roleCommitment(sk, roleTag) = persistentHash("agent-escrow:role:" || tag || sk)
  *
- * THIS IS AN EDUCATIONAL SKELETON. It has NOT been compiled or deployed on-chain
- * in this commit. Compile with Compact ~0.31.1 (see README) before any deploy.
+ * THIS IS AN EDUCATIONAL SKELETON. Lab-compiled with Compact 0.31.1 / lang 0.23
+ * (2026-09-26 CT); managed artifacts are gitignored. NOT deployed on-chain.
+ * Recompile with Compact ~0.31.1 (see README) before any deploy.
  *
  * Official docs:
  *   https://docs.midnight.network/compact
@@ -145,9 +146,12 @@ circuit assertIsAgent(): [] {
  * initialize() requires agentPk to differ from clientPk and approverPk.
  */
 circuit assertIsApprover(): [] {
+  /* Disclose derived commitments first so the OR comparison is over public
+   * values (explicit-disclosure). Commitments are already on-ledger when
+   * auth succeeds; the localSecretKey itself stays private. */
   const sk = localSecretKey();
-  const asClient = roleCommitment(sk, clientTag());
-  const asApprover = roleCommitment(sk, approverTag());
+  const asClient = disclose(roleCommitment(sk, clientTag()));
+  const asApprover = disclose(roleCommitment(sk, approverTag()));
   assert(
     clientPk == asClient || approverPk == asApprover,
     "not a registered approver"
@@ -197,7 +201,7 @@ export circuit addMilestone(amount: Uint<64>, deadline: Uint<64>): [] {
     proofHash: pad(32, ""),
     deadline: disclose(deadline)
   });
-  milestoneTotal = milestoneTotal + amt;
+  milestoneTotal = (milestoneTotal + amt) as Uint<64>;
 }
 
 /** Client funds the escrow budget (single funding event in this skeleton). */
@@ -259,7 +263,7 @@ export circuit approve(milestoneId: Uint<64>): [] {
     proofHash: m.proofHash,
     deadline: m.deadline
   });
-  released = released + m.amount;
+  released = (released + m.amount) as Uint<64>;
   decidedCount.increment(1);
 }
 
@@ -296,8 +300,8 @@ export circuit dispute(): [] {
 export circuit resolveDisputeRefund(): [] {
   assertIsClient();
   assert(state == EscrowState.DISPUTED, "escrow is not in dispute");
-  const bal = funded - released - refunded;
-  refunded = refunded + bal;
+  const bal = (funded - released - refunded) as Uint<64>;
+  refunded = (refunded + bal) as Uint<64>;
   state = EscrowState.REFUNDED;
 }
 
@@ -316,8 +320,8 @@ export circuit settle(): [] {
     decidedCount.read() == milestoneCount.read(),
     "all milestones must be released or rejected first"
   );
-  const bal = funded - released - refunded;
-  refunded = refunded + bal;
+  const bal = (funded - released - refunded) as Uint<64>;
+  refunded = (refunded + bal) as Uint<64>;
   state = EscrowState.SETTLED;
 }
 
@@ -328,7 +332,7 @@ export circuit cancel(): [] {
     state == EscrowState.CREATED || state == EscrowState.FUNDED,
     "can only cancel before work starts"
   );
-  const bal = funded - released - refunded;
-  refunded = refunded + bal;
+  const bal = (funded - released - refunded) as Uint<64>;
+  refunded = (refunded + bal) as Uint<64>;
   state = EscrowState.CANCELLED;
 }

@@ -262,7 +262,15 @@ Pages path (when Actions enabled): `/nocturne/`. **LOCAL-TRUE** — localStorage
 
 ## Compact / Midnight toolchain (official)
 
-Do **not** rely on this repo to install Compact. Use Midnight’s guide:
+**Lab status (2026-09-26 CT):** Compact **CLI 0.5.2** + toolchain **0.31.1** (lang **0.23.0**, ledger **8.0.2**, runtime **0.16.0**) installed on the build box. Both `hello-midnight` and `agent-escrow` **compiled with proving keys**. Proof-server / `create-mn-app` still blocked here (no Docker; Node 20 vs required 22+). See [`contracts/README.md`](./contracts/README.md) and [docs/COMPACT-PREPROD-PATH-2026-09-26.md](./docs/COMPACT-PREPROD-PATH-2026-09-26.md) for the full works-vs-blocked report.
+
+```bash
+# After Compact is on PATH (install guide below):
+npm run compact:hello    # → contracts/hello-midnight/out/ (gitignored)
+npm run compact:escrow   # → contracts/agent-escrow/src/managed/ (gitignored)
+```
+
+Official guides (do not invent APIs):
 
 1. **Install Compact + proof server** — https://docs.midnight.network/getting-started/installation  
 2. **Compact language** — https://docs.midnight.network/compact  
@@ -272,10 +280,11 @@ Do **not** rely on this repo to install Compact. Use Midnight’s guide:
 6. **DApp connector (Lace)** — https://docs.midnight.network/api-reference/dapp-connector  
 7. **React wallet connect** — https://docs.midnight.network/guides/react-wallet-connect  
 8. **Connector API repo** — https://github.com/midnightntwrk/midnight-dapp-connector-api  
+9. **create-mn-app** — https://github.com/midnightntwrk/create-mn-app (Node 22+, Docker Compose v2)
 
 Wallet: [Lace](https://www.lace.io/) with Midnight network settings and a local proof server when developing locally.
 
-See `contracts/README.md` for how this lab expects you to compile once Compact is on your `PATH`.
+Compat snapshot this lab tracks: Compact **~0.31.1** / lang **~0.23**, midnight-js **4.1.1**, DApp Connector **4.0.1**, proof-server **8.1.0**. Re-check Midnight’s compatibility matrix before deploy.
 
 ## Midnight concepts (high-level, from official materials)
 
@@ -310,7 +319,7 @@ Milestone escrow for AI-agent work — Compact skeleton + **LOCAL-TRUE** studio:
 - Compact port notes (sister): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/blob/main/apps/agent-escrow/COMPACT-PORT.md
 - Audit log: [`contracts/AUDIT-NOTES.md`](./contracts/AUDIT-NOTES.md)
 
-Pin Compact compiler **~0.31.1** (create-mn-app / example-bboard matrix). This lab has **not** deployed the escrow contract on-chain in the scaffold commit.
+Pin Compact compiler **~0.31.1** (create-mn-app / example-bboard matrix). **Compiled** on the lab box with 0.31.1 (managed artifacts gitignored). **Not** deployed on-chain.
 
 ## Upstream sweep log
 
@@ -318,7 +327,7 @@ See [`docs/UPSTREAM-SWEEP-2026-09-25.md`](./docs/UPSTREAM-SWEEP-2026-09-25.md) f
 
 ## Recommended next apps
 
-1. Compile `contracts/agent-escrow` with Compact ~0.31.1, then wire witnesses like `example-bboard`.
-2. Wire `contracts/hello-midnight` through the official Compact compile → TypeScript bindings flow.
-3. Extend `apps/lace-connect-demo` with read-only Preprod indexer queries (still no transfer claims until proven).
+1. ~~Compile escrow / hello with Compact ~0.31.1~~ **done on lab box** — next: wire witnesses like `example-bboard` + `@midnight-ntwrk/compact-runtime@0.16.0`.
+2. Run `docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v` on a Docker host; point Lace → local proof server.
+3. Scaffold with `npx create-mn-app@latest` on **Node 22+**, or deepen Lace demo with read-only Preprod indexer queries (still no transfer claims until proven).
 4. Follow the official privacy-preserving leaderboard tutorial end-to-end, then adapt patterns here.
