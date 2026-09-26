@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Preprod hello path: Compact artifacts, local prove vs :6300, midnight-js 4.1.1 providers, clear-fail deploy gate. NOT a fake deploy.",
+  "description": "Preprod path: hello + agent-escrow Compact artifacts, local prove vs :6300, midnight-js 4.1.1 providers, clear-fail deploy gate. NOT a fake deploy.",
   "engines": {
     "node": ">=22"
   },
@@ -17,7 +17,9 @@
     "preprod:deploy": "node src/deploy-preprod.mjs",
     "wallet:gen": "node src/generate-throwaway-wallet.mjs",
     "faucet:attempt": "node src/attempt-faucet.mjs",
-    "prove:hello-local": "node src/prove-hello-local.mjs"
+    "prove:hello-local": "node src/prove-hello-local.mjs",
+    "prove:escrow-local": "node src/prove-escrow-local.mjs",
+    "check:escrow-artifacts": "node src/check-escrow-artifacts.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

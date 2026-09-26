@@ -14,8 +14,8 @@ contract skeleton from the JS/Python reference protocol:
 > **Status:** educational skeleton. **Compiled successfully** with Compact
 > **0.31.1** / language **0.23.0** on the lab box (2026-09-26 CT) — TS
 > bindings + 12 circuit proving keys generated under `src/managed/`
-> (gitignored). This commit still does **not** claim an on-chain deploy or
-> a running proof server. Wire witnesses + proof-server before Preprod.
+> (gitignored). Local ZK prove path: `npm run prove:escrow-local` (`initialize` +
+> synthetic `localSecretKey` vs proof-server `:6300`). **Not** an on-chain deploy.
 
 ## Layout
 
@@ -120,6 +120,17 @@ Amounts are integer subunits (map to lovelace off-chain). Proof verification is
 - Native shielded token transfers / coin ADTs (wire via Midnight.js later)
 - Automatic late-penalty logic (`deadline` is stored for future hooks)
 - On-chain deploy scripts or faucet funding
+
+## Local ZK prove (no chain)
+
+```bash
+# requires: npm run compact:escrow + proof-server on :6300
+npm run prove:escrow-local
+```
+
+Exercises impure circuit **`initialize`** with a lab RNG witness. See
+[`ARTIFACT-CONSUMERS.md`](../ARTIFACT-CONSUMERS.md) for the other 11 circuits'
+role-secret requirements. **Not** a Preprod deploy.
 
 ## Branding
 

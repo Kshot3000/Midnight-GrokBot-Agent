@@ -191,3 +191,64 @@ npm run prove:hello-local
 npm run artifacts:list
 npm run stub:test
 ```
+
+
+---
+
+## Update — Agent-escrow local ZK prove vs :6300 (2026-09-26 ~00:55 CT)
+
+**Real progress:** circuit-level ZK prove for agent-escrow **`initialize`** against local proof-server — **synthetic witness only, no funded wallet**.
+
+### What landed
+
+| Item | Detail |
+| --- | --- |
+| Script | `npm run prove:escrow-local` → `src/prove-escrow-local.mjs` |
+| Artifact gate | `npm run stub:check-escrow` / `check:escrow-artifacts` |
+| Circuit | `initialize(agentCommitment, approverCommitment)` |
+| Witness | `localSecretKey` → lab RNG `Bytes<32>` (client role); commitments via `pureCircuits.roleCommitment` |
+| ZK config | `NodeZkConfigProvider(contracts/agent-escrow/src/managed/agent-escrow)` |
+| Measured (lab) | preimage **786** B · check ~**24** ms · **proof 4508** B · prove ~**1.1** s |
+| Tests | vitest escrow smoke (live prove when `:6300` + artifacts present) |
+| Docs | `contracts/ARTIFACT-CONSUMERS.md` + this file |
+
+### Success criteria (`prove:escrow-local`)
+
+1. `GET http://127.0.0.1:6300/health` → 200 / `status: ok`
+2. 12 impure circuit keys present under managed tree
+3. Off-chain `initialize` sets non-empty distinct `clientPk` / `agentPk`
+4. Serialized preimage `byteLength > 0`
+5. `/check` returns binding-slot array
+6. `/prove` returns `Uint8Array` with `proofBytes > 0` (initialize typical **~4508**)
+7. Report claim string includes **NOT a Preprod deploy**; `witness.fundedWallet === false`
+
+Exit **3** if proof-server unhealthy; **1** on artifact/runtime failure; **0** on success.
+
+### Partial scope (honest)
+
+| Proved | Not proved in this script |
+| --- | --- |
+| `initialize` | `fund`, `addMilestone`, `start`, `submitProof`, `approve`, `reject`, `dispute`, `resolve*`, `settle`, `cancel` |
+
+Later circuits need **role-matching** secrets (client / agent / approver) that hash to the commitments registered at `initialize`. Pure helpers (`roleCommitment`, `*Tag`) have **no** `.prover` / `.zkir` — cannot `/prove` them.
+
+### Still NOT claimed
+
+| Item | Status |
+| --- | --- |
+| On-chain Preprod deploy | **no** |
+| Funded tNIGHT / tDUST | **blocked** (faucet captcha) |
+| Full 12-circuit lifecycle smoke | **partial** — initialize only |
+| X posts | **none** |
+
+### Cheat-sheet add
+
+```bash
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env)" && fnm use 22
+curl -sS http://127.0.0.1:6300/health
+npm run stub:check-escrow
+npm run prove:escrow-local
+npm run prove:hello-local
+npm run stub:test
+```

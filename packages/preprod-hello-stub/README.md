@@ -62,6 +62,21 @@ npm run prove:hello-local -w @kshot/preprod-hello-stub
 Success: greetings 0→1, preimage >0 B, proofBytes ≈2940, claim **NOT a Preprod deploy**.
 Exit 3 if proof-server down. Does **not** call `deployContract` / `proveTx`.
 
+## Local ZK prove — agent-escrow (no wallet)
+
+Same proof-server path for **`initialize`** with a synthetic `localSecretKey` witness:
+
+```bash
+curl -sS http://127.0.0.1:6300/health
+npm run check:escrow-artifacts -w @kshot/preprod-hello-stub
+npm run prove:escrow-local -w @kshot/preprod-hello-stub
+# root aliases: npm run stub:check-escrow · npm run prove:escrow-local
+```
+
+Success: non-empty distinct role commitments, preimage >0 B, proofBytes ≈4508, claim **NOT a Preprod deploy**, `fundedWallet: false`.
+Exit 3 if proof-server down. **Does not** prove the other 11 lifecycle circuits (those need role-matching secrets after initialize — see `ESCROW_WITNESS_REQUIREMENTS` / `contracts/ARTIFACT-CONSUMERS.md`).
+
+
 
 
 ## CLI output
