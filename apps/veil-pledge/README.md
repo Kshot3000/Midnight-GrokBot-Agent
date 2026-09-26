@@ -1,19 +1,14 @@
 # Veil Pledge Studio
 
-Private tip jar & pledge board for the Midnight dual-state model.
+Private tip jar & pledge board for Midnight — **local-true** educational studio.
 
-**Educational local stub** — not on-chain, not Compact, not real ADA transfers from this UI.
+Seal amounts · public commitment hashes · threshold theater (prove ≥ T without revealing tip) · selective disclose.
 
-## Features
+**Real local features:** `localStorage` persistence (schema v2), **multi-tab sync** (`BroadcastChannel` + `storage` events), **Export / Import JSON**, vitest for core helpers.
 
-- Pledge journey: idle → sealed → committed → disclosed
-- Compose & seal: amount + note + salt stay in a private vault (`localStorage`)
-- Public commitment: domain-separated SHA-256 teaching stand-in
-- Threshold theater: prove `amount ≥ X` without revealing the exact tip (simulated)
-- Tip jar atelier with always-visible Cardano donate address + `@kshot9000`
-- Starfield / nebula / aurora · skip link · reduced-motion · donate dock
+Starfield + aurora, donate dock (`@kshot9000` + Cardano addr). Honest **LOCAL-TRUE · not on-chain** labels — no Compact / Lace / ADA settlement claims from the UI pledges.
 
-## Local run
+## Run locally
 
 ```bash
 cd apps/veil-pledge
@@ -21,15 +16,31 @@ python3 -m http.server 5179
 # open http://localhost:5179
 ```
 
-Pages path (when Actions enabled): `/pledge/`.
+Tests:
+
+```bash
+cd apps/veil-pledge
+npm install
+npm test
+```
+
+Documented Pages path (when Actions enabled): `/pledge/`.
 
 ## Honest scope
 
-- No Compact runtime / proof server / Lace connect / `makeTransfer`
-- No claim that GitHub Pages is live until the workflow is enabled
-- SHA-256 commitments are a **teaching stand-in** — verify official Compact / Zswap crypto before shipping
+- Does **not** run Compact, a proof server, Lace transfers, or real ADA tips from this UI.
+- Commitments and threshold “proofs” are **teaching stand-ins** — verify official Compact / Zswap crypto before shipping.
+- Export JSON may include amounts, notes, and salts — treat downloads as sensitive.
 
-## Branding
+## Flow
 
-- Donate ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
-- X: [@kshot9000](https://x.com/kshot9000)
+| Step | Teaching point |
+|------|----------------|
+| Seal | Amount + note + salt → commitment |
+| Commit | Public hash on board; amount veiled |
+| Threshold | Prove amount ≥ T without revealing exact tip |
+| Disclose / re-seal | Full reveal or UI re-seal (theater) |
+| Export / Import | Portable JSON snapshot across browsers/tabs |
+| Multi-tab | Other tabs refresh when this tab saves |
+
+Built by [@kshot9000](https://x.com/kshot9000).

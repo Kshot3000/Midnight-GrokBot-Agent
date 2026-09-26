@@ -1,16 +1,26 @@
 /**
- * Veil Pledge Studio — educational private tip jar / pledge board.
- * Dual-state: public commitment hash vs private amount+note+salt in localStorage.
- * Not a Compact runtime. Not on-chain. Not real ADA transfers. Not Pages-live claims.
+ * Veil Pledge Studio — private tip jar / pledge board (local-true).
+ * Real localStorage persistence, multi-tab sync, export/import.
+ * Teaching commitments + threshold theater. Not Compact. Not on-chain.
  */
-(function () {
-  "use strict";
+import {
+  DONATE_ADDR,
+  short,
+  escapeHtml,
+  commitHash,
+} from "./pledge-core.mjs";
+import {
+  loadStudioState,
+  saveStudioState,
+  clearStudioState,
+  exportStudioJSON,
+  importStudioJSON,
+  createTabSync,
+  loadDraft as persistLoadDraft,
+  saveDraft as persistDraft,
+} from "./persist.mjs";
 
-  const STORAGE_KEY = "mn-veil-pledge-v1";
-  const STORAGE_DRAFT = "mn-veil-pledge-draft-v1";
-  const DOMAIN = "veil-pledge:commit:v1";
-  const DONATE_ADDR =
-    "addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v";
+
 
   /** @type {{ id: string, handle: string, commitment: string, salt: string, amount: number, note: string, createdAt: string, disclosure: 'sealed'|'range'|'full', rangeMin?: number }[]} */
   let pledges = [];
@@ -26,18 +36,7 @@
     return [...arr].map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
-  function short(hex, n = 10) {
-    if (!hex) return "—";
-    return hex.length <= n * 2 ? hex : `${hex.slice(0, n)}…${hex.slice(-6)}`;
-  }
 
-  function escapeHtml(s) {
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
 
   function announce(msg) {
     const el = document.getElementById("live-region");
@@ -51,39 +50,114 @@
     el.className = `status${kind ? ` ${kind}` : ""}`;
   }
 
-  async function commitHash(amount, note, salt) {
-    const enc = new TextEncoder();
-    const payload = `${DOMAIN}|${Number(amount).toFixed(4)}|${note}|${salt}`;
-    const digest = await crypto.subtle.digest("SHA-256", enc.encode(payload));
-    return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  let tabSync = null;
+  let applyingRemote = false;
+
+  function snapshotState() {
+    return { pledges, draft };
   }
 
-  function loadPledges() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      pledges = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(pledges)) pledges = [];
-    } catch {
-      pledges = [];
+  function applyState(data, { announceRemote = false } = {}) {
+    pledges = Array.isArray(data.pledges) ? data.pledges : [];
+    draft = data.draft || null;
+    if (announceRemote) {
+      announce("Pledge studio synced from another tab");
+      pushThreshLog("Synced from another tab (BroadcastChannel / storage).");
     }
   }
 
   function savePledges() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(pledges));
+    if (applyingRemote) return;
+    const saved = saveStudioState(snapshotState());
+    try {
+      tabSync?.broadcast(saved);
+    } catch (_) {}
+    // keep draft key in sync
+    persistDraft(draft);
+  }
+
+  function loadPledges() {
+    const data = loadStudioState();
+    applyState(data);
   }
 
   function loadDraft() {
-    try {
-      const raw = localStorage.getItem(STORAGE_DRAFT);
-      draft = raw ? JSON.parse(raw) : null;
-    } catch {
-      draft = null;
-    }
+    // draft may live inside schema v2 state; fall back to DRAFT_KEY
+    if (draft) return;
+    draft = persistLoadDraft();
   }
 
   function saveDraft() {
-    if (draft) localStorage.setItem(STORAGE_DRAFT, JSON.stringify(draft));
-    else localStorage.removeItem(STORAGE_DRAFT);
+    persistDraft(draft);
+    // also mirror into studio state when possible
+    if (!applyingRemote) {
+      try {
+        saveStudioState(snapshotState());
+        tabSync?.broadcast(snapshotState());
+      } catch (_) {}
+    }
+  }
+
+  function startTabSync() {
+    tabSync?.stop();
+    tabSync = createTabSync({
+      onRemote(state) {
+        applyingRemote = true;
+        try {
+          applyState(state, { announceRemote: true });
+          renderDraftPreview();
+          renderBoard();
+        } finally {
+          applyingRemote = false;
+        }
+      },
+    });
+  }
+
+  function exportStudio() {
+    const json = exportStudioJSON(snapshotState());
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    a.href = url;
+    a.download = `veil-pledge-export-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    announce("Studio exported as JSON");
+    pushThreshLog("export · local snapshot downloaded (sensitive — amounts/salts).");
+  }
+
+  async function importStudioFromFile(file) {
+    if (!file) return;
+    const text = await file.text();
+    const result = importStudioJSON(text);
+    if (!result.ok) {
+      setStatus("seal-status", result.error || "Import failed", "fail");
+      announce("Import failed");
+      return;
+    }
+    if (!window.confirm("Import replaces this tab's Veil Pledge data. Continue?")) return;
+    applyingRemote = true;
+    try {
+      applyState(result.state);
+      saveStudioState(snapshotState());
+      persistDraft(draft);
+      tabSync?.broadcast(snapshotState());
+    } finally {
+      applyingRemote = false;
+    }
+    renderDraftPreview();
+    renderBoard();
+    setJourney(
+      pledges.some((p) => p.disclosure !== "sealed") ? "disclosed" : pledges.length ? "committed" : "idle",
+      "Imported local snapshot — still LOCAL-TRUE educational data, not on-chain."
+    );
+    announce("Pledge studio imported");
+    pushThreshLog(`import · ${result.state.pledges.length} pledge(s)`);
   }
 
   function setJourney(phase, detail) {
@@ -239,7 +313,7 @@
       list.innerHTML = `<li class="empty empty-rich" role="status">
         <div class="empty-glyph" aria-hidden="true">✧</div>
         <strong>Pledge board quiet</strong>
-        <span class="muted small">Seal an amount into the tip jar to publish a public commitment — exact ADA stays veiled until you disclose. LOCAL STUB · not on-chain.</span>
+        <span class="muted small">Seal an amount into the tip jar to publish a public commitment — exact ADA stays veiled until you disclose. LOCAL-TRUE · not on-chain.</span>
         <button type="button" class="btn ghost small" id="empty-focus-amount">Compose a pledge</button>
       </li>`;
       queueMicrotask(() => {
@@ -315,7 +389,7 @@
 
     if (!Number.isFinite(amount) || amount < 0.1) {
       setStatus("seal-status", "Amount must be ≥ 0.1 ADA (stub).", "fail");
-      setPledgeError("Amount must be a positive number — LOCAL STUB will not seal an empty or invalid tip.");
+      setPledgeError("Amount must be a positive number — LOCAL-TRUE will not seal an empty or invalid tip.");
       setStatus("seal-status", "Seal rejected — invalid amount.", "warn");
       announce("Seal rejected — invalid amount");
       document.getElementById("pledge-amount")?.focus();
@@ -389,7 +463,7 @@
     if (!p) {
       setStatus("thresh-status", "Select a committed pledge.", "fail");
       setProofResult("REJECT — no pledge", "fail");
-      announce("Threshold proof rejected — no pledge selected. Honest miss · LOCAL STUB.");
+      announce("Threshold proof rejected — no pledge selected. Honest miss · LOCAL-TRUE.");
       return;
     }
     if (!Number.isFinite(threshold) || threshold <= 0) {
@@ -607,13 +681,29 @@
     });
 
     document.getElementById("btn-clear-board")?.addEventListener("click", () => {
-      if (confirm("Clear all local pledges?")) {
+      if (confirm("Clear all local pledges? Also clears exportable studio state.")) {
         pledges = [];
-        savePledges();
+        draft = null;
+        clearStudioState();
+        persistDraft(null);
+        tabSync?.broadcast(snapshotState());
+        renderDraftPreview();
         renderBoard();
         pushThreshLog("Board cleared.");
         announce("Pledge board cleared");
       }
+    });
+  }
+
+  function initPersistUi() {
+    document.getElementById("btn-export")?.addEventListener("click", exportStudio);
+    document.getElementById("btn-import")?.addEventListener("click", () => {
+      document.getElementById("import-file")?.click();
+    });
+    document.getElementById("import-file")?.addEventListener("change", (e) => {
+      const file = e.target?.files?.[0];
+      importStudioFromFile(file).catch(console.error);
+      e.target.value = "";
     });
   }
 
@@ -633,15 +723,17 @@
   function boot() {
     loadPledges();
     loadDraft();
+    startTabSync();
     initStarfield();
     initNav();
     initCompose();
     initThreshold();
     initBoard();
+    initPersistUi();
     initDonate();
     renderDraftPreview();
     renderBoard();
-    pushThreshLog("Veil Pledge Studio ready · LOCAL STUB · not on-chain.");
+    pushThreshLog("Veil Pledge Studio ready · LOCAL-TRUE · not on-chain.");
   }
 
   if (document.readyState === "loading") {
@@ -649,4 +741,3 @@
   } else {
     boot();
   }
-})();

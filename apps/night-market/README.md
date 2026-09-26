@@ -1,19 +1,14 @@
 # Night Market Studio
 
-Sealed listings & private bids for the Midnight dual-state model.
+Sealed listings & private bids for Midnight — **local-true** educational studio.
 
-**Educational local stub** — not on-chain, not Compact, not real ADA / DUST transfers from this UI.
+Public titles + commitment hashes · private reserves / bid amounts · prove bid ≥ reserve theater · award / disclose.
 
-## Features
+**Real local features:** `localStorage` persistence (schema v2), **multi-tab sync** (`BroadcastChannel` + `storage` events), **Export / Import JSON**, vitest for core helpers.
 
-- Market journey: idle → listed → bidding → awarded
-- Seal a listing: public title + private reserve/details → commitment hash
-- Private bids: amounts stay in `localStorage` vault; only commitments hit the board
-- Bid theater: prove `bid ≥ reserve` without revealing either amount (simulated); reject is first-class
-- Award + selective disclose (range or full)
-- Starfield / nebula / aurora · skip link · reduced-motion · donate dock (`@kshot9000` + ADA always visible)
+Starfield + aurora, donate dock (`@kshot9000` + Cardano addr). Honest **LOCAL-TRUE · not on-chain** labels — no Compact / Lace / ADA settlement claims.
 
-## Local run
+## Run locally
 
 ```bash
 cd apps/night-market
@@ -21,15 +16,32 @@ python3 -m http.server 5180
 # open http://localhost:5180
 ```
 
-Pages path (when Actions enabled): `/market/`.
+Tests:
+
+```bash
+cd apps/night-market
+npm install
+npm test
+```
+
+Documented Pages path (when Actions enabled): `/market/`.
 
 ## Honest scope
 
-- No Compact runtime / proof server / Lace connect / settlement
-- No claim that GitHub Pages is live until the workflow is enabled
-- SHA-256 commitments are a **teaching stand-in** — verify official Compact / Zswap crypto before shipping
+- Does **not** run Compact, a proof server, Lace, or real ADA settlement.
+- Listing/bid commitments and clearance “proofs” are **teaching stand-ins**.
+- Export JSON may include reserves, bids, and salts — treat downloads as sensitive.
 
-## Branding
+## Flow
 
-- Donate ADA: `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
-- X: [@kshot9000](https://x.com/kshot9000)
+| Step | Teaching point |
+|------|----------------|
+| Seal listing | Reserve + details + salt → commitment |
+| Open stall | Public title + hash on the board |
+| Seal bid | Amount + listing id + salt → bid commitment |
+| Prove | bid ≥ reserve without revealing numbers |
+| Award / disclose | Winner path or full reveal (local) |
+| Export / Import | Portable JSON snapshot |
+| Multi-tab | Other tabs refresh when this tab saves |
+
+Built by [@kshot9000](https://x.com/kshot9000).

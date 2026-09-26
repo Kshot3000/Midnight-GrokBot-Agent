@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Veil Pledge Studio — Midnight private tip jar & pledge board. Seal amounts, commit public hashes, prove thresholds without revealing exact tips. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="description" content="Veil Pledge Studio — private tip jar & pledge board. Real localStorage + multi-tab sync + export/import by @kshot9000. LOCAL-TRUE educational — not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
-  <title>Veil Pledge Studio — Private Tip Jar · Midnight Lab</title>
+  <title>Veil Pledge Studio — LOCAL-TRUE · Midnight GrokBot Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M18 40 Q32 12 46 40' fill='none' stroke='%23a78bfa' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='36' r='7' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Cpath d='M28 36h8M32 32v8' stroke='%237c9cff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
 </head>
@@ -40,7 +40,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -258,7 +258,7 @@
     <section id="board" class="panel reveal" aria-labelledby="board-heading">
       <div class="section-head">
         <h2 id="board-heading">Pledge board</h2>
-        <p class="muted">Public commitments first. Private bodies stay veiled until threshold or full disclose. Data in <code>localStorage</code> only.</p>
+        <p class="muted">Public commitments first. Private bodies stay veiled until threshold or full disclose. Real <code>localStorage</code> (schema v2) + multi-tab sync + JSON export/import — still LOCAL-TRUE, not on-chain.</p>
       </div>
       <div class="board-toolbar">
         <div class="board-stats" aria-live="polite">
@@ -267,8 +267,14 @@
           <span><strong id="stat-disclosed">0</strong> disclosed</span>
           <span>Σ veiled <strong id="stat-sum">—</strong></span>
         </div>
-        <button type="button" class="btn ghost small" id="btn-clear-board">Clear all (local)</button>
+        <div class="btn-row">
+          <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+          <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
+          <button type="button" class="btn ghost small" id="btn-clear-board">Clear all (local)</button>
+        </div>
       </div>
+      <p class="muted small" style="margin-top:0.5rem">localStorage schema v2 · BroadcastChannel sync · Export may include amounts/salts — treat as sensitive. LOCAL-TRUE ≠ on-chain.</p>
       <ul class="pledge-list" id="pledge-list"></ul>
     </section>
 
@@ -360,13 +366,13 @@ export circuit seal(): [] {
         <button type="button" class="btn ghost small" id="copy-addr">Copy address</button>
       </div>
       <p class="disclaimer">
-        Educational stub only. Not affiliated with the Midnight Foundation or Input Output.
-        Does not claim on-chain Compact deploy, real ADA tips from this UI, or live GitHub Pages until Actions are enabled.
+        LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Educational only. Not affiliated with Midnight / IOG.
+        Does not claim Compact deploy, real ADA tips from this UI, or live GitHub Pages until Actions are enabled.
         Verify against official docs before mainnet use.
       </p>
     </footer>
   </main>
 
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

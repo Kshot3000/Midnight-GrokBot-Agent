@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Sealed Invite Studio — Midnight private RSVP. Dual-state: public event commitments, private guest vault, capacity proofs without revealing who. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="description" content="Sealed Invite Studio — private RSVP. Real localStorage + multi-tab sync + export/import by @kshot9000. LOCAL-TRUE educational — not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
-  <title>Sealed Invite Studio — Private RSVP · Midnight Lab</title>
+  <title>Sealed Invite Studio — LOCAL-TRUE · Midnight GrokBot Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Crect x='14' y='20' width='36' height='28' rx='4' fill='none' stroke='%23a78bfa' stroke-width='2.2'/%3E%3Cpath d='M14 24l18 12 18-12' fill='none' stroke='%2322d3ee' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='18' r='6' fill='%23080c1a' stroke='%237c9cff' stroke-width='2'/%3E%3Cpath d='M46 18h4M48 16v4' stroke='%237c9cff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E" />
 </head>
@@ -40,7 +40,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -312,7 +312,7 @@
               <div class="proof-label">Last proof</div>
               <strong id="proof-result">No proof yet</strong>
             </div>
-            <span class="badge badge-stub">LOCAL STUB</span>
+            <span class="badge badge-stub">LOCAL-TRUE</span>
           </div>
         </div>
         <div class="thresh-card">
@@ -339,7 +339,7 @@
     <section id="board" class="panel reveal" aria-labelledby="board-heading">
       <div class="section-head">
         <h2 id="board-heading">Invite board</h2>
-        <p class="muted">Public invite board — commitments first, guest names only after selective disclose.</p>
+        <p class="muted">Public invite board — commitments first, guest names only after selective disclose. Schema v2 localStorage · BroadcastChannel sync · JSON export/import. LOCAL-TRUE ≠ on-chain.</p>
       </div>
       <div class="board-toolbar">
         <div class="board-stats">
@@ -348,6 +348,9 @@
           <span>Admitted: <strong id="stat-admitted">0</strong></span>
         </div>
         <div class="btn-row">
+          <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+          <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
           <button type="button" class="btn ghost small" id="btn-seed">Seed demo invite</button>
           <button type="button" class="btn danger small" id="btn-reset">Reset studio</button>
         </div>
@@ -415,12 +418,12 @@ witness guestName: Bytes&lt;64&gt;;
         <a href="https://x.com/kshot9000">@kshot9000</a>
       </p>
       <p class="disclaimer">
-        LOCAL STUB · educational simulation only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Educational only. Not affiliated with Midnight / IOG / Lace beyond public docs.
         No claim of live GitHub Pages, on-chain settlement, or real guest-list custody.
       </p>
     </footer>
   </main>
 
-  <script src="main.js" defer></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>

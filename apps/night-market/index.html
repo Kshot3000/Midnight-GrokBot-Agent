@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Night Market Studio — Midnight sealed listings & private bids. Dual-state marketplace: public commitments, private reserves, bid-threshold proofs. Educational local stub by @kshot9000. Not on-chain." />
+  <meta name="description" content="Night Market Studio — sealed listings & private bids. Real localStorage + multi-tab sync + export/import by @kshot9000. LOCAL-TRUE educational — not on-chain." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
-  <title>Night Market Studio — Sealed Listings · Midnight Lab</title>
+  <title>Night Market Studio — LOCAL-TRUE · Midnight GrokBot Lab</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M14 42h36M18 42V28l14-10 14 10v14' fill='none' stroke='%23a78bfa' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='34' r='5' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Cpath d='M26 48h12' stroke='%237c9cff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
 </head>
@@ -40,7 +40,7 @@
       <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
       <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
     </nav>
-    <span class="badge badge-stub" title="Educational local stub">LOCAL STUB · not on-chain</span>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
   </header>
 
   <aside class="donate-dock" aria-label="Always-visible donate">
@@ -286,7 +286,7 @@
               <div class="proof-label">Last proof</div>
               <strong id="proof-result">No proof yet</strong>
             </div>
-            <span class="badge badge-stub">LOCAL STUB</span>
+            <span class="badge badge-stub">LOCAL-TRUE</span>
           </div>
         </div>
         <div class="thresh-card">
@@ -299,7 +299,7 @@
     <section id="stalls" class="panel reveal" aria-labelledby="stalls-heading">
       <div class="section-head">
         <h2 id="stalls-heading">Night stalls</h2>
-        <p class="muted">Public marketplace board — commitments first, amounts only after selective disclose.</p>
+        <p class="muted">Public marketplace board — commitments first, amounts only after selective disclose. Schema v2 localStorage · BroadcastChannel sync · JSON export/import. LOCAL-TRUE ≠ on-chain.</p>
       </div>
       <div class="board-toolbar">
         <div class="board-stats">
@@ -308,6 +308,9 @@
           <span>Awarded: <strong id="stat-awarded">0</strong></span>
         </div>
         <div class="btn-row">
+          <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+          <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
           <button type="button" class="btn ghost small" id="btn-seed">Seed demo stall</button>
           <button type="button" class="btn danger small" id="btn-reset">Reset market</button>
         </div>
@@ -374,12 +377,12 @@ witness reserveAda: Uint&lt;64&gt;;
         <a href="https://x.com/kshot9000">@kshot9000</a>
       </p>
       <p class="disclaimer">
-        LOCAL STUB · educational simulation only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Educational only. Not affiliated with Midnight / IOG / Lace beyond public docs.
         No claim of live GitHub Pages, on-chain settlement, or real marketplace custody.
       </p>
     </footer>
   </main>
 
-  <script src="main.js" defer></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
