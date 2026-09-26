@@ -509,18 +509,17 @@ main {
   border-color: rgba(110, 231, 183, 0.4);
   background: rgba(110, 231, 183, 0.1);
 }
-.badge-demo {
-  color: var(--accent-3);
-  border-color: rgba(34, 211, 238, 0.4);
-  background: rgba(34, 211, 238, 0.1);
-}
 .badge-flagship {
   border-color: rgba(34, 211, 238, 0.55);
   color: #67e8f9;
   background: rgba(34, 211, 238, 0.12);
   box-shadow: 0 0 18px rgba(34, 211, 238, 0.15);
 }
-
+.badge-demo {
+  color: var(--accent-3);
+  border-color: rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.1);
+}
 .badge-stub {
   color: var(--warn);
   border-color: rgba(251, 191, 36, 0.4);

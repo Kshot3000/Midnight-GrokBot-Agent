@@ -91,7 +91,7 @@
             <span>Local dual-state · educational</span>
           </div>
           <div class="app-card-actions">
-            <a class="btn primary small" href="board/">Open studio</a>
+            <a class="btn primary small" href="shield/">Open studio</a>
             <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/shield-board" rel="noopener noreferrer">Source</a>
           </div>
         </article>
@@ -143,3 +143,200 @@
             <a class="btn ghost small" href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/apps/auth-lab" rel="noopener noreferrer">Source</a>
           </div>
         </article>
+
+      </div>
+    </section>
+
+    <section id="compat" class="panel compat-panel reveal">
+      <div class="section-head tight">
+        <h2>Compat matrix <span class="badge badge-research">Sep 2026 research</span></h2>
+        <p class="muted">Lab pins from research — <strong>verify against the official Midnight compatibility matrix</strong> before deploying.</p>
+      </div>
+      <div class="compat-grid" role="list">
+        <div class="compat-item" role="listitem"><span class="compat-key">Compact toolchain</span><span class="compat-val">0.31.1</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">Compact language</span><span class="compat-val">~0.23</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">Runtime</span><span class="compat-val">0.16.0</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">midnight-js</span><span class="compat-val">4.1.1</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">wallet-sdk</span><span class="compat-val">1.2.0</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">DApp Connector</span><span class="compat-val">4.0.1</span></div>
+        <div class="compat-item" role="listitem"><span class="compat-key">proof-server</span><span class="compat-val">8.1.0</span></div>
+      </div>
+      <p class="muted compat-note">
+        Source of truth:
+        <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">installation / matrix docs</a>
+        · Never treat these pins as a substitute for the official matrix.
+      </p>
+    </section>
+
+    <section id="about" class="panel reveal">
+      <h2>What is Midnight?</h2>
+      <p>
+        Midnight is a fourth-generation blockchain designed for
+        <strong>programmable privacy</strong>: developers write smart contracts in
+        <strong>Compact</strong>, which compiles to TypeScript/JavaScript bindings and
+        zero-knowledge circuits. Public ledger state stays on-chain; private state can
+        remain local to the client, with selective disclosure when required.
+      </p>
+      <ul class="bullets">
+        <li>Hybrid UTXO + account-style contract updates in atomic steps</li>
+        <li>Dual-state ledger: public on-chain state ↔ local private state via ZK proofs</li>
+        <li>Built for real-world regulated workflows without exposing all data by default</li>
+      </ul>
+      <p class="muted">
+        Source of truth:
+        <a href="https://midnight.network/" rel="noopener noreferrer">midnight.network</a>
+        ·
+        <a href="https://docs.midnight.network/" rel="noopener noreferrer">docs.midnight.network</a>
+      </p>
+    </section>
+
+    <section id="stack" class="grid-3">
+      <article class="card reveal">
+        <div class="icon" aria-hidden="true">◈</div>
+        <h3>Compact</h3>
+        <p>
+          Strongly typed contract language for Midnight. Declares public ledger fields,
+          circuits for proven transitions, and witnesses for private client data.
+        </p>
+        <a href="https://docs.midnight.network/compact" rel="noopener noreferrer">Compact docs →</a>
+      </article>
+      <article class="card reveal">
+        <div class="icon" aria-hidden="true">⬡</div>
+        <h3>Lace wallet</h3>
+        <p>
+          Browser wallet used with Midnight DApps. Connect via the official DApp connector API;
+          point local proof generation at your proof server when developing.
+        </p>
+        <a href="https://docs.midnight.network/api-reference/dapp-connector" rel="noopener noreferrer">Connector API →</a>
+      </article>
+      <article class="card reveal">
+        <div class="icon" aria-hidden="true">✦</div>
+        <h3>This lab</h3>
+        <p>
+          Repo layout under <code>apps/</code> and <code>contracts/</code> — polished static demos plus
+          commented Compact skeletons. Compile only after installing the official toolchain.
+        </p>
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Open repo →</a>
+      </article>
+    </section>
+
+    <section id="tokens" class="panel reveal">
+      <h2>NIGHT &amp; DUST (high-level)</h2>
+      <div class="token-grid">
+        <div class="token-chip">
+          <h3>NIGHT</h3>
+          <p>
+            Native <strong>unshielded</strong> utility / governance token. Registered NIGHT
+            holdings generate the DUST resource used for fees. Testnets use <strong>tNIGHT</strong>
+            from the faucet.
+          </p>
+        </div>
+        <div class="token-chip">
+          <h3>DUST</h3>
+          <p>
+            <strong>Shielded, non-transferable</strong> network resource consumed to pay
+            transaction fees. Regenerates over time from registered NIGHT (test: <strong>tDUST</strong>).
+          </p>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:1rem">
+        Details:
+        <a href="https://midnight.network/night" rel="noopener noreferrer">NIGHT overview</a>
+        ·
+        <a href="https://docs.midnight.network/guides/acquire-tokens" rel="noopener noreferrer">Acquire tokens / faucet guide</a>
+        ·
+        <a href="https://docs.midnight.network/glossary" rel="noopener noreferrer">Glossary</a>
+      </p>
+    </section>
+
+    <section id="start" class="panel reveal">
+      <h2>Start building</h2>
+      <ol class="steps">
+        <li>
+          Install Compact + proof server from the
+          <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">official installation guide</a>
+          (pin versions from the compatibility matrix — see <a href="#compat">our research pins</a>).
+        </li>
+        <li>
+          Install <a href="https://www.lace.io/" rel="noopener noreferrer">Lace</a>, select the Midnight network
+          (e.g. Preprod for test work), and fund with faucet tNIGHT → generate tDUST.
+        </li>
+        <li>
+          Explore <code>contracts/hello-midnight/hello.compact</code> in this repo, then follow an
+          official tutorial such as the
+          <a href="https://docs.midnight.network/tutorials/leaderboard/overview" rel="noopener noreferrer">privacy-preserving leaderboard DApp</a>.
+        </li>
+        <li>
+          Open the live lab on
+          <a href="https://kshot3000.github.io/Midnight-GrokBot-Agent/">GitHub Pages</a>
+          or serve locally:
+          <code>cd apps/midnight-lab-site &amp;&amp; python3 -m http.server 5173</code>
+        </li>
+        <li>
+          Try the Lace connect demo:
+          <a href="lace/">Pages /lace/</a>
+          or <code>npm run dev:lace-demo</code> → http://localhost:5174
+        </li>
+        <li>
+          Walk the Agent Escrow stub:
+          <a href="escrow/">Pages /escrow/</a>
+          or <code>cd apps/agent-escrow-stub &amp;&amp; python3 -m http.server 5175</code>
+        </li>
+        <li>
+          <strong>Auth Lab</strong> —
+          <a href="auth/">Pages /auth/</a>
+          or <code>cd apps/auth-lab &amp;&amp; python3 -m http.server 5176</code>
+        </li>
+        <li>
+          <strong>Shield Board</strong> (flagship) —
+          <a href="shield/">Pages /shield/</a>
+          or <code>cd apps/shield-board &amp;&amp; python3 -m http.server 5177</code>
+        </li>
+      </ol>
+    </section>
+
+    <section id="links" class="panel links reveal">
+      <h2>Official links</h2>
+      <ul>
+        <li><a href="https://midnight.network/" rel="noopener noreferrer">midnight.network</a></li>
+        <li><a href="https://docs.midnight.network/" rel="noopener noreferrer">Developer docs</a></li>
+        <li><a href="https://docs.midnight.network/compact" rel="noopener noreferrer">Compact language</a></li>
+        <li><a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">Install toolchain</a></li>
+        <li><a href="https://docs.midnight.network/api-reference/dapp-connector" rel="noopener noreferrer">DApp connector API</a></li>
+        <li><a href="https://github.com/midnightntwrk" rel="noopener noreferrer">midnightntwrk on GitHub</a></li>
+      </ul>
+    </section>
+
+    <section id="donate" class="panel donate reveal">
+      <h2>Support the lab</h2>
+      <p>Cardano (ADA) donations keep the 24/7 Midnight build lab going.</p>
+      <div class="addr-box">
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" id="copy-addr" class="btn ghost small">Copy</button>
+      </div>
+      <p class="muted">
+        Follow <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> on X
+        · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Midnight GrokBot Agent</strong>
+      <span> · MIT · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a></span>
+      <span> · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a></span>
+      <span> · <a href="https://kshot3000.github.io/Midnight-GrokBot-Agent/">Live Pages</a></span>
+    </div>
+    <div class="footer-donate">
+      <span>Donate ADA:</span>
+      <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+    </div>
+    <p class="disclaimer">
+      Not affiliated with the Midnight Foundation. Facts link to official docs; verify versions before mainnet use.
+    </p>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
