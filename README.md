@@ -22,6 +22,7 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | `/market/` | **Night Market Studio** — sealed listings & private bids |
 | `/invite/` | **Sealed Invite Studio** — private RSVP & sealed invites |
 | `/proof/` | **Proof Playground** — visual ZK / circuit explainer |
+| `/ballot/` | **Private Ballot Studio** — sealed polls & private votes |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -40,7 +41,8 @@ Until then the URL may 404.
 │   ├── veil-pledge/           # Veil Pledge Studio — private tip jar & pledge board
 │   ├── night-market/          # Night Market Studio — sealed listings & private bids
 │   ├── sealed-invite/         # Sealed Invite Studio — private RSVP & sealed invites
-│   └── proof-playground/      # Proof Playground — visual ZK / circuit explainer
+│   ├── proof-playground/      # Proof Playground — visual ZK / circuit explainer
+│   └── private-ballot/        # Private Ballot Studio — sealed polls & private votes
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
 ├── contracts/
@@ -62,6 +64,7 @@ Until then the URL may 404.
 | `apps/night-market` | **Night Market Studio** — sealed listings, private bids, bid-threshold theater (local stub) |
 | `apps/sealed-invite` | **Sealed Invite Studio** — private RSVP, capacity proofs, selective admit (local stub) |
 | `apps/proof-playground` | **Proof Playground** — visual ZK circuits, witness→gate→prove theater (local stub) |
+| `apps/private-ballot` | **Private Ballot Studio** — sealed polls, nullifiers, tally theater (local stub) |
 | `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
@@ -144,6 +147,19 @@ python3 -m http.server 5181
 
 Pages path (when Actions enabled): `/invite/`. Local stub only — no on-chain Compact deploy, no real guest-list custody from this UI.
 
+
+
+## Quick start — Private Ballot Studio
+
+Sealed polls & private votes: public questions + ballot commitments, nullifiers against double-votes, tally theater that certifies counts without publishing openings.
+
+```bash
+cd apps/private-ballot
+python3 -m http.server 5183
+# open http://localhost:5183
+```
+
+Pages path (when Actions enabled): `/ballot/`. Local stub only — no on-chain Compact deploy, no real votes custody from this UI.
 
 ## Quick start — Proof Playground
 
