@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="MPS-0029 Auth Lab — interactive demo of forgeable ownPublicKey vs witness-derived Compact auth on Midnight." />
+  <meta name="theme-color" content="#05070f" />
+  <title>MPS-0029 Auth Lab — Midnight GrokBot</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Cpath d='M20 40 L32 18 L44 40 Z' fill='none' stroke='%23a78bfa' stroke-width='3'/%3E%3Ccircle cx='32' cy='36' r='4' fill='%237c9cff'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <div class="bg-aurora"></div>
+    <div class="bg-aurora bg-aurora-2"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <a class="logo" href="../">Midnight<span>Lab</span></a>
+    <nav aria-label="Primary">
+      <a href="#lesson">Lesson</a>
+      <a href="#forge">Forge demo</a>
+      <a href="#board">Safe board</a>
+      <a href="#wallets">Wallets</a>
+      <a href="#snippets">Snippets</a>
+    </nav>
+    <span class="badge">LOCAL STUB · not on-chain</span>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot"></span> MPS-0029 · Compact caller identity</p>
+      <h1>Never gate auth on <code>ownPublicKey()</code> alone</h1>
+      <p class="lede">
+        On Midnight, <code>ownPublicKey()</code> is a <strong>prover-supplied witness</strong> — not cryptographically
+        bound to the transaction signer. Any <code>assert(ownPublicKey() == owner)</code> is bypassable.
+        Prefer witness-derived keys, as in <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a>
+        / <code>create-mn-app --template bboard</code>.
+        Lab by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#forge">Try the forge demo</a>
+        <a class="btn ghost" href="https://github.com/midnightntwrk/midnight-improvement-proposals/blob/main/mps/mps-0029-compact-caller-identity.md" rel="noopener noreferrer">Read MPS-0029</a>
+        <a class="btn ghost" href="../">← Lab home</a>
+      </div>
+    </section>
+
+    <section id="lesson" class="panel reveal">
+      <div class="section-head">
+        <h2>The rule in one screen</h2>
+        <p class="muted">Safe uses of <code>ownPublicKey()</code> are token <em>routing</em> after a real auth gate — never the gate itself.</p>
+      </div>
+      <div class="rule-grid">
+        <article class="rule-card bad">
+          <div class="rule-tag">Unsafe</div>
+          <h3>Auth via <code>ownPublicKey()</code></h3>
+          <p>Prover picks any 32-byte value. Assertions that compare it to a stored owner are theater.</p>
+          <ul>
+            <li><code>assert(ownPublicKey() == admin)</code></li>
+            <li>Blacklists keyed only by <code>ownPublicKey()</code></li>
+            <li>Role maps filled from <code>ownPublicKey()</code> at register</li>
+          </ul>
+        </article>
+        <article class="rule-card ok">
+          <div class="rule-tag">Safe</div>
+          <h3>Witness-derived identity</h3>
+          <p>Caller proves knowledge of a secret. Derive a public commitment in-circuit (bboard / zkloan pattern).</p>
+          <ul>
+            <li><code>witness localSecretKey(): Bytes&lt;32&gt;</code></li>
+            <li><code>publicKey(sk)</code> / <code>persistentHash</code> with domain sep</li>
+            <li><code>ownPublicKey()</code> only to <em>route</em> shielded coins</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="forge" class="panel reveal">
+      <div class="section-head">
+        <h2>Forge demo <span class="badge badge-sim">simulated</span></h2>
+        <p class="muted">Local model of a naive “owner = ownPublicKey” contract. No Compact runtime — educational only.</p>
+      </div>
+      <div class="forge-layout">
+        <div class="forge-card">
+          <h3>1. Deploy (honest)</h3>
+          <p class="muted">Alice deploys and stores her claimed public key as <code>owner</code>.</p>
+          <div class="field">
+            <label for="alice-pk">Alice claimed pk (hex)</label>
+            <input id="alice-pk" type="text" spellcheck="false" autocomplete="off" />
+          </div>
+          <button type="button" class="btn primary" id="btn-deploy">Deploy as Alice</button>
+          <p class="status" id="deploy-status">Not deployed.</p>
+        </div>
+        <div class="forge-card">
+          <h3>2. Attack (Mallory)</h3>
+          <p class="muted">Mallory calls <code>adminOnly()</code> while supplying Alice’s public key as her “ownPublicKey”.</p>
+          <div class="field">
+            <label for="mallory-claim">Mallory supplies as ownPublicKey</label>
+            <input id="mallory-claim" type="text" spellcheck="false" autocomplete="off" />
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn ghost" id="btn-copy-alice">Copy Alice pk → claim</button>
+            <button type="button" class="btn danger" id="btn-forge">Call adminOnly()</button>
+          </div>
+          <p class="status" id="forge-status">Waiting…</p>
+        </div>
+        <div class="forge-card wide">
+          <h3>3. Same call with witness binding</h3>
+          <p class="muted">With a secret-bound owner, Mallory cannot reproduce Alice’s derived key without Alice’s secret.</p>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-safe-deploy">Deploy safe (Alice secret)</button>
+            <button type="button" class="btn danger" id="btn-safe-forge">Mallory tries adminOnly()</button>
+            <button type="button" class="btn ghost" id="btn-safe-alice">Alice calls adminOnly()</button>
+          </div>
+          <p class="status" id="safe-status">Safe contract not deployed.</p>
+          <pre class="log" id="forge-log" aria-live="polite"></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="board" class="panel reveal">
+      <div class="section-head">
+        <h2>Safe local bulletin board</h2>
+        <p class="muted">bboard-inspired stub: posts bind to <code>publicKey(localSecret)</code>. Only the secret holder can take down a post. Data stays in <code>localStorage</code>.</p>
+      </div>
+      <div class="board-layout">
+        <div class="board-side">
+          <div class="ident-card">
+            <h3>Your local secret</h3>
+            <p class="muted small">Generated in-browser. Never sent anywhere. Mimics <code>localSecretKey</code> witness.</p>
+            <code class="mono block" id="my-sk">—</code>
+            <code class="mono block muted" id="my-pk">pk: —</code>
+            <div class="btn-row">
+              <button type="button" class="btn ghost small" id="btn-rotate-sk">Rotate secret</button>
+              <button type="button" class="btn ghost small" id="btn-copy-pk">Copy pk</button>
+            </div>
+          </div>
+          <div class="post-form">
+            <h3>Post message</h3>
+            <textarea id="post-body" rows="3" maxlength="280" placeholder="Privacy-preserving note…"></textarea>
+            <button type="button" class="btn primary" id="btn-post">Post (bound to my pk)</button>
+          </div>
+        </div>
+        <div class="board-main">
+          <div class="board-head">
+            <h3>Board <span class="muted" id="post-count">(0)</span></h3>
+            <button type="button" class="btn ghost small" id="btn-clear-board">Clear all (local)</button>
+          </div>
+          <ul class="post-list" id="post-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="wallets" class="panel reveal">
+      <div class="section-head">
+        <h2>Wallet discovery</h2>
+        <p class="muted">Enumerate <code>Object.entries(window.midnight)</code>. Do <strong>not</strong> hardcode <code>mnLace</code> — keys are often UUIDs.</p>
+      </div>
+      <div class="wallet-toolbar">
+        <button type="button" class="btn primary" id="btn-scan-wallets">Scan window.midnight</button>
+        <span class="status" id="wallet-status">Not scanned yet.</span>
+      </div>
+      <div class="wallet-grid" id="wallet-grid"></div>
+    </section>
+
+    <section id="snippets" class="panel reveal">
+      <div class="section-head">
+        <h2>Compact snippets</h2>
+        <p class="muted">Illustrative — verify against current Compact docs / <code>example-bboard</code> before shipping.</p>
+      </div>
+      <div class="snip-grid">
+        <div class="snip bad">
+          <div class="snip-label">✗ Forgeable</div>
+<pre><code>export ledger owner: ZswapCoinPublicKey;
+
+constructor() {
+  owner = ownPublicKey(); // anyone can later claim this
+}
+
+export circuit adminOnly(): [] {
+  assert(ownPublicKey() == owner, "not owner"); // bypassable
+}</code></pre>
+        </div>
+        <div class="snip ok">
+          <div class="snip-label">✓ Witness-derived (bboard-style)</div>
+<pre><code>witness localSecretKey(): Bytes&lt;32&gt;;
+
+export ledger owner: Bytes&lt;32&gt;;
+
+constructor() {
+  owner = publicKey(localSecretKey());
+}
+
+export circuit adminOnly(): [] {
+  assert(
+    disclose(publicKey(localSecretKey()) == owner),
+    "not owner"
+  );
+}</code></pre>
+        </div>
+      </div>
+      <p class="muted snip-note">
+        Prefer starters: <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a>
+        · <a href="https://github.com/midnightntwrk/create-mn-app" rel="noopener noreferrer">create-mn-app</a>
+        · Counter is <strong>archived</strong>. Official security:
+        <a href="https://docs.midnight.network/guides/security-best-practices" rel="noopener noreferrer">security best practices</a>.
+      </p>
+    </section>
+
+    <section id="donate" class="panel donate reveal">
+      <h2>Support the lab</h2>
+      <p>Cardano (ADA) donations keep the 24/7 Midnight build lab going.</p>
+      <div class="addr-box">
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" class="btn ghost small" id="copy-addr">Copy</button>
+      </div>
+      <p class="muted">Follow <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> · <a href="https://nightdream.io" rel="noopener noreferrer">NightDream.io</a></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>MPS-0029 Auth Lab</strong>
+      · part of <a href="../">Midnight GrokBot Agent</a>
+      · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </div>
+    <p class="disclaimer">Educational stub only. Not affiliated with the Midnight Foundation. Verify against official docs before mainnet use.</p>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

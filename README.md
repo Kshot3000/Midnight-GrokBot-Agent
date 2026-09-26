@@ -15,6 +15,7 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 | `/` | Lab site (landing + apps gallery + compat matrix) |
 | `/escrow/` | Agent Escrow local stub |
 | `/lace/` | Lace connect demo (discovery + connect only) |
+| `/auth/` | MPS-0029 Auth Lab (forge demo + local bboard stub) |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -27,7 +28,8 @@ Until then the URL may 404.
 ├── apps/
 │   ├── midnight-lab-site/     # Static marketing / dev landing site
 │   ├── lace-connect-demo/     # Vite demo: discover + connect Lace Midnight
-│   └── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
+│   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
+│   └── auth-lab/              # MPS-0029 Auth Lab (forge demo + local bboard)
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
 ├── contracts/
@@ -43,6 +45,7 @@ Until then the URL may 404.
 | `apps/midnight-lab-site` | Zero-dependency HTML/CSS/JS site about Midnight + this lab |
 | `apps/lace-connect-demo` | Vite page using the kit — **discovery + connect only** (no transfer claims) |
 | `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
+| `apps/auth-lab` | MPS-0029 educational lab — forgeable `ownPublicKey` vs witness-derived auth |
 | `packages/lace-midnight-kit` | Enumerate `window.midnight`, connect, addresses/network, graceful errors + Lace workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
