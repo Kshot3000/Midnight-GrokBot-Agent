@@ -25,6 +25,7 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | `/ballot/` | **Private Ballot Studio** — sealed polls & private votes |
 | `/passport/` | **Veil Passport Studio** — confidential credentials & selective disclosure |
 | `/atelier/` | **Compact Atelier** — editable Compact snippets + explain panel |
+| `/nocturne/` | **Nocturne Messenger** — private sealed DMs preview studio |
 
 Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
 The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
@@ -46,7 +47,8 @@ Until then the URL may 404.
 │   ├── proof-playground/      # Proof Playground — visual ZK / circuit explainer
 │   ├── private-ballot/        # Private Ballot Studio — sealed polls & private votes
 │   ├── veil-passport/         # Veil Passport Studio — confidential credentials
-│   └── compact-atelier/       # Compact Atelier — editable snippets + explain panel
+│   ├── compact-atelier/       # Compact Atelier — editable snippets + explain panel
+│   └── nocturne-messenger/    # Nocturne Messenger — sealed DMs preview studio
 ├── packages/
 │   └── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
 ├── contracts/
@@ -59,7 +61,7 @@ Until then the URL may 404.
 
 | Path | Role |
 | --- | --- |
-| `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Matrix Explorer, donate dock |
+| `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Explorer, **⌘K command palette**, donate dock |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — journey stepper, injection watch, matrix, capability radar · **discovery + connect only** |
 | `apps/agent-escrow-stub` | Local state-machine UI stub for Agent Escrow (no Lace / no deploy) |
 | `apps/auth-lab` | **Auth Forge Studio** — attack journey, scorecard, forge theater, local bboard |
@@ -71,6 +73,7 @@ Until then the URL may 404.
 | `apps/private-ballot` | **Private Ballot Studio** — sealed polls, nullifiers, tally theater (local stub) |
 | `apps/veil-passport` | **Veil Passport Studio** — confidential credentials, selective disclose, predicate theater (local stub) |
 | `apps/compact-atelier` | **Compact Atelier** — editable Compact snippets, explain panel, lint theater (local stub) |
+| `apps/nocturne-messenger` | **Nocturne Messenger Studio** — sealed DMs, envelope veil, selective reveal (local stub) |
 | `packages/lace-midnight-kit` | v0.2.0 — enumerate, connect journey, injection watch, capability probe, demo mode, errors + workarounds |
 | `contracts/hello-midnight` | Commented Compact skeleton (compile after official toolchain install) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |
@@ -203,6 +206,18 @@ python3 -m http.server 5185
 ```
 
 Pages path (when Actions enabled): `/atelier/`. Local stub only — not a Compact compiler, proof server, or on-chain deploy.
+
+## Quick start — Nocturne Messenger Studio
+
+Private sealed DMs preview: claim a handle, seal bodies in an envelope veil, publish commitments on the ledger rail, run selective reveal theater.
+
+```bash
+cd apps/nocturne-messenger
+python3 -m http.server 5186
+# open http://localhost:5186
+```
+
+Pages path (when Actions enabled): `/nocturne/`. Local stub only — not a relay, Lace, Compact compiler, or on-chain messaging.
 
 ## Compact / Midnight toolchain (official)
 

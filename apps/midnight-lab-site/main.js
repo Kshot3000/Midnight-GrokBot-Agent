@@ -371,6 +371,129 @@
       .replace(/"/g, "&quot;");
   }
 
+
+  const PALETTE_STUDIOS = [
+    { name: "Nocturne Messenger", path: "nocturne/", tags: "messenger sealed dm" },
+    { name: "Compact Atelier", path: "atelier/", tags: "compact editor lint" },
+    { name: "Veil Passport", path: "passport/", tags: "credentials disclose" },
+    { name: "Private Ballot", path: "ballot/", tags: "vote poll nullifier" },
+    { name: "Proof Playground", path: "proof/", tags: "zk circuit" },
+    { name: "Sealed Invite", path: "invite/", tags: "rsvp" },
+    { name: "Night Market", path: "market/", tags: "bids listings" },
+    { name: "Veil Pledge", path: "pledge/", tags: "tip jar" },
+    { name: "Shield Board", path: "board/", tags: "bulletin dual-state" },
+    { name: "Auth Forge", path: "auth/", tags: "mps-0029" },
+    { name: "Lace Connect", path: "lace/", tags: "wallet connect" },
+    { name: "Agent Escrow", path: "escrow/", tags: "role theater" },
+    { name: "Donate ADA", path: "#donate", tags: "tip support" },
+    { name: "Compat Explorer", path: "#compat", tags: "pins matrix" },
+  ];
+
+  function initCommandPalette() {
+    const overlay = document.getElementById("cmd-palette");
+    const input = /** @type {HTMLInputElement | null} */ (document.getElementById("cmd-input"));
+    const list = document.getElementById("cmd-list");
+    const openBtn = document.getElementById("btn-open-palette");
+    if (!overlay || !input || !list) return;
+
+    let active = 0;
+    let filtered = PALETTE_STUDIOS.slice();
+
+    function close() {
+      overlay.hidden = true;
+      announce("Command palette closed");
+    }
+    function open() {
+      overlay.hidden = false;
+      input.value = "";
+      active = 0;
+      render("");
+      requestAnimationFrame(() => input.focus());
+      announce("Command palette open");
+    }
+
+    function render(q) {
+      const qq = (q || "").trim().toLowerCase();
+      filtered = PALETTE_STUDIOS.filter((s) => {
+        if (!qq) return true;
+        return (
+          s.name.toLowerCase().includes(qq) ||
+          s.path.toLowerCase().includes(qq) ||
+          s.tags.toLowerCase().includes(qq)
+        );
+      });
+      if (active >= filtered.length) active = Math.max(0, filtered.length - 1);
+      list.innerHTML = "";
+      if (!filtered.length) {
+        list.innerHTML = '<li class="muted small" style="padding:0.75rem">No matches</li>';
+        return;
+      }
+      filtered.forEach((s, i) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "cmd-item" + (i === active ? " is-active" : "");
+        btn.setAttribute("role", "option");
+        btn.setAttribute("aria-selected", i === active ? "true" : "false");
+        btn.innerHTML = `<span><strong>${escapeHtml(s.name)}</strong><span>${escapeHtml(s.path)}</span></span><span class="cmd-go">↵</span>`;
+        btn.addEventListener("click", () => go(s));
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    function go(s) {
+      close();
+      if (s.path.startsWith("#")) {
+        const el = document.querySelector(s.path);
+        el?.scrollIntoView({ behavior: "smooth" });
+        announce(`Jumped to ${s.name}`);
+      } else {
+        location.href = s.path;
+      }
+    }
+
+    openBtn?.addEventListener("click", open);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
+    input.addEventListener("input", () => {
+      active = 0;
+      render(input.value);
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        active = Math.min(filtered.length - 1, active + 1);
+        render(input.value);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        active = Math.max(0, active - 1);
+        render(input.value);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (filtered[active]) go(filtered[active]);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        if (overlay.hidden) open();
+        else close();
+        return;
+      }
+      if (e.key === "Escape" && !overlay.hidden) {
+        close();
+      }
+    });
+  }
+
+
   function bind() {
     document.getElementById("copy-addr")?.addEventListener("click", () => copyDonate("copy-addr"));
     document.getElementById("dock-copy-addr")?.addEventListener("click", () => copyDonate("dock-copy-addr"));
@@ -385,6 +508,7 @@
     initStarfield();
     initFilters();
     initCompatExplorer();
+    initCommandPalette();
     bind();
     // Auto-probe once after paint — honest results either way
     requestAnimationFrame(() => {

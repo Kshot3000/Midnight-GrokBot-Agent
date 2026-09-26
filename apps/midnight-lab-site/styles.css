@@ -1058,3 +1058,61 @@ main {
   color: #6ee7b7;
   border-color: rgba(110, 231, 183, 0.4);
 }
+
+
+/* —— Hub command palette (Pass 13 polish) —— */
+.hub-cmd-btn {
+  margin-left: 0.25rem;
+  font-family: var(--mono, ui-monospace, monospace);
+  letter-spacing: 0.02em;
+}
+.cmd-palette {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(3, 5, 12, 0.72); backdrop-filter: blur(8px);
+  display: grid; place-items: start center; padding: 12vh 1rem 1rem;
+}
+.cmd-palette[hidden] { display: none !important; }
+.cmd-card {
+  width: min(520px, 100%);
+  border-radius: 18px; border: 1px solid rgba(124,156,255,0.4);
+  background: rgba(12, 18, 34, 0.97); box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  padding: 0.85rem 0.95rem 0.75rem;
+  animation: cmdIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes cmdIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cmd-card { animation: none; }
+}
+.cmd-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  margin-bottom: 0.55rem;
+}
+.cmd-head h3 { margin: 0; font-family: var(--display, inherit); font-size: 1.05rem; }
+#cmd-input {
+  width: 100%; border-radius: 12px; border: 1px solid rgba(124,156,255,0.28);
+  background: rgba(0,0,0,0.28); color: #eef2ff;
+  padding: 0.7rem 0.85rem; font: inherit; font-size: 0.95rem; margin-bottom: 0.55rem;
+}
+#cmd-input:focus-visible {
+  outline: none; box-shadow: 0 0 0 3px rgba(124,156,255,0.45);
+}
+.cmd-list {
+  list-style: none; margin: 0; padding: 0; max-height: 320px; overflow: auto;
+}
+.cmd-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  width: 100%; text-align: left; cursor: pointer;
+  padding: 0.65rem 0.75rem; margin-bottom: 0.25rem;
+  border-radius: 12px; border: 1px solid transparent;
+  background: transparent; color: inherit; font: inherit;
+}
+.cmd-item:hover, .cmd-item.is-active {
+  background: rgba(124,156,255,0.1); border-color: rgba(124,156,255,0.35);
+}
+.cmd-item strong { display: block; font-size: 0.92rem; }
+.cmd-item span { color: #9aa8c7; font-size: 0.75rem; font-family: ui-monospace, monospace; }
+.cmd-item .cmd-go { color: #22d3ee; font-size: 0.78rem; font-weight: 700; }
+.cmd-foot { margin: 0.55rem 0 0; text-align: center; }
