@@ -88,7 +88,7 @@ Until then the URL may 404.
 | `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
 | `packages/prove-metrics` | **@kshot/prove-metrics** — shared hello+escrow local ZK prove metrics helpers (sync into apps for Pages) |
 | `packages/preprod-hello-stub` | Preprod path — off-chain hello + **providers wiring** + clear-fail deploy gate · banners + exit-code legend · **not a confirmed Preprod deploy** |
-| Hub `#preprod` panel | Honest Compact / proof-server / deploy status (compiled yes · proof optional · blocked pending tDUST) |
+| Hub `#preprod` panel | Honest Compact / proof-server `:6300` + prove-bridge `:6399` live probes (soft-fail) / deploy status (compiled yes · blocked pending tDUST) |
 | `@kshot/lace-midnight-kit` | **0.3.1** — install guide + `ERROR_CATALOG` surfaced in Lace Connect Studio |
 | `contracts/hello-midnight` | Compact counter — `npm run compact:hello` (artifacts gitignored) |
 | `contracts/agent-escrow` | Agent Escrow Compact skeleton — MPS-0029 auth, pragma ≥ 0.23, Compact **~0.31.1** notes |

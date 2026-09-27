@@ -1,4 +1,4 @@
-# `@kshot/lace-midnight-kit` (v0.3.1)
+# `@kshot/lace-midnight-kit` (v0.3.2)
 
 Reusable **browser** helpers for connecting a DApp to **Lace Midnight** via the official
 [`@midnight-ntwrk/dapp-connector-api`](https://www.npmjs.com/package/@midnight-ntwrk/dapp-connector-api) **4.0.1** types.
@@ -14,6 +14,8 @@ Built for the [Midnight GrokBot Agent](https://github.com/Kshot3000/Midnight-Gro
 | `connect(networkId)` + connection status | ✅ |
 | Read unshielded / shielded / dust addresses | ✅ (when Lace allows) |
 | Graceful `LaceMidnightKitError` + user hints | ✅ |
+| Recovery actions (`recoveryActionsForError`) | ✅ Studio error panel |
+| Network catalog + switch plan (`NETWORK_CATALOG` / `describeNetworkSwitch`) | ✅ |
 | Documented Lace workarounds | ✅ see below / `src/workarounds.ts` |
 | Connect status matrix (`probeStatusMatrix`) | ✅ |
 | Connect journey phases (`createConnectJourney`) | ✅ |

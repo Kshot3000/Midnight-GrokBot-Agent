@@ -13,12 +13,14 @@ import {
   LACE_INSTALL_GUIDE,
   LACE_MIDNIGHT_WORKAROUNDS,
   ERROR_CATALOG,
+  NETWORK_CATALOG,
   MidnightNetworkIds,
   advanceConnectJourney,
   connectWithProvider,
   createConnectJourney,
   createDemoCapabilityProbe,
   createDemoSession,
+  describeNetworkSwitch,
   discoverProviders,
   formatAddress,
   formatInjectionKey,
@@ -29,6 +31,7 @@ import {
   probeSessionCapabilities,
   probeStatusMatrix,
   reconnectFromPrefs,
+  recoveryActionsForError,
   refreshConnectedSession,
   rememberSuccessfulConnect,
   resolvePreferredProvider,
@@ -47,36 +50,20 @@ import {
   type ConnectedSession,
   type DiscoveredProvider,
   type InjectionWatcher,
+  type LaceMidnightKitError,
+  type RecoveryAction,
   type SessionPrefs,
   type StatusMatrix,
 } from '@kshot/lace-midnight-kit';
 
-const NETWORKS = [
-  {
-    id: MidnightNetworkIds.Preprod,
-    label: 'preprod',
-    hint: 'Test — default',
-    tone: 'ok' as const,
-  },
-  {
-    id: MidnightNetworkIds.Preview,
-    label: 'preview',
-    hint: 'Test',
-    tone: 'ok' as const,
-  },
-  {
-    id: MidnightNetworkIds.Undeployed,
-    label: 'undeployed',
-    hint: 'Local',
-    tone: 'info' as const,
-  },
-  {
-    id: MidnightNetworkIds.Mainnet,
-    label: 'mainnet',
-    hint: 'Connect only — no transfer demo',
-    tone: 'warn' as const,
-  },
-] as const;
+const NETWORKS = NETWORK_CATALOG.map((n) => ({
+  id: n.id,
+  label: n.label,
+  hint: n.hint,
+  tone: n.tone,
+  recommended: Boolean(n.recommended),
+  connectOnly: Boolean(n.connectOnly),
+}));
 
 const LS_DEMO = 'midnight-lab.lace.demoMode';
 
@@ -97,6 +84,8 @@ type AppState = {
   balances: BalanceSnapshot | null;
   health: ConnectionHealthSnapshot | null;
   refreshing: boolean;
+  /** Last normalized connector error — drives recovery action panel. */
+  lastError: LaceMidnightKitError | null;
 };
 
 function loadDemoFlag(): boolean {
@@ -129,6 +118,7 @@ const state: AppState = {
   balances: null,
   health: null,
   refreshing: false,
+  lastError: null,
 };
 
 let watcher: InjectionWatcher | null = null;
@@ -188,6 +178,93 @@ function setJourney(
 ): void {
   state.journey = advanceConnectJourney(state.journey, phase, detail);
 }
+
+function noteError(err: unknown): LaceMidnightKitError {
+  const e = normalizeConnectorError(err);
+  state.lastError = e;
+  return e;
+}
+
+function clearLastError(): void {
+  state.lastError = null;
+}
+
+function renderRecoveryActions(): string {
+  if (state.journey.phase !== 'error' || !state.lastError) return '';
+  const actions = recoveryActionsForError(state.lastError);
+  if (!actions.length) return '';
+  const buttons = actions
+    .map(
+      (a) =>
+        `<button type="button" class="ghost small recovery-btn" data-recovery="${escapeAttr(a.id)}" title="${escapeAttr(a.hint)}">${escapeHtml(a.label)}</button>`,
+    )
+    .join('');
+  return `
+    <div class="recovery-panel" role="group" aria-label="Error recovery">
+      <p class="recovery-head">
+        <strong>Recovery</strong>
+        <span class="mx-pill mx-warn">${escapeHtml(state.lastError.code)}</span>
+        ${state.lastError.recoverable ? '<span class="mx-pill mx-ok">retryable</span>' : '<span class="mx-pill mx-bad">not retryable</span>'}
+      </p>
+      <p class="muted small">${escapeHtml(userHintForError(state.lastError))}</p>
+      <div class="recovery-actions">${buttons}</div>
+    </div>
+  `;
+}
+
+async function runRecoveryAction(action: RecoveryAction): Promise<void> {
+  log(`Recovery action: ${action.id}`);
+  switch (action.id) {
+    case 'rediscover':
+      refreshDiscovery();
+      refreshMatrix();
+      clearLastError();
+      setJourney(
+        state.providers.length ? 'ready_to_connect' : 'idle',
+        'Re-discovered after error',
+      );
+      announce('Re-discovered wallets');
+      render();
+      return;
+    case 'retry_connect':
+      clearLastError();
+      await handleConnect();
+      return;
+    case 'reconnect':
+      clearLastError();
+      await handleReconnect();
+      return;
+    case 'switch_network':
+      document.getElementById('session')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      announce('Pick a network pill, then Connect / Reconnect');
+      log('Hint: switch network pill (prefer preprod/preview), then reconnect.');
+      return;
+    case 'open_workarounds':
+      document.getElementById('workarounds')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      announce('Opened documented Lace workarounds');
+      return;
+    case 'install_lace':
+      window.open(action.href || LAB_BRANDING.laceInstallUrl, '_blank', 'noopener,noreferrer');
+      announce('Opened Lace install page');
+      return;
+    case 'clear_session':
+      stopHealthWatch();
+      state.session = null;
+      state.capabilities = null;
+      state.balances = null;
+      clearLastError();
+      setJourney(
+        state.providers.length ? 'ready_to_connect' : 'idle',
+        'Cleared local session after error (prefs kept)',
+      );
+      announce('Local session cleared');
+      render();
+      return;
+    default:
+      return;
+  }
+}
+
 
 function escapeHtml(s: string): string {
   return s
@@ -315,7 +392,7 @@ function refreshDiscovery(silent = false): void {
       );
     }
   } catch (err) {
-    const e = normalizeConnectorError(err);
+    const e = noteError(err);
     setJourney('error', userHintForError(e));
     log(`Discovery error: ${e.code} — ${userHintForError(e)}`);
   }
@@ -366,6 +443,7 @@ const CONNECT_HINTS = [
 ] as const;
 
 async function afterLiveConnect(session: ConnectedSession): Promise<void> {
+  clearLastError();
   state.session = session;
   state.prefs = rememberSuccessfulConnect(session);
   try {
@@ -404,6 +482,7 @@ async function afterLiveConnect(session: ConnectedSession): Promise<void> {
 async function handleConnect(): Promise<void> {
   if (state.demoMode) {
     stopHealthWatch();
+    clearLastError();
     state.session = createDemoSession(state.networkId);
     state.capabilities = createDemoCapabilityProbe();
     state.balances = null;
@@ -439,7 +518,7 @@ async function handleConnect(): Promise<void> {
     setJourney('reading_addresses');
     await afterLiveConnect(session);
   } catch (err) {
-    const e = normalizeConnectorError(err);
+    const e = noteError(err);
     setJourney('error', userHintForError(e));
     log(`Connect failed: [${e.code}] ${e.message}`);
     log(`Hint: ${userHintForError(e)}`);
@@ -475,7 +554,7 @@ async function handleReconnect(): Promise<void> {
     setJourney('reading_addresses');
     await afterLiveConnect(session);
   } catch (err) {
-    const e = normalizeConnectorError(err);
+    const e = noteError(err);
     setJourney('error', userHintForError(e));
     log(`Reconnect failed: [${e.code}] ${e.message}`);
     log(`Hint: ${userHintForError(e)}`);
@@ -552,6 +631,7 @@ function renderJourney(): string {
       ${state.demoMode ? `<span class="mx-pill mx-warn">${escapeHtml(DEMO_MODE_LABEL)}</span>` : ''}
       ${isDemoSession(state.session) ? '<span class="mx-pill mx-warn">simulated session</span>' : ''}
     </p>
+    ${renderRecoveryActions()}
   `;
 }
 
@@ -782,7 +862,7 @@ function render(): void {
       <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
         <div class="section-head">
           <h2 id="journey-heading">Connect journey</h2>
-          <p class="muted">Labeled phases from idle → connected. Error is a parallel state, not a silent failure.</p>
+          <p class="muted">Labeled phases from idle → connected. Error is a parallel state with recovery actions (reconnect / switch network / workarounds) — not a silent failure.</p>
         </div>
         ${renderJourney()}
         <div class="row" style="margin-top:0.85rem;margin-bottom:0">
@@ -870,17 +950,31 @@ function render(): void {
       <section class="panel reveal" id="session" aria-labelledby="session-heading">
         <div class="section-head">
           <h2 id="session-heading">2. Connect (read-only)</h2>
-          <p class="muted">Default is <strong>preprod</strong>. Mainnet is connect/status only — no transfers.</p>
+          <p class="muted">Default is <strong>preprod</strong>. Switching network while connected soft-clears the session and asks you to reconnect. Mainnet is connect/status only — no transfers.</p>
         </div>
         <div class="network-pills" role="radiogroup" aria-label="Network id">
           ${NETWORKS.map((n) => {
             const checked = n.id === state.networkId;
-            return `<button type="button" class="net-pill tone-${n.tone} ${checked ? 'is-active' : ''}" role="radio" aria-checked="${checked}" data-network="${escapeAttr(n.id)}" id="net-${escapeAttr(n.id)}">
+            const mismatch =
+              state.session && state.session.networkId && state.session.networkId !== n.id && checked
+                ? ' is-mismatch'
+                : '';
+            const title = n.connectOnly
+              ? 'Connect/status only — no transfer demo'
+              : n.recommended
+                ? 'Recommended test network'
+                : n.hint;
+            return `<button type="button" class="net-pill tone-${n.tone} ${checked ? 'is-active' : ''}${mismatch}" role="radio" aria-checked="${checked}" data-network="${escapeAttr(n.id)}" id="net-${escapeAttr(n.id)}" title="${escapeAttr(title)}">
               <span class="net-id">${escapeHtml(n.label)}</span>
               <span class="net-hint">${escapeHtml(n.hint)}</span>
             </button>`;
           }).join('')}
         </div>
+        ${
+          state.session && state.session.networkId !== state.networkId
+            ? `<p class="network-switch-banner" role="status">Preference is <strong>${escapeHtml(state.networkId)}</strong> but live session is still <strong>${escapeHtml(state.session.networkId)}</strong> — reconnect to apply.</p>`
+            : ''
+        }
         <div class="row" style="margin-top:0.85rem">
           <button type="button" id="btn-connect" ${hasLace || state.demoMode ? '' : 'disabled'} ${state.connecting ? 'aria-busy="true"' : ''}>
             ${state.connecting ? 'Connecting…' : state.demoMode ? 'Start demo session' : 'Connect with Lace'}
@@ -912,7 +1006,7 @@ function render(): void {
       <section class="panel reveal" id="error-codes" aria-labelledby="err-heading">
         <div class="section-head">
           <h2 id="err-heading">Error codes reference</h2>
-          <p class="muted">Stable kit + connector codes from <code>ERROR_CATALOG</code> (kit 0.3.1). Recoverable = retry after user action.</p>
+          <p class="muted">Stable kit + connector codes from <code>ERROR_CATALOG</code> (kit 0.3.2). Recoverable = retry after user action · recovery buttons appear on journey error.</p>
         </div>
         <div class="error-catalog" role="table" aria-label="Error codes">
           <div class="error-catalog-head" role="row">
@@ -1077,10 +1171,36 @@ function bindEvents(app: HTMLElement): void {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-network');
       if (!id) return;
+      const liveNetwork = state.session?.networkId ?? null;
+      const plan = describeNetworkSwitch(liveNetwork ?? state.networkId, id);
       state.networkId = id;
       state.prefs = setPreferredNetwork(id as typeof MidnightNetworkIds.Preprod);
-      log(`Network set to ${id} (persisted)`);
+      log(`Network preference → ${id} (persisted)`);
+      if (state.session && liveNetwork && liveNetwork !== id) {
+        // Soft-clear live session so connect() must re-run with the new networkId.
+        stopHealthWatch();
+        state.session = null;
+        state.capabilities = null;
+        state.balances = null;
+        clearLastError();
+        setJourney('ready_to_connect', plan.message);
+        announce(`Network switched to ${id} — reconnect to apply`);
+        log(`Soft-cleared session (${liveNetwork} → ${id}). ${plan.message}`);
+      } else if (plan.changed) {
+        log(plan.message);
+        announce(`Network set to ${id}`);
+      }
       render();
+    });
+  });
+
+  app.querySelectorAll('[data-recovery]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-recovery');
+      if (!id || !state.lastError) return;
+      const action = recoveryActionsForError(state.lastError).find((a) => a.id === id);
+      if (!action) return;
+      void runRecoveryAction(action);
     });
   });
 

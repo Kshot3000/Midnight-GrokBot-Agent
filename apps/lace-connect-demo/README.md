@@ -1,7 +1,7 @@
 # Lace Connect Studio
 
 Production-quality **browser Lace** discover + connect app for Midnight, powered by
-[`@kshot/lace-midnight-kit@0.3.1`](../../packages/lace-midnight-kit) and official
+[`@kshot/lace-midnight-kit@0.3.2`](../../packages/lace-midnight-kit) and official
 `@midnight-ntwrk/dapp-connector-api@4.0.1`.
 
 ## What works (real function)
@@ -17,6 +17,8 @@ Production-quality **browser Lace** discover + connect app for Midnight, powered
 | Capability radar | Read-only probe including balances; `makeTransfer` / submit skipped |
 | Install guide | Structured empty-state steps from `LACE_INSTALL_GUIDE` |
 | Error codes | In-app `ERROR_CATALOG` table (kit + connector codes, recoverable flags) |
+| Error recovery | Journey error panel with `recoveryActionsForError` buttons (reconnect / switch network / workarounds) |
+| Network switch | Soft-clears live session when preference ≠ session networkId; prompts reconnect via `describeNetworkSwitch` |
 
 ## What it does **not** do
 

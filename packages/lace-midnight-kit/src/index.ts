@@ -23,7 +23,12 @@ export { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 export {
   MidnightNetworkIds,
   DEFAULT_DEMO_NETWORK,
+  NETWORK_CATALOG,
+  findNetworkCatalogEntry,
+  describeNetworkSwitch,
   type MidnightNetworkId,
+  type NetworkCatalogEntry,
+  type NetworkSwitchPlan,
 } from './networks.js';
 
 export {
@@ -61,12 +66,15 @@ export {
   ERROR_CATALOG,
   listErrorCatalog,
   findErrorCatalogEntry,
+  recoveryActionsForError,
   isAPIError,
   isLaceMidnightKitError,
   normalizeConnectorError,
   userHintForError,
   type KitErrorCode,
   type ErrorCatalogEntry,
+  type RecoveryAction,
+  type RecoveryActionId,
 } from './errors.js';
 
 export {
@@ -190,4 +198,4 @@ export const LAB_BRANDING = {
 } as const;
 
 /** Kit semver for UI badges. */
-export const KIT_VERSION = '0.3.1';
+export const KIT_VERSION = '0.3.2';

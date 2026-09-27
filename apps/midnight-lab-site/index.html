@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain. Honest Preprod status: Compact compiled, local prove ready (hello+escrow), proof-server optional, deploy blocked pending tDUST." />
+  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain. Honest Preprod status: Compact compiled, local prove ready (hello+escrow), proof-server :6300 + prove-bridge :6399 optional soft-fail probes, deploy blocked pending tDUST." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
   <title>Midnight Studio Hub — Flagship Labs · @kshot9000</title>
@@ -167,9 +167,9 @@
             </div>
           </div>
           <h3>Lace Connect Studio</h3>
-          <p>Real Lace discover/connect — prefs, reconnect, balance refresh, health watch. Kit 0.3.0 + connector API 4.0.1. No transfers.</p>
+          <p>Real Lace discover/connect — prefs, reconnect, balance refresh, health watch, error recovery actions + network-switch soft-clear. Kit 0.3.2 + connector API 4.0.1. No transfers.</p>
           <div class="app-card-meta">
-            <span>Vite · kit 0.3.0 · real Lace connect</span>
+            <span>Vite · kit 0.3.2 · real Lace connect</span>
             <span class="status-pill" data-status-for="lace" aria-live="polite">Unchecked</span>
           </div>
           <div class="app-card-actions">
@@ -434,6 +434,21 @@
           </div>
         </article>
 
+        <article class="preprod-card" role="listitem" data-preprod-item="prove-bridge">
+          <div class="preprod-card-top">
+            <h3>Prove-bridge</h3>
+            <span class="status-pill is-checking" id="preprod-bridge-pill">Optional check</span>
+          </div>
+          <p class="muted">
+            Local CORS bridge <code>:6399</code> for Studio <code>#local-prove</code>
+            (hello + escrow via shared <code>@kshot/prove-metrics</code>). Soft-fails when down —
+            expected on Pages / remote hosts. <strong>NOT on-chain.</strong>
+          </p>
+          <div class="preprod-actions">
+            <button type="button" class="btn ghost small" id="btn-probe-bridge">Probe localhost:6399</button>
+            <span class="muted small" id="preprod-bridge-detail">Not probed yet</span>
+          </div>
+        </article>
 
         <article class="preprod-card" role="listitem" data-preprod-item="local-prove">
           <div class="preprod-card-top">
@@ -441,7 +456,7 @@
             <span class="status-pill is-ok" id="preprod-prove-pill">hello + escrow</span>
           </div>
           <p class="muted">
-            Off-chain ZK against proof-server <code>:6300</code> —
+            Off-chain ZK against proof-server <code>:6300</code> via prove-bridge <code>:6399</code> —
             <strong>hello</strong> <code>increment</code> and
             <strong>agent-escrow</strong> multi-circuit lifecycle
             (synthetic client/agent/approver secrets).
@@ -472,10 +487,15 @@
         </article>
       </div>
 
+      <div class="preprod-actions preprod-live-row">
+        <button type="button" class="btn ghost small" id="btn-probe-live-labs">Probe live labs (:6300 + :6399)</button>
+        <span class="muted small" id="preprod-live-detail">Optional — soft-fails on Pages / CORS / when services are down</span>
+      </div>
+
       <aside class="preprod-honesty" role="note">
         <strong>Honest bar:</strong> Compact compiled <em>yes</em> · local prove
-        <em>ready (hello + escrow multi-circuit)</em> · proof-server health
-        <em>optional local check</em> · deploy <em>blocked pending tDUST</em>.
+        <em>ready (hello + escrow multi-circuit)</em> · proof-server <code>:6300</code> + prove-bridge <code>:6399</code>
+        <em>optional live probes (soft-fail)</em> · deploy <em>blocked pending tDUST</em>.
         Brand: donate ADA + <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>.
       </aside>
     </section>

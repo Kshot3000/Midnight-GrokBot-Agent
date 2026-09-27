@@ -257,3 +257,109 @@ export function listErrorCatalog(): readonly ErrorCatalogEntry[] {
 export function findErrorCatalogEntry(code: string): ErrorCatalogEntry | undefined {
   return ERROR_CATALOG.find((e) => e.code === code);
 }
+
+/** Suggested recovery control for Connect Studio error panels. */
+export type RecoveryActionId =
+  | 'rediscover'
+  | 'retry_connect'
+  | 'reconnect'
+  | 'switch_network'
+  | 'open_workarounds'
+  | 'install_lace'
+  | 'clear_session';
+
+export type RecoveryAction = {
+  id: RecoveryActionId;
+  label: string;
+  hint: string;
+  /** Optional in-page hash or external URL the demo may open. */
+  href?: string;
+};
+
+const ACTION_REDISCOVER: RecoveryAction = {
+  id: 'rediscover',
+  label: 'Re-discover wallets',
+  hint: 'Re-enumerate window.midnight (UUID keys change each load).',
+};
+
+const ACTION_RETRY: RecoveryAction = {
+  id: 'retry_connect',
+  label: 'Retry connect',
+  hint: 'Call connect(networkId) again after fixing the issue in Lace.',
+};
+
+const ACTION_RECONNECT: RecoveryAction = {
+  id: 'reconnect',
+  label: 'Reconnect from prefs',
+  hint: 'One-click real connect() using the last saved wallet preference.',
+};
+
+const ACTION_SWITCH_NETWORK: RecoveryAction = {
+  id: 'switch_network',
+  label: 'Switch network',
+  hint: 'Pick preprod / preview (recommended) then reconnect.',
+  href: '#session',
+};
+
+const ACTION_WORKAROUNDS: RecoveryAction = {
+  id: 'open_workarounds',
+  label: 'Open workarounds',
+  hint: 'Documented Lace sync / unavailable mitigations.',
+  href: '#workarounds',
+};
+
+const ACTION_INSTALL: RecoveryAction = {
+  id: 'install_lace',
+  label: 'Install Lace',
+  hint: 'Install Lace with Midnight enabled, then refresh this page.',
+  href: 'https://www.lace.io/',
+};
+
+const ACTION_CLEAR: RecoveryAction = {
+  id: 'clear_session',
+  label: 'Clear local session',
+  hint: 'Drop the in-page session (prefs kept). Connector has no global disconnect.',
+};
+
+/**
+ * Map a normalized error to ordered recovery actions for Studio UX.
+ * Recoverable codes get retry-oriented actions; non-recoverable get install/docs.
+ */
+export function recoveryActionsForError(
+  error: LaceMidnightKitError | { code: string; recoverable?: boolean },
+): RecoveryAction[] {
+  const code = error.code;
+  switch (code) {
+    case KitErrorCodes.NoWindow:
+      return [];
+    case KitErrorCodes.NoProviders:
+      return [ACTION_INSTALL, ACTION_REDISCOVER, ACTION_WORKAROUNDS];
+    case KitErrorCodes.ProviderNotFound:
+    case KitErrorCodes.DuplicateRdns:
+      return [ACTION_REDISCOVER, ACTION_RETRY, ACTION_CLEAR];
+    case KitErrorCodes.IncompatibleApiVersion:
+      return [ACTION_INSTALL, ACTION_WORKAROUNDS];
+    case KitErrorCodes.NetworkMismatch:
+      return [ACTION_SWITCH_NETWORK, ACTION_RECONNECT, ACTION_RETRY, ACTION_CLEAR];
+    case KitErrorCodes.WalletUnavailable:
+    case ErrorCodes.InternalError:
+      return [ACTION_WORKAROUNDS, ACTION_RECONNECT, ACTION_RETRY, ACTION_CLEAR];
+    case KitErrorCodes.UserCancelled:
+    case ErrorCodes.Rejected:
+    case ErrorCodes.PermissionRejected:
+      return [ACTION_RETRY, ACTION_RECONNECT, ACTION_CLEAR];
+    case KitErrorCodes.ConnectionLost:
+    case ErrorCodes.Disconnected:
+      return [ACTION_RECONNECT, ACTION_REDISCOVER, ACTION_RETRY];
+    case ErrorCodes.InvalidRequest:
+      return [ACTION_SWITCH_NETWORK, ACTION_WORKAROUNDS, ACTION_CLEAR];
+    case KitErrorCodes.Unknown:
+    default: {
+      const recoverable =
+        typeof error.recoverable === 'boolean' ? error.recoverable : true;
+      return recoverable
+        ? [ACTION_RETRY, ACTION_RECONNECT, ACTION_REDISCOVER, ACTION_WORKAROUNDS]
+        : [ACTION_WORKAROUNDS, ACTION_CLEAR];
+    }
+  }
+}

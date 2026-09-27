@@ -40,7 +40,7 @@
       key: "DApp Connector",
       val: "4.0.1",
       cat: "wallet",
-      note: "DApp Connector API pin used by Lace Connect Studio + lace-midnight-kit 0.3.1. Discovery + connect only in this lab.",
+      note: "DApp Connector API pin used by Lace Connect Studio + lace-midnight-kit 0.3.2. Discovery + connect + recovery/network-switch UX only in this lab.",
     },
     {
       key: "proof-server",
@@ -475,6 +475,8 @@
     { name: "Compat Explorer", path: "#compat", tags: "pins matrix" },
     { name: "Preprod status", path: "#preprod", tags: "compact proof-server local-prove tdust deploy" },
     { name: "Local prove ready", path: "#preprod", tags: "zk prove hello escrow proof-server" },
+    { name: "Prove-bridge live", path: "#preprod", tags: "prove-bridge 6399 local-prove soft-fail" },
+    { name: "Proof-server live", path: "#preprod", tags: "proof-server 6300 health soft-fail" },
     { name: "Hello Studio local prove", path: "hello/#local-prove", tags: "hello zk prove bridge last-prove" },
   ];
 
@@ -598,47 +600,167 @@
 
 
   /**
-   * Optional browser probe of local proof-server.
-   * Honest: may fail on Pages / CORS / non-local hosts — that is not a deploy claim.
+   * Shared soft-fail health probe for local lab services.
+   * Honest: may fail on Pages / CORS / non-local hosts — never a deploy claim.
+   * @param {string} url
+   * @param {{ timeoutMs?: number }} [opts]
+   * @returns {Promise<{ ok: boolean, softFail: boolean, status?: number, body?: string, reason?: string, url: string }>}
    */
-  async function probeProofServerOptional() {
-    const pill = document.getElementById("preprod-proof-pill");
-    const detail = document.getElementById("preprod-proof-detail");
-    if (!pill || !detail) return;
-    pill.className = "status-pill is-checking";
-    pill.textContent = "Checking…";
-    detail.textContent = "Fetching http://127.0.0.1:6300/health …";
+  async function probeLocalHealth(url, opts = {}) {
+    const timeoutMs = opts.timeoutMs ?? 2500;
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 2500);
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
-      const res = await fetch("http://127.0.0.1:6300/health", {
+      const res = await fetch(url, {
         signal: ctrl.signal,
         mode: "cors",
         cache: "no-store",
       });
       clearTimeout(timer);
-      if (res.ok) {
-        let body = "";
-        try { body = (await res.text()).slice(0, 120); } catch { /* ignore */ }
-        pill.className = "status-pill is-ok";
-        pill.textContent = "Healthy";
-        detail.textContent = body ? `OK · ${body}` : "OK · HTTP " + res.status;
-        announce("Proof-server health OK on localhost:6300");
-      } else {
-        pill.className = "status-pill is-miss";
-        pill.textContent = "HTTP " + res.status;
-        detail.textContent = "Reached :6300 but non-OK status — check proof-server logs.";
-        announce("Proof-server returned HTTP " + res.status);
+      let body = "";
+      try {
+        body = (await res.text()).slice(0, 160);
+      } catch {
+        /* ignore body read */
       }
+      if (res.ok) {
+        return { ok: true, softFail: false, status: res.status, body, url };
+      }
+      return {
+        ok: false,
+        softFail: true,
+        status: res.status,
+        body,
+        reason: "HTTP " + res.status,
+        url,
+      };
     } catch (err) {
       clearTimeout(timer);
-      pill.className = "status-pill is-miss";
-      pill.textContent = "Unreachable";
-      const reason = err && err.name === "AbortError" ? "timeout" : (err && err.message) || "blocked";
-      detail.textContent =
-        "Optional check failed (" + reason + "). Expected on GitHub Pages / CORS. On the build box: curl -sS http://127.0.0.1:6300/health or npm run proof-server:podman";
-      announce("Proof-server optional probe failed — not a deploy claim");
+      const reason =
+        err && err.name === "AbortError"
+          ? "timeout"
+          : (err && err.message) || "blocked";
+      return { ok: false, softFail: true, reason, url };
     }
+  }
+
+  /**
+   * Apply probe result to a status pill + detail span.
+   * Down / CORS / timeout → is-miss soft-fail (never throws).
+   */
+  function applyProbeResult(pill, detail, result, labels) {
+    if (!pill || !detail) return;
+    if (result.ok) {
+      pill.className = "status-pill is-ok";
+      pill.textContent = labels.okText || "Healthy";
+      const snippet = result.body ? ` · ${result.body}` : "";
+      detail.textContent = `OK · HTTP ${result.status || 200}${snippet}`;
+      return;
+    }
+    pill.className = "status-pill is-miss";
+    if (result.status) {
+      pill.textContent = "HTTP " + result.status;
+      detail.textContent =
+        (labels.httpMiss || "Reached but non-OK") +
+        " — soft-fail (not a deploy claim). " +
+        (labels.hint || "");
+    } else {
+      pill.textContent = "Unreachable";
+      detail.textContent =
+        `Optional check failed (${result.reason || "blocked"}). ` +
+        "Expected on GitHub Pages / CORS / when the service is down. Soft-fail — not a deploy claim. " +
+        (labels.hint || "");
+    }
+  }
+
+  /**
+   * Optional browser probe of local proof-server :6300.
+   */
+  async function probeProofServerOptional() {
+    const pill = document.getElementById("preprod-proof-pill");
+    const detail = document.getElementById("preprod-proof-detail");
+    if (!pill || !detail) return { ok: false, softFail: true, reason: "missing-dom" };
+    pill.className = "status-pill is-checking";
+    pill.textContent = "Checking…";
+    detail.textContent = "Fetching http://127.0.0.1:6300/health …";
+    const result = await probeLocalHealth("http://127.0.0.1:6300/health", {
+      timeoutMs: 2500,
+    });
+    applyProbeResult(pill, detail, result, {
+      okText: "Healthy",
+      httpMiss: "Reached :6300 but non-OK status",
+      hint: "On the build box: curl -sS http://127.0.0.1:6300/health or npm run proof-server:podman",
+    });
+    if (result.ok) announce("Proof-server health OK on localhost:6300");
+    else announce("Proof-server optional probe soft-fail — not a deploy claim");
+    return result;
+  }
+
+  /**
+   * Optional browser probe of local prove-bridge :6399.
+   * Soft-fails when down / CORS / timeout — Studio panels use the same honesty.
+   */
+  async function probeProveBridgeOptional() {
+    const pill = document.getElementById("preprod-bridge-pill");
+    const detail = document.getElementById("preprod-bridge-detail");
+    if (!pill || !detail) return { ok: false, softFail: true, reason: "missing-dom" };
+    pill.className = "status-pill is-checking";
+    pill.textContent = "Checking…";
+    detail.textContent = "Fetching http://127.0.0.1:6399/health …";
+    const result = await probeLocalHealth("http://127.0.0.1:6399/health", {
+      timeoutMs: 2500,
+    });
+    let claimNote = "";
+    if (result.ok && result.body) {
+      try {
+        const parsed = JSON.parse(result.body);
+        if (parsed && parsed.claim) claimNote = ` · ${parsed.claim}`;
+        else if (parsed && parsed.service) claimNote = ` · ${parsed.service}`;
+      } catch {
+        /* plain text body is fine */
+      }
+    }
+    applyProbeResult(pill, detail, result, {
+      okText: "Healthy",
+      httpMiss: "Reached :6399 but non-OK status",
+      hint: "On the build box: npm run prove-bridge · curl -sS http://127.0.0.1:6399/health",
+    });
+    if (result.ok && claimNote && detail) {
+      detail.textContent = (detail.textContent || "") + claimNote;
+    }
+    if (result.ok) announce("Prove-bridge health OK on localhost:6399 — still NOT on-chain");
+    else announce("Prove-bridge optional probe soft-fail — not a deploy claim");
+    return result;
+  }
+
+  /**
+   * Probe proof-server :6300 and prove-bridge :6399 in parallel (soft-fail each).
+   */
+  async function probeLiveLabs() {
+    const live = document.getElementById("preprod-live-detail");
+    const btn = document.getElementById("btn-probe-live-labs");
+    if (btn) btn.setAttribute("aria-busy", "true");
+    if (live) live.textContent = "Probing :6300 + :6399 in parallel…";
+    const [proof, bridge] = await Promise.all([
+      probeProofServerOptional(),
+      probeProveBridgeOptional(),
+    ]);
+    const okCount = (proof?.ok ? 1 : 0) + (bridge?.ok ? 1 : 0);
+    if (live) {
+      if (okCount === 2) {
+        live.textContent =
+          "Both live labs reachable (:6300 + :6399). LOCAL ZK only — NOT on-chain / NOT a Preprod deploy.";
+      } else if (okCount === 1) {
+        live.textContent =
+          "Partial: one of :6300 / :6399 reachable. Soft-fail on the other — expected off-box or when a service is down.";
+      } else {
+        live.textContent =
+          "Both optional probes soft-failed (down / CORS / timeout). Expected on GitHub Pages. Start with npm run proof-server:podman + npm run prove-bridge on the build box.";
+      }
+    }
+    announce(`Live lab probes: ${okCount} of 2 ok (soft-fail allowed)`);
+    if (btn) btn.removeAttribute("aria-busy");
+    return { proof, bridge, okCount };
   }
 
   function initPreprodPanel() {
@@ -653,7 +775,8 @@
     if (provePill) {
       provePill.className = "status-pill is-ok";
       provePill.textContent = "hello + escrow";
-      provePill.title = "prove:hello-local + prove:escrow-local (multi-circuit) vs :6300 — NOT on-chain";
+      provePill.title =
+        "prove:hello-local + prove:escrow-local (multi-circuit) vs :6300 / bridge :6399 — NOT on-chain";
     }
     const deployPill = document.getElementById("preprod-deploy-pill");
     if (deployPill) {
@@ -663,6 +786,12 @@
     }
     document.getElementById("btn-probe-proof")?.addEventListener("click", () => {
       probeProofServerOptional().catch(() => {});
+    });
+    document.getElementById("btn-probe-bridge")?.addEventListener("click", () => {
+      probeProveBridgeOptional().catch(() => {});
+    });
+    document.getElementById("btn-probe-live-labs")?.addEventListener("click", () => {
+      probeLiveLabs().catch(() => {});
     });
   }
 
@@ -684,9 +813,11 @@
     initCommandPalette();
     initPreprodPanel();
     bind();
-    // Auto-probe once after paint — honest results either way
+    // Auto-probe once after paint — honest soft-fail either way
     requestAnimationFrame(() => {
       probeStatuses().catch(() => {});
+      // Optional local lab probes (:6300 + :6399) — soft-fail on Pages / CORS / down
+      probeLiveLabs().catch(() => {});
     });
   }
 

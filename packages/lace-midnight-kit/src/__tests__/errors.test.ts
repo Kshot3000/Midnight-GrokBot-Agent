@@ -6,6 +6,7 @@ import {
   listErrorCatalog,
   findErrorCatalogEntry,
   normalizeConnectorError,
+  recoveryActionsForError,
   userHintForError,
 } from '../errors.js';
 import { LACE_INSTALL_GUIDE, formatInstallGuideMarkdown } from '../installGuide.js';
@@ -46,5 +47,31 @@ describe('installGuide', () => {
     const md = formatInstallGuideMarkdown();
     expect(md).toContain('Install Lace');
     expect(md).toContain('Not claimed');
+  });
+});
+
+describe('recoveryActionsForError', () => {
+  it('suggests install + rediscover for NoProviders', () => {
+    const e = new LaceMidnightKitError(KitErrorCodes.NoProviders, 'none', {
+      recoverable: true,
+    });
+    const actions = recoveryActionsForError(e).map((a) => a.id);
+    expect(actions).toContain('install_lace');
+    expect(actions).toContain('rediscover');
+  });
+
+  it('suggests switch_network for NetworkMismatch', () => {
+    const e = new LaceMidnightKitError(KitErrorCodes.NetworkMismatch, 'bad net', {
+      recoverable: true,
+    });
+    const actions = recoveryActionsForError(e).map((a) => a.id);
+    expect(actions[0]).toBe('switch_network');
+    expect(actions).toContain('reconnect');
+  });
+
+  it('suggests workarounds for WalletUnavailable', () => {
+    const e = normalizeConnectorError(new Error('Wallet is unavailable'));
+    const actions = recoveryActionsForError(e).map((a) => a.id);
+    expect(actions[0]).toBe('open_workarounds');
   });
 });
