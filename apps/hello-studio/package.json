@@ -1,0 +1,14 @@
+{
+  "name": "@kshot/hello-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Hello Studio — local ZK prove metrics for hello.compact increment via last-prove.json / prove-bridge. LOCAL ≠ on-chain.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.7"
+  }
+}

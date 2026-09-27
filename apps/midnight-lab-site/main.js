@@ -475,6 +475,7 @@
     { name: "Compat Explorer", path: "#compat", tags: "pins matrix" },
     { name: "Preprod status", path: "#preprod", tags: "compact proof-server local-prove tdust deploy" },
     { name: "Local prove ready", path: "#preprod", tags: "zk prove hello escrow proof-server" },
+    { name: "Hello Studio local prove", path: "hello/#local-prove", tags: "hello zk prove bridge last-prove" },
   ];
 
   function initCommandPalette() {

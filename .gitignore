@@ -40,3 +40,4 @@ contracts/hello-midnight/out-zk/
 
 # Studio local prove metrics (CLI/bridge output — regenerable)
 apps/agent-escrow-stub/last-prove.json
+apps/hello-studio/last-prove.json

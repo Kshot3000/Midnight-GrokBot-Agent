@@ -14,6 +14,7 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | Path | App |
 | --- | --- |
 | `/` | **Midnight Studio Hub** — flagship homepage, studio cards, live status, Compat Explorer |
+| `/hello/` | **Hello Studio** — local ZK prove metrics for hello.compact |
 | `/escrow/` | **Agent Escrow Studio** — role theater (LOCAL-TRUE) |
 | `/lace/` | **Lace Connect Studio** — journey + matrix + capability radar |
 | `/auth/` | **Auth Forge Studio** — MPS-0029 journey + scorecard (LOCAL-TRUE) |
@@ -38,6 +39,7 @@ Until then the URL may 404.
 ├── apps/
 │   ├── midnight-lab-site/     # Midnight Studio Hub (flagship homepage)
 │   ├── lace-connect-demo/     # Lace Connect Studio (journey, matrix, capabilities)
+│   ├── hello-studio/          # Hello Studio — local ZK prove metrics (hello.compact)
 │   ├── agent-escrow-stub/     # Local UI stub for Agent Escrow (no chain)
 │   ├── auth-lab/              # Auth Forge Studio LOCAL-TRUE (MPS-0029)
 │   ├── shield-board/          # Flagship dual-state privacy bulletin studio
@@ -69,6 +71,7 @@ Until then the URL may 404.
 | --- | --- |
 | `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Explorer, **⌘K command palette**, donate dock |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — real Lace discover/connect, localStorage prefs, reconnect, balances, health · **no transfers** |
+| `apps/hello-studio` | **LOCAL prove** Hello Studio — `prove:hello-local` metrics panel (`last-prove.json` / prove-bridge `:6399` `POST /prove?contract=hello`), vitest · not on-chain |
 | `apps/agent-escrow-stub` | **LOCAL-TRUE** escrow role theater — localStorage v2, multi-tab sync, export/import, optional local ZK prove metrics (`last-prove.json` / prove-bridge `:6399`), vitest · not on-chain |
 | `apps/auth-lab` | **LOCAL-TRUE** Auth Forge — localStorage v2, multi-tab sync, export/import, vitest · MPS-0029 · not on-chain |
 | `apps/shield-board` | **LOCAL-TRUE** dual-state bulletin — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
@@ -99,6 +102,7 @@ Serve each app from its own folder (or assemble for Pages). Default lab ports:
 | **5173** | Midnight Studio Hub | `/` | `cd apps/midnight-lab-site && python3 -m http.server 5173` |
 | **5174** | Lace Connect Studio | `/lace/` | `npm run dev:lace-demo` (Vite) |
 | **5175** | Agent Escrow Studio | `/escrow/` | `cd apps/agent-escrow-stub && python3 -m http.server 5175` |
+| **5187** | Hello Studio | `/hello/` | `cd apps/hello-studio && python3 -m http.server 5187` |
 | **5177** | Shield Board | `/board/` | `cd apps/shield-board && python3 -m http.server 5177` |
 | **5176** | Auth Forge Studio | `/auth/` | `cd apps/auth-lab && python3 -m http.server 5176` |
 | **5179** | Veil Pledge Studio | `/pledge/` | `cd apps/veil-pledge && python3 -m http.server 5179` |

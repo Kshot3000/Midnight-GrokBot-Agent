@@ -152,3 +152,13 @@ curl -sS http://127.0.0.1:6300/health
 | Local ZK prove | **yes** — `prove:hello-local` (circuit `/prove`, no wallet) |
 | Faucet / tDUST | **blocked** on captcha / funding |
 | On-chain deploy | **no** — refuse to claim |
+
+## Hello Studio last-prove
+
+`npm run prove:hello-local` writes slim metrics to
+`apps/hello-studio/last-prove.json` (+ `/tmp/midnight-hello-last-prove.json`).
+Serve Hello Studio (`python3 -m http.server 5187`) and open `#local-prove`,
+or use prove-bridge `:6399` (`POST /prove?contract=hello`).
+
+**LOCAL ZK only — NOT on-chain.**
+

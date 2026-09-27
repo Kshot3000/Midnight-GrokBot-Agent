@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { slimProveReport, writeLastProveJson, LAST_PROVE_SCHEMA } from '../src/last-prove-writer.mjs';
+import { slimProveReport, slimHelloProveReport, writeLastProveJson, isHelloProveReport, LAST_PROVE_SCHEMA } from '../src/last-prove-writer.mjs';
 
 describe('last-prove-writer', () => {
   it('slims a multi-step report', () => {
@@ -59,5 +59,50 @@ describe('last-prove-writer', () => {
     expect(written).toContain(tmp);
     expect(JSON.parse(fs.readFileSync(studio, 'utf8')).totals.proofBytes).toBe(2);
     expect(slim.source).toBe('test');
+  });
+});
+
+describe('hello last-prove-writer', () => {
+  it('slims a hello prove report', () => {
+    const slim = slimHelloProveReport({
+      claim: 'local ZK prove against proof-server — NOT a Preprod deploy',
+      ok: true,
+      circuit: 'increment',
+      proofServer: 'http://127.0.0.1:6300',
+      greetings: { before: '0', after: '1' },
+      preimageBytes: 400,
+      checkMs: 12,
+      proofBytes: 2940,
+      proveMs: 720,
+      checkLen: 2,
+    });
+    expect(slim.schemaVersion).toBe(LAST_PROVE_SCHEMA);
+    expect(slim.kind).toBe('hello-local-prove');
+    expect(slim.totals.proofBytes).toBe(2940);
+    expect(slim.greetings.after).toBe('1');
+    expect(slim.steps).toHaveLength(1);
+    expect(slim.studioHint).toMatch(/Hello Studio/);
+  });
+
+  it('writeLastProveJson routes hello to hello paths', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hello-prove-'));
+    const studio = path.join(dir, 'hello-last-prove.json');
+    const tmp = path.join(dir, 'tmp-hello-last-prove.json');
+    const { slim, written } = writeLastProveJson(
+      {
+        ok: true,
+        circuit: 'increment',
+        greetings: { before: '0', after: '1' },
+        preimageBytes: 10,
+        proofBytes: 2940,
+        proveMs: 5,
+        checkMs: 1,
+      },
+      { studioPath: studio, tmpPath: tmp, source: 'test-hello', kind: 'hello' },
+    );
+    expect(isHelloProveReport(slim)).toBe(true);
+    expect(slim.kind).toBe('hello-local-prove');
+    expect(written).toContain(studio);
+    expect(JSON.parse(fs.readFileSync(studio, 'utf8')).totals.proofBytes).toBe(2940);
   });
 });

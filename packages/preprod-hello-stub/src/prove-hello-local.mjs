@@ -19,6 +19,7 @@ import { PREPROD } from './preprod-config.mjs';
 import { requireHelloArtifactsOrExit } from './check-artifacts.mjs';
 import { probeProofServer } from './providers.mjs';
 import { banner, section, kv, ok, fail, warn, brandLine, printJson } from './cli-format.mjs';
+import { writeLastProveJson, HELLO_LAST_PROVE_STUDIO_PATH, HELLO_LAST_PROVE_TMP_PATH } from './last-prove-writer.mjs';
 
 const CIRCUIT = 'increment';
 const PROOF_URL = process.env.MIDNIGHT_PROOF_SERVER || PREPROD.proofServer;
@@ -151,6 +152,12 @@ if (isMain) {
     ok('local prove succeeded (off-chain ZK only)');
     section('Success criteria');
     for (const [k, v] of Object.entries(SUCCESS_CRITERIA)) kv(k, v);
+    const written = writeLastProveJson(report, { source: 'prove:hello-local', kind: 'hello' });
+    section('Studio last-prove.json');
+    kv('studio', written.studioPath || HELLO_LAST_PROVE_STUDIO_PATH);
+    kv('tmp', written.tmpPath || HELLO_LAST_PROVE_TMP_PATH);
+    kv('written', (written.written || []).join(' · ') || 'none');
+    kv('hint', 'Hello Studio #local-prove · prove-bridge :6399 POST /prove?contract=hello');
     printJson(report);
     brandLine();
     process.exit(0);

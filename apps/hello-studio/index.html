@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Hello Studio — local ZK prove metrics for hello.compact increment. last-prove.json / prove-bridge :6399 by @kshot9000. LOCAL ≠ on-chain."
+  />
+  <meta name="theme-color" content="#05070f" />
+  <title>Hello Studio — LOCAL prove · Midnight GrokBot Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='28' fill='%236ee7b7'%3Ehi%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <div class="bg-aurora"></div>
+    <div class="bg-aurora bg-aurora-2"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" id="site-header">
+    <a class="logo" href="./">Hello<span>Studio</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#local-prove">Local prove</a>
+      <a href="#contract">Contract</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab site</a>
+      <a href="../escrow/#local-prove">Escrow prove</a>
+      <a href="../atelier/">Atelier</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-live" title="Real CLI/bridge ZK metrics — not on-chain">LOCAL prove ≠ on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <main id="main">
+    <div class="hero-block">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Midnight Compact · hello.compact</p>
+      <h1>Hello Studio — local ZK prove metrics</h1>
+      <p class="lede">
+        Mirror of Agent Escrow’s local-prove panel for the hello
+        <code>increment</code> circuit. Load <code>last-prove.json</code> from
+        <code>npm run prove:hello-local</code> or prove-bridge <code>:6399</code>
+        (<code>POST /prove?contract=hello</code>).
+        Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000.
+        <strong>LOCAL prove ≠ on-chain.</strong>
+      </p>
+      <div class="cta-row hero-cta">
+        <a class="btn primary" href="#local-prove">Local ZK metrics</a>
+        <a class="btn ghost" href="#contract">Contract path</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+    </div>
+
+    <div class="banner" role="status">
+      <strong>REAL local ZK vs proof-server :6300 — not a Preprod deploy.</strong>
+      Browser cannot CORS to proof-server; use CLI writer or prove-bridge.
+      Soft-fails cleanly when bridge / proof-server are down.
+    </div>
+
+    <section id="local-prove" class="panel local-prove-panel" aria-labelledby="local-prove-heading">
+      <div class="section-head">
+        <h2 id="local-prove-heading">Local ZK prove metrics <span class="badge badge-live">REAL vs :6300</span></h2>
+        <p class="muted">
+          Optional bridge to real <code>prove:hello-local</code> output — preimage size, proof bytes, prove ms, greetings 0→1.
+          <strong>LOCAL prove ≠ on-chain.</strong>
+        </p>
+      </div>
+      <div class="prove-status-row" role="status" aria-live="polite">
+        <span>Status: <span id="proveStatusPill" class="pill warn">empty</span></span>
+        <span id="proveStatusLabel" class="muted">No local prove loaded</span>
+      </div>
+      <p class="hint" id="proveStatusDetail">Run <code>npm run prove:hello-local</code> then Load, or start <code>npm run prove-bridge</code>.</p>
+      <p class="muted small" id="proveHonestClaim">local ZK prove against proof-server — NOT a Preprod deploy / NOT on-chain</p>
+      <div class="btn-row prove-actions">
+        <button type="button" class="btn primary small" id="btn-load-last-prove" title="Fetch ./last-prove.json written by CLI">Load last local prove</button>
+        <button type="button" class="btn ghost small" id="btn-probe-bridge" title="GET http://127.0.0.1:6399/health">Probe prove-bridge :6399</button>
+        <button type="button" class="btn ghost small" id="btn-bridge-last" title="GET :6399/last-prove?contract=hello">Load from bridge</button>
+        <button type="button" class="btn ghost small" id="btn-bridge-prove" title="POST :6399/prove?contract=hello (needs proof-server)">Bridge prove hello</button>
+        <button type="button" class="btn ghost small" id="btn-import-prove" title="Import a last-prove.json file">Import prove JSON</button>
+        <input type="file" id="prove-import-file" accept="application/json,.json" hidden />
+        <span class="muted small" id="proveBridgePill">bridge: unknown</span>
+      </div>
+      <div class="prove-summary" id="proveSummary" hidden>
+        <div class="status-row">
+          <span>Circuit: <code id="provePath">—</code></span>
+          <span>Greetings: <code id="proveGreetings">—</code></span>
+          <span>Proof: <code id="proveTotalProof">—</code></span>
+          <span>Prove: <code id="proveTotalMs">—</code></span>
+          <span>Written: <code id="proveWrittenAt">—</code></span>
+        </div>
+      </div>
+      <div class="table-wrap" id="proveTableWrap" hidden>
+        <table>
+          <thead>
+            <tr><th>Circuit</th><th>Role</th><th>Preimage</th><th>Proof</th><th>Prove</th><th>Greetings</th></tr>
+          </thead>
+          <tbody id="proveStepsBody"></tbody>
+        </table>
+      </div>
+      <pre class="log prove-raw" id="proveRaw" hidden></pre>
+      <p class="muted small">CLI: <code>npm run prove:hello-local</code> → writes <code>apps/hello-studio/last-prove.json</code> + <code>/tmp/midnight-hello-last-prove.json</code>. Bridge: <code>npm run prove-bridge</code> → <code>POST /prove?contract=hello</code>.</p>
+    </section>
+
+    <section id="contract" class="panel" aria-labelledby="contract-heading">
+      <div class="section-head">
+        <h2 id="contract-heading">Contract path</h2>
+        <p class="muted">Real Compact artifacts — compile locally; not on-chain.</p>
+      </div>
+      <ul>
+        <li>Source: <code>contracts/hello-midnight/hello.compact</code></li>
+        <li>Compile: <code>npm run compact:hello</code> → <code>contracts/hello-midnight/out/</code> (gitignored)</li>
+        <li>Prove: <code>npm run prove:hello-local</code> vs proof-server <code>:6300</code></li>
+        <li>Package: <code>@kshot/preprod-hello-stub</code></li>
+        <li>Related: <a href="../escrow/#local-prove">Agent Escrow #local-prove</a> · <a href="../atelier/">Compact Atelier</a></li>
+      </ul>
+    </section>
+
+    <section id="donate" class="panel donate">
+      <h2>Support the lab</h2>
+      <p class="muted">Built by @kshot9000 / Kshot3000 (Midnight GrokBot Agent). Cardano donations keep the 24/7 Midnight build lab going.</p>
+      <div class="addr-box">
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" class="btn ghost small" id="copy-addr">Copy</button>
+      </div>
+      <p class="muted small">
+        <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+        ·
+        <a href="../escrow/">Agent Escrow</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Hello Studio</strong> · Midnight GrokBot Agent · MIT
+      · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000
+      · <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      · <a href="../">Lab home</a>
+    </div>
+    <div class="footer-donate">
+      <span>Donate ADA:</span>
+      <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+    </div>
+    <p class="disclaimer">LOCAL prove panel shows REAL CLI/bridge metrics when available — still NOT on-chain / NOT a Preprod deploy.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
