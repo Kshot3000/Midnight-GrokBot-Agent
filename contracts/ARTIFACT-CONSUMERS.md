@@ -6,6 +6,73 @@ Compiled outputs are **gitignored**. Consumers regenerate locally, then load via
 
 **This document does not claim a Preprod deploy.**
 
+## Quick smoke (copy-paste)
+
+Node **22+** (fnm recommended — keeps system Node 20 untouched). From repo root:
+
+```bash
+# 0) Node 22 via fnm (once per shell)
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env)" && fnm use 22
+node -v   # expect v22.x
+
+# 1) Inventory (exit 0 even if some trees missing)
+npm run artifacts:list
+
+# 2) Proof-server health (required for prove)
+curl -sS http://127.0.0.1:6300/health
+# if down: npm run proof-server:podman
+
+# 3) Optional Studio CORS bridge
+curl -sS http://127.0.0.1:6399/health
+# if down: npm run prove-bridge   # claim: LOCAL ZK bridge — NOT on-chain
+
+# 4) One-shot consumer smoke (health + hello + escrow initialize)
+#    Soft-fails (exit 0) when :6300 is down — clear message, no fake deploy
+npm run smoke:local-prove
+```
+
+### Per-script prove (all paths)
+
+```bash
+# hello — single circuit `increment` · no wallet
+npm run prove:hello-local
+
+# escrow — default path=happy (7 lifecycle circuits) · synthetic role secrets · no wallet
+npm run prove:escrow-local
+
+# escrow — named paths (copy any one)
+npm run prove:escrow-local -- --path=initialize
+npm run prove:escrow-local -- --path=happy
+npm run prove:escrow-local -- --path=reject
+npm run prove:escrow-local -- --path=dispute-refund
+npm run prove:escrow-local -- --path=dispute-resume
+npm run prove:escrow-local -- --path=cancel
+
+# escrow — all 12 impure circuits across named paths
+npm run prove:escrow-all
+# equivalent: npm run prove:escrow-local -- --path=all
+
+# Studio CORS bridge (hello + escrow POST /prove)
+npm run prove-bridge
+# then:
+#   curl -sS http://127.0.0.1:6399/health
+#   curl -sS -X POST 'http://127.0.0.1:6399/prove?contract=hello'
+#   curl -sS -X POST 'http://127.0.0.1:6399/prove?path=initialize'
+```
+
+| Command | Needs `:6300` | Needs `:6399` | Wallet / tDUST | On-chain? |
+| --- | --- | --- | --- | --- |
+| `npm run artifacts:list` | no | no | no | **no** |
+| `npm run smoke:local-prove` | yes (soft-fail if down) | optional | no | **no** |
+| `npm run prove:hello-local` | yes (exit 3 if down) | no | no | **no** |
+| `npm run prove:escrow-local` | yes (exit 3 if down) | no | no | **no** |
+| `npm run prove:escrow-all` | yes (exit 3 if down) | no | no | **no** |
+| `npm run prove-bridge` | yes (for POST /prove) | is the server | no | **no** |
+
+Exit codes for individual prove scripts: `0` ok · `3` proof-server down · `1` other failure.  
+`smoke:local-prove` maps proof-server-down → **exit 0 + `softFail: true`** so CI/lab boxes without Podman stay green with an honest message.
+
 ## Layout (after compile)
 
 ### hello-midnight
@@ -76,8 +143,9 @@ Prints JSON: present/missing trees, file sizes, circuit names, consumer load pat
 | hello-midnight | `npm run prove:hello-local` | `increment` | **no** |
 | agent-escrow | `npm run prove:escrow-local` (default path=happy) | multi-circuit lifecycle | **no** (synthetic role secrets) |
 | agent-escrow | `npm run prove:escrow-all` | all 12 impure via named paths | **no** |
+| both (smoke) | `npm run smoke:local-prove` | hello + escrow `initialize` | **no** |
 
-See `@kshot/preprod-hello-stub` (`src/prove-hello-local.mjs`, `src/prove-escrow-local.mjs`).
+See `@kshot/preprod-hello-stub` (`src/prove-hello-local.mjs`, `src/prove-escrow-local.mjs`) and root `scripts/smoke-local-prove.mjs`.
 
 ## Escrow witness requirements (exact)
 
@@ -92,11 +160,27 @@ See `@kshot/preprod-hello-stub` (`src/prove-hello-local.mjs`, `src/prove-escrow-
 | `walletProvider` / `midnightProvider` | **no** | **yes** |
 | `deployContract` / `proveTx` | **no** (circuit `/prove` only) | **yes** |
 
-`prove:escrow-local` default path **`happy`** proves 7 lifecycle circuits with synthetic role secrets.
-`prove:escrow-all` covers **all 12** impure circuits across named paths (`happy` / `reject` / `dispute-*` / `cancel`).
+`prove:escrow-local` default path **`happy`** proves 7 lifecycle circuits with synthetic role secrets.  
+`prove:escrow-all` covers **all 12** impure circuits across named paths (`happy` / `reject` / `dispute-*` / `cancel`).  
 **Blocked for local prove: none.** On-chain still needs faucet/tDUST.
 
 Faucet remains captcha-gated — no automated funding claimed.
+
+## Optional: create-mn-app dry-run (Node 22 + fnm)
+
+Upstream scaffold parity check — does **not** replace this lab’s hello/escrow artifacts.
+
+```bash
+# Activate Node 22 (do not overwrite system Node 20)
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env)" && fnm use 22
+node -v   # v22.23.3 on the lab box
+
+# Dry-run only (no install / no git) — needs network for npx
+npx create-mn-app@0.5.1 --dry-run -y -t hello-world --skip-install --skip-git mn-hello-dry
+```
+
+Full scaffold still wants Docker/Podman Compose v2. Pin Compact **~0.31.1** (create-mn-app / example-bboard matrix). See `docs/COMPACT-PREPROD-PATH-2026-09-26.md`.
 
 ## Pins (lab)
 
@@ -106,3 +190,5 @@ Faucet remains captcha-gated — no automated funding claimed.
 | compact-runtime | 0.16.0 |
 | midnight-js + http proof provider | 4.1.1 |
 | proof-server image | 8.1.0 |
+| Node (fnm) | 22.23.3 (system Node 20 untouched) |
+| create-mn-app (optional dry-run) | 0.5.1 |

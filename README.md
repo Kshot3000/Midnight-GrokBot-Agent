@@ -371,9 +371,10 @@ See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-20
 
 **Not claimed:** on-chain Preprod deploy success, Pages live, X posts from this pass.
 
-## Local prove (2026-09-26)
+## Local prove (2026-09-27)
 
 ```bash
+npm run smoke:local-prove   # health + hello + escrow initialize — soft-fail if :6300 down — NOT Preprod
 npm run prove:hello-local   # hello increment ZK vs http://127.0.0.1:6300 — NOT Preprod deploy
 npm run prove:escrow-local  # agent-escrow multi-circuit (happy) + synthetic roles — writes last-prove.json — NOT Preprod deploy
 npm run prove:escrow-all    # all 12 impure circuits via named paths — NOT Preprod deploy
@@ -381,5 +382,6 @@ npm run prove-bridge        # CORS bridge :6399 for Agent Escrow Studio local-pr
 npm run artifacts:list      # hello + escrow compiled artifact inventory
 ```
 
-See `docs/COMPACT-PREPROD-PATH-2026-09-26.md` and `contracts/ARTIFACT-CONSUMERS.md`.
+Copy-paste smoke for all paths + create-mn-app dry-run (Node 22 fnm): `contracts/ARTIFACT-CONSUMERS.md`.  
+Also: `docs/COMPACT-PREPROD-PATH-2026-09-26.md`.
 
