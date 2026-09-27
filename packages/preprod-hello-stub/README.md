@@ -122,7 +122,8 @@ Example:
 | 3 | Proof-server unhealthy (submit refused) |
 | 4 | Preprod indexer/node probe failed |
 | 5 | Credentials + infra OK; `MIDNIGHT_PREPROD_ALLOW_SUBMIT` not set |
-| 6 | Allow set but funded-wallet harness not enabled (tDUST pending) |
+| 6 | Allow set but tDUST still 0 after registration wait |
+| 7 | Derived unshielded address != expected funded address |
 
 ## Env
 
@@ -150,8 +151,8 @@ curl -sS http://127.0.0.1:6300/health
 | Providers wiring | **yes** (wallet slots null until funded) |
 | Proof-server | local `:6300` — **required** for `prove:hello-local` |
 | Local ZK prove | **yes** — `prove:hello-local` (circuit `/prove`, no wallet) |
-| Faucet / tDUST | **blocked** on captcha / funding |
-| On-chain deploy | **no** — refuse to claim |
+| Faucet / tDUST | funded wallet path enabled — see docs/PREPROD-FUNDING.md |
+| On-chain deploy | only after `deployTxData.public.contractAddress` |
 
 ## Hello Studio last-prove
 

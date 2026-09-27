@@ -34,7 +34,7 @@
     "@midnight-ntwrk/midnight-js-protocol": "^4.1.1",
     "@midnight-ntwrk/midnight-js-types": "^4.1.1",
     "@midnight-ntwrk/midnight-js-utils": "^4.1.1",
-    "@midnight-ntwrk/wallet-sdk": "^1.1.0",
+    "@midnight-ntwrk/wallet-sdk": "1.2.0",
     "@scure/bip39": "^1.5.4",
     "dotenv": "^16.4.7",
     "ws": "^8.18.3"

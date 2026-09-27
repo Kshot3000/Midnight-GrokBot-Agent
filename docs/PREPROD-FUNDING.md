@@ -103,3 +103,22 @@ npm run stub:deploy-preprod   # refuses submit without keys / allow flag / tDUST
 - No X posts from this path.
 - No fake on-chain deploy.
 - Off-chain `stub:offchain` ≠ chain submit.
+
+
+## Funded throwaway (lab)
+
+| Item | Value |
+| --- | --- |
+| Unshielded | `mn_addr_preprod1ex8d8jusga4wpex65nc7uerarjhhfh0yl0z725h30vfcwnr3tztsujaew3` |
+| Faucet drip | **5000 tNIGHT** claimed (alt faucet) |
+| Faucet tx | `00af07ab30c9e9cf210b3dfbe90f4c70d7b5ea6e2b86fb1b231e9f832e57b6c79d` |
+| Secrets | gitignored `.secrets/` + `/workspace/secrets/midnight-preprod/` only |
+| Deploy claim | **only** after `deployTxData.public.contractAddress` |
+
+```bash
+# After copying seed into .env.preprod (never commit):
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env)" && fnm use 22
+curl -sS http://127.0.0.1:6300/health
+MIDNIGHT_PREPROD_ALLOW_SUBMIT=1 npm run stub:deploy-preprod
+```
