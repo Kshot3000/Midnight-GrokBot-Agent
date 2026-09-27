@@ -1,0 +1,20 @@
+{
+  "claim": "Preprod hello deploy CONFIRMED via deployTxData.public.contractAddress",
+  "networkId": "preprod",
+  "contractAddress": "bfbe9b7b17f23bf85513d3d2b05f7a020c2ffd836b22f50a0097d7530e6d87f9",
+  "txId": "0091f8c7ef78f37583a2fc34505425d53e36bad0cd6f655d13e69ce37b411fae4f",
+  "blockHeight": 2738449,
+  "unshieldedAddress": "mn_addr_preprod1ex8d8jusga4wpex65nc7uerarjhhfh0yl0z725h30vfcwnr3tztsujaew3",
+  "dustRegistrationTxId": "00417807a313eccfec141e1b1edccd14fce1e8a04443fbc1bfe94475678905dbf1",
+  "deployedAt": "2026-09-27T22:33:01.828Z",
+  "explorers": [
+    "https://midnightexplorer.com",
+    "https://midnight.subscan.io"
+  ],
+  "brand": {
+    "donate": "addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v",
+    "x": "@kshot9000",
+    "xUrl": "https://x.com/kshot9000",
+    "nightdream": "https://nightdream.io"
+  }
+}

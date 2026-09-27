@@ -151,8 +151,8 @@ curl -sS http://127.0.0.1:6300/health
 | Providers wiring | **yes** (wallet slots null until funded) |
 | Proof-server | local `:6300` — **required** for `prove:hello-local` |
 | Local ZK prove | **yes** — `prove:hello-local` (circuit `/prove`, no wallet) |
-| Faucet / tDUST | funded wallet path enabled — see docs/PREPROD-FUNDING.md |
-| On-chain deploy | only after `deployTxData.public.contractAddress` |
+| Faucet / tDUST | **funded + registered** — see docs/PREPROD-FUNDING.md |
+| On-chain deploy | **yes** — see `docs/PREPROD-HELLO-DEPLOY.md` |
 
 ## Hello Studio last-prove
 

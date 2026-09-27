@@ -122,3 +122,8 @@ eval "$(fnm env)" && fnm use 22
 curl -sS http://127.0.0.1:6300/health
 MIDNIGHT_PREPROD_ALLOW_SUBMIT=1 npm run stub:deploy-preprod
 ```
+
+
+## Confirmed hello deploy (2026-09-27)
+
+See [`docs/PREPROD-HELLO-DEPLOY.md`](./PREPROD-HELLO-DEPLOY.md) for contract address + tx (public only).
