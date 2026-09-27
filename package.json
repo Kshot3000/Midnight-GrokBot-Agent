@@ -30,7 +30,8 @@
     "artifacts:list": "node contracts/list-compiled-artifacts.mjs",
     "prove:escrow-local": "npm run prove:escrow-local -w @kshot/preprod-hello-stub",
     "prove:escrow-all": "npm run prove:escrow-all -w @kshot/preprod-hello-stub",
-    "stub:check-escrow": "npm run check:escrow-artifacts -w @kshot/preprod-hello-stub"
+    "stub:check-escrow": "npm run check:escrow-artifacts -w @kshot/preprod-hello-stub",
+    "prove-bridge": "npm run prove-bridge --prefix apps/agent-escrow-stub"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",

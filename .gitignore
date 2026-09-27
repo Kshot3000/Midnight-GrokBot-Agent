@@ -37,3 +37,6 @@ keys/
 # Hello Compact compile outputs (regenerate with compact compile)
 contracts/hello-midnight/out/
 contracts/hello-midnight/out-zk/
+
+# Studio local prove metrics (CLI/bridge output — regenerable)
+apps/agent-escrow-stub/last-prove.json

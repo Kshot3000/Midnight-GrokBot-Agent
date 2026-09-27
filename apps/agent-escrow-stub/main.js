@@ -1,7 +1,8 @@
 /**
  * Agent Escrow Studio — role theater + dual-state proofs (local-true).
  * Real localStorage persistence, multi-tab sync, export/import.
- * Not Compact. Not on-chain.
+ * Optional local ZK prove metrics via last-prove.json / prove-bridge :6399.
+ * Not Compact deploy. Not on-chain.
  */
 import {
   MAIN_PATH,
@@ -27,6 +28,19 @@ import {
   importStudioJSON,
   createTabSync,
 } from './persist.mjs';
+import {
+  parseLastProve,
+  fetchLastProve,
+  probeProveBridge,
+  requestBridgeProve,
+  summarizeProveStatus,
+  proveStepRows,
+  formatBytes,
+  formatMs,
+  DEFAULT_BRIDGE_URL,
+  DEFAULT_STATIC_URL,
+  PROVE_CLAIM,
+} from './prove-metrics.mjs';
 
 const ROLE_HINTS = {
   client:
@@ -505,6 +519,198 @@ if (header && toggle && nav) {
 // silence unused import lint for ROLE_ACTS / ROLE_HINTS_HTML if tree-shaken
 void ROLE_ACTS;
 
+
+/* —— Local ZK prove metrics panel (REAL CLI / bridge — still NOT on-chain) —— */
+let lastProveReport = null;
+
+const proveEl = {
+  pill: document.getElementById('proveStatusPill'),
+  label: document.getElementById('proveStatusLabel'),
+  detail: document.getElementById('proveStatusDetail'),
+  claim: document.getElementById('proveHonestClaim'),
+  bridgePill: document.getElementById('proveBridgePill'),
+  summary: document.getElementById('proveSummary'),
+  tableWrap: document.getElementById('proveTableWrap'),
+  body: document.getElementById('proveStepsBody'),
+  raw: document.getElementById('proveRaw'),
+  path: document.getElementById('provePath'),
+  steps: document.getElementById('proveSteps'),
+  totalProof: document.getElementById('proveTotalProof'),
+  totalMs: document.getElementById('proveTotalMs'),
+  writtenAt: document.getElementById('proveWrittenAt'),
+};
+
+function renderProvePanel(report, meta = {}) {
+  lastProveReport = report || null;
+  const status = summarizeProveStatus(report, meta);
+  if (proveEl.pill) {
+    proveEl.pill.textContent = status.state;
+    proveEl.pill.className = 'pill ' + (status.state === 'loaded' ? 'ok' : 'warn');
+  }
+  if (proveEl.label) proveEl.label.textContent = status.label;
+  if (proveEl.detail) proveEl.detail.textContent = status.detail;
+  if (proveEl.claim) proveEl.claim.textContent = status.honest || PROVE_CLAIM;
+
+  if (!report) {
+    if (proveEl.summary) proveEl.summary.hidden = true;
+    if (proveEl.tableWrap) proveEl.tableWrap.hidden = true;
+    if (proveEl.raw) {
+      proveEl.raw.hidden = true;
+      proveEl.raw.textContent = '';
+    }
+    return;
+  }
+
+  if (proveEl.summary) proveEl.summary.hidden = false;
+  if (proveEl.path) proveEl.path.textContent = report.path || '—';
+  if (proveEl.steps) {
+    proveEl.steps.textContent =
+      report.kind === 'escrow-local-prove-all'
+        ? `${report.coveredCount}/${report.expectedImpure}`
+        : String(report.stepCount ?? '—');
+  }
+  if (proveEl.totalProof) proveEl.totalProof.textContent = formatBytes(report.totals?.proofBytes);
+  if (proveEl.totalMs) proveEl.totalMs.textContent = formatMs(report.totals?.proveMs);
+  if (proveEl.writtenAt) {
+    const w = report.writtenAt;
+    proveEl.writtenAt.textContent = w ? String(w).replace('T', ' ').replace(/\.\d+Z$/, 'Z') : '—';
+  }
+
+  const rows = proveStepRows(report);
+  if (proveEl.tableWrap && proveEl.body) {
+    if (rows.length) {
+      proveEl.tableWrap.hidden = false;
+      proveEl.body.innerHTML = rows
+        .map(
+          (r) =>
+            `<tr><td><code>${escapeHtml(r.circuit)}</code></td><td>${escapeHtml(r.role)}</td>` +
+            `<td>${escapeHtml(r.preimage)}</td><td>${escapeHtml(r.proof)}</td>` +
+            `<td>${escapeHtml(r.ms)}</td><td>${escapeHtml(r.state)}</td></tr>`,
+        )
+        .join('');
+    } else if (report.kind === 'escrow-local-prove-all' && report.paths?.length) {
+      proveEl.tableWrap.hidden = false;
+      proveEl.body.innerHTML = report.paths
+        .map(
+          (p) =>
+            `<tr><td colspan="2"><code>${escapeHtml(p.path)}</code></td>` +
+            `<td colspan="2">${escapeHtml((p.circuitsProved || []).join(' → '))}</td>` +
+            `<td>${escapeHtml(formatMs(p.totalProveMs))}</td><td>${p.stepCount}</td></tr>`,
+        )
+        .join('');
+    } else {
+      proveEl.tableWrap.hidden = true;
+      proveEl.body.innerHTML = '';
+    }
+  }
+
+  if (proveEl.raw) {
+    proveEl.raw.hidden = false;
+    proveEl.raw.textContent = JSON.stringify(
+      {
+        claim: report.claim,
+        path: report.path,
+        stepCount: report.stepCount,
+        totals: report.totals,
+        circuitsProved: report.circuitsProved,
+        witness: report.witness,
+        coveredCount: report.coveredCount,
+        allImpureCovered: report.allImpureCovered,
+      },
+      null,
+      2,
+    );
+  }
+}
+
+async function loadLastProveStatic() {
+  showToast('Loading last-prove.json…', false);
+  const r = await fetchLastProve(DEFAULT_STATIC_URL);
+  if (!r.ok) {
+    showToast(r.error || 'Load failed', true);
+    renderProvePanel(null);
+    return;
+  }
+  renderProvePanel(r.report, { sourceLabel: 'last-prove.json' });
+  showToast(`Loaded path=${r.report.path} · ${r.report.stepCount || r.report.coveredCount} · LOCAL ≠ chain`, false);
+}
+
+async function loadLastProveBridge() {
+  showToast('Fetching bridge /last-prove…', false);
+  const r = await fetchLastProve(`${DEFAULT_BRIDGE_URL}/last-prove`);
+  if (!r.ok) {
+    showToast(r.error || 'Bridge load failed', true);
+    return;
+  }
+  renderProvePanel(r.report, { sourceLabel: 'prove-bridge :6399' });
+  showToast(`Bridge loaded path=${r.report.path}`, false);
+}
+
+async function doProbeBridge() {
+  if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: probing…';
+  const r = await probeProveBridge(DEFAULT_BRIDGE_URL);
+  if (!r.ok) {
+    if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: down';
+    showToast('prove-bridge :6399 unreachable — npm run prove-bridge', true);
+    return;
+  }
+  const exists = r.body?.lastProveExists ? 'has last-prove' : 'no last-prove yet';
+  if (proveEl.bridgePill) proveEl.bridgePill.textContent = `bridge: up · ${exists}`;
+  showToast(`prove-bridge up · ${exists}`, false);
+}
+
+async function doBridgeProveInit() {
+  showToast('Bridge proving initialize (may take ~1–3s)…', false);
+  if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: proving…';
+  const r = await requestBridgeProve(DEFAULT_BRIDGE_URL, { path: 'initialize' });
+  if (!r.ok) {
+    if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: prove failed';
+    showToast(r.error || 'Bridge prove failed', true);
+    return;
+  }
+  if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: up · proved';
+  renderProvePanel(r.report, { sourceLabel: 'bridge POST /prove' });
+  showToast('initialize proved via bridge — LOCAL ≠ on-chain', false);
+}
+
+function importProveFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const parsed = parseLastProve(String(reader.result || ''));
+    if (!parsed.ok) {
+      showToast(parsed.error || 'Invalid prove JSON', true);
+      return;
+    }
+    renderProvePanel(parsed.report, { sourceLabel: 'import' });
+    showToast('Imported prove JSON · LOCAL ≠ on-chain', false);
+  };
+  reader.onerror = () => showToast('Could not read file', true);
+  reader.readAsText(file);
+}
+
+document.getElementById('btn-load-last-prove')?.addEventListener('click', () => {
+  loadLastProveStatic().catch((e) => showToast(String(e?.message || e), true));
+});
+document.getElementById('btn-probe-bridge')?.addEventListener('click', () => {
+  doProbeBridge().catch((e) => showToast(String(e?.message || e), true));
+});
+document.getElementById('btn-bridge-last')?.addEventListener('click', () => {
+  loadLastProveBridge().catch((e) => showToast(String(e?.message || e), true));
+});
+document.getElementById('btn-bridge-prove-init')?.addEventListener('click', () => {
+  doBridgeProveInit().catch((e) => showToast(String(e?.message || e), true));
+});
+document.getElementById('btn-import-prove')?.addEventListener('click', () => {
+  document.getElementById('prove-import-file')?.click();
+});
+document.getElementById('prove-import-file')?.addEventListener('change', (e) => {
+  importProveFile(e.target?.files?.[0]);
+  e.target.value = '';
+});
+
+
+renderProvePanel(null);
 load();
 startTabSync();
 render();

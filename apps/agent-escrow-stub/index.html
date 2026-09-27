@@ -30,6 +30,7 @@
     <nav id="site-nav" aria-label="Primary">
       <a href="#roles">Roles</a>
       <a href="#proofs">Proofs</a>
+      <a href="#local-prove">Local prove</a>
       <a href="#donate">Donate</a>
       <a href="../">Lab site</a>
       <a href="../board/">Shield Board</a>
@@ -63,6 +64,7 @@
       <div class="cta-row hero-cta">
         <a class="btn primary" href="#roles">Enter role theater</a>
         <a class="btn ghost" href="#proofs">Dual-state proofs</a>
+        <a class="btn ghost" href="#local-prove">Local ZK metrics</a>
         <a class="btn ghost" href="#donate">Donate ADA</a>
       </div>
     </div>
@@ -209,6 +211,52 @@
     </section>
 
 
+
+    <section id="local-prove" class="panel local-prove-panel" aria-labelledby="local-prove-heading">
+      <div class="section-head">
+        <h2 id="local-prove-heading">Local ZK prove metrics <span class="badge badge-live">REAL vs :6300</span></h2>
+        <p class="muted">
+          Optional bridge to real <code>prove:escrow-local</code> output — preimage size, proof bytes, prove ms.
+          Browser cannot CORS to proof-server; load <code>last-prove.json</code> (CLI writes it) or use prove-bridge <code>:6399</code>.
+          <strong>LOCAL prove ≠ on-chain.</strong>
+        </p>
+      </div>
+      <div class="prove-status-row" role="status" aria-live="polite">
+        <span>Status: <span id="proveStatusPill" class="pill warn">empty</span></span>
+        <span id="proveStatusLabel" class="muted">No local prove loaded</span>
+      </div>
+      <p class="hint" id="proveStatusDetail">Run <code>npm run prove:escrow-local</code> then Load, or start <code>npm run prove-bridge</code>.</p>
+      <p class="muted small" id="proveHonestClaim">local ZK prove against proof-server — NOT a Preprod deploy / NOT on-chain</p>
+      <div class="btn-row prove-actions">
+        <button type="button" class="btn primary small" id="btn-load-last-prove" title="Fetch ./last-prove.json written by CLI">Load last local prove</button>
+        <button type="button" class="btn ghost small" id="btn-probe-bridge" title="GET http://127.0.0.1:6399/health">Probe prove-bridge :6399</button>
+        <button type="button" class="btn ghost small" id="btn-bridge-last" title="GET :6399/last-prove">Load from bridge</button>
+        <button type="button" class="btn ghost small" id="btn-bridge-prove-init" title="POST :6399/prove?path=initialize (needs proof-server)">Bridge prove initialize</button>
+        <button type="button" class="btn ghost small" id="btn-import-prove" title="Import a last-prove.json file">Import prove JSON</button>
+        <input type="file" id="prove-import-file" accept="application/json,.json" hidden />
+        <span class="muted small" id="proveBridgePill">bridge: unknown</span>
+      </div>
+      <div class="prove-summary" id="proveSummary" hidden>
+        <div class="status-row">
+          <span>Path: <code id="provePath">—</code></span>
+          <span>Steps: <code id="proveSteps">—</code></span>
+          <span>Σ proof: <code id="proveTotalProof">—</code></span>
+          <span>Σ prove: <code id="proveTotalMs">—</code></span>
+          <span>Written: <code id="proveWrittenAt">—</code></span>
+        </div>
+      </div>
+      <div class="table-wrap" id="proveTableWrap" hidden>
+        <table>
+          <thead>
+            <tr><th>Circuit</th><th>Role</th><th>Preimage</th><th>Proof</th><th>Prove</th><th>Ledger</th></tr>
+          </thead>
+          <tbody id="proveStepsBody"></tbody>
+        </table>
+      </div>
+      <pre class="log prove-raw" id="proveRaw" hidden></pre>
+      <p class="muted small">CLI: <code>npm run prove:escrow-local</code> → writes <code>apps/agent-escrow-stub/last-prove.json</code> + <code>/tmp/midnight-escrow-last-prove.json</code>. Bridge: <code>npm run prove-bridge</code> (port 6399, CORS).</p>
+    </section>
+
     <section id="donate" class="panel donate">
       <h2>Support the lab</h2>
       <p class="muted">Built by @kshot9000 / Kshot3000 (Midnight GrokBot Agent). Cardano donations keep the 24/7 Midnight build lab going.</p>
@@ -249,7 +297,7 @@
       <span>Donate ADA:</span>
       <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
     </div>
-    <p class="disclaimer">LOCAL-TRUE — real browser persistence ≠ on-chain Compact. No Lace transfers or proof server claimed.</p>
+    <p class="disclaimer">LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Optional local-prove panel shows REAL CLI/bridge metrics when available — still NOT on-chain.</p>
   </footer>
 
   <script type="module" src="main.js"></script>

@@ -69,7 +69,7 @@ Until then the URL may 404.
 | --- | --- |
 | `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Explorer, **⌘K command palette**, donate dock |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — real Lace discover/connect, localStorage prefs, reconnect, balances, health · **no transfers** |
-| `apps/agent-escrow-stub` | **LOCAL-TRUE** escrow role theater — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
+| `apps/agent-escrow-stub` | **LOCAL-TRUE** escrow role theater — localStorage v2, multi-tab sync, export/import, optional local ZK prove metrics (`last-prove.json` / prove-bridge `:6399`), vitest · not on-chain |
 | `apps/auth-lab` | **LOCAL-TRUE** Auth Forge — localStorage v2, multi-tab sync, export/import, vitest · MPS-0029 · not on-chain |
 | `apps/shield-board` | **LOCAL-TRUE** dual-state bulletin — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
 | `apps/veil-pledge` | **LOCAL-TRUE** Veil Pledge — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
@@ -322,7 +322,7 @@ MIT — see [`LICENSE`](./LICENSE). Official Midnight docs/examples may use thei
 Milestone escrow for AI-agent work — Compact skeleton + **LOCAL-TRUE** studio:
 
 - Contract: [`contracts/agent-escrow/`](./contracts/agent-escrow/) (witness role commitments; **not** `ownPublicKey()` alone)
-- Studio: [`apps/agent-escrow-stub/`](./apps/agent-escrow-stub/) — localStorage v2, multi-tab sync, export/import (`python3 -m http.server 5175`)
+- Studio: [`apps/agent-escrow-stub/`](./apps/agent-escrow-stub/) — localStorage v2, multi-tab sync, export/import, local prove metrics panel (`python3 -m http.server 5175`; `npm run prove-bridge`)
 - Protocol reference (JS/Python): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/tree/main/apps/agent-escrow
 - Compact port notes (sister): https://github.com/Kshot3000/Cardano-Midnight-Qwen-Builder/blob/main/apps/agent-escrow/COMPACT-PORT.md
 - Audit log: [`contracts/AUDIT-NOTES.md`](./contracts/AUDIT-NOTES.md)
@@ -369,8 +369,9 @@ See **[`docs/COMPACT-PREPROD-PATH-2026-09-26.md`](./docs/COMPACT-PREPROD-PATH-20
 
 ```bash
 npm run prove:hello-local   # hello increment ZK vs http://127.0.0.1:6300 — NOT Preprod deploy
-npm run prove:escrow-local  # agent-escrow multi-circuit (happy) + synthetic roles — NOT Preprod deploy
+npm run prove:escrow-local  # agent-escrow multi-circuit (happy) + synthetic roles — writes last-prove.json — NOT Preprod deploy
 npm run prove:escrow-all    # all 12 impure circuits via named paths — NOT Preprod deploy
+npm run prove-bridge        # CORS bridge :6399 for Agent Escrow Studio local-prove panel — NOT on-chain
 npm run artifacts:list      # hello + escrow compiled artifact inventory
 ```
 

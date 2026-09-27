@@ -20,6 +20,7 @@ import { PREPROD } from './preprod-config.mjs';
 import { requireEscrowArtifactsOrExit } from './check-escrow-artifacts.mjs';
 import { probeProofServer } from './providers.mjs';
 import { banner, section, kv, ok, fail, warn, brandLine, printJson } from './cli-format.mjs';
+import { writeLastProveJson, LAST_PROVE_STUDIO_PATH, LAST_PROVE_TMP_PATH } from './last-prove-writer.mjs';
 
 const PROOF_URL = process.env.MIDNIGHT_PROOF_SERVER || PREPROD.proofServer;
 const TIMEOUT_MS = Number(process.env.MIDNIGHT_PROVE_TIMEOUT_MS || 180_000);
@@ -477,6 +478,10 @@ if (isMain) {
       kv('allImpureCovered', report.allImpureCovered);
       kv('blockedByCoinZswap', '[] (none)');
       ok('local escrow all-paths prove succeeded (off-chain ZK only)');
+      const written = writeLastProveJson(report, { source: 'prove:escrow-all' });
+      section('Studio last-prove.json');
+      kv('studio', written.written.includes(LAST_PROVE_STUDIO_PATH) ? LAST_PROVE_STUDIO_PATH : '(skipped)');
+      kv('tmp', LAST_PROVE_TMP_PATH);
       printJson(report);
       brandLine();
       process.exit(report.ok && report.allImpureCovered ? 0 : 1);
@@ -508,6 +513,11 @@ if (isMain) {
     kv('onChainStillNeeds', ESCROW_WITNESS_REQUIREMENTS.blockedCircuits.onChainStillNeeds);
     section('Success criteria');
     for (const [k, v] of Object.entries(ESCROW_SUCCESS_CRITERIA)) kv(k, v);
+    const written = writeLastProveJson(report, { source: `prove:escrow-local path=${pathName}` });
+    section('Studio last-prove.json');
+    kv('studio', written.written.includes(LAST_PROVE_STUDIO_PATH) ? LAST_PROVE_STUDIO_PATH : '(skipped)');
+    kv('tmp', LAST_PROVE_TMP_PATH);
+    kv('hint', 'Agent Escrow Studio → Load last local prove (or prove-bridge :6399)');
     printJson(report);
     brandLine();
     process.exit(0);
