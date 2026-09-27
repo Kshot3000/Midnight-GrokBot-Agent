@@ -7,6 +7,8 @@ import {
   summarizeProveStatus,
   proveStepRows,
   PROVE_CLAIM,
+  detectProveKind,
+  ESCROW_BRIDGE_PATHS,
 } from '../prove-metrics.mjs';
 
 const sample = {
@@ -76,9 +78,15 @@ describe('hello prove-metrics', () => {
     expect(formatMs(720)).toBe('720 ms');
   });
 
+  it('shared package detects escrow kinds too', () => {
+    expect(detectProveKind({ kind: 'escrow-local-prove', steps: [] })).toBe('escrow');
+    expect(ESCROW_BRIDGE_PATHS).toContain('all');
+  });
+
   it('empty status is honest', () => {
-    const s = summarizeProveStatus(null);
+    const s = summarizeProveStatus(null, { studio: 'hello' });
     expect(s.state).toBe('empty');
+    expect(s.detail).toMatch(/prove:hello-local/);
     expect(s.honest).toMatch(/NOT on-chain/);
   });
 });

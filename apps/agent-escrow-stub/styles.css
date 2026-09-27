@@ -927,3 +927,19 @@ button.wrong-role:disabled {
   background: rgba(148, 163, 184, 0.12);
   border: 1px solid rgba(148, 163, 184, 0.28);
 }
+
+.local-prove-panel #prove-path-select {
+  margin-left: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 0.85rem;
+}
+.local-prove-panel label[for="prove-path-select"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}

@@ -77,7 +77,7 @@ const proveEl = {
 
 function renderProvePanel(report, meta = {}) {
   lastProveReport = report || null;
-  const status = summarizeProveStatus(report, meta);
+  const status = summarizeProveStatus(report, { studio: 'hello', ...meta });
   if (proveEl.pill) {
     proveEl.pill.textContent = status.state;
     proveEl.pill.className = 'pill ' + (status.state === 'loaded' ? 'ok' : 'warn');
@@ -149,7 +149,9 @@ function renderProvePanel(report, meta = {}) {
 
 async function loadLastProveStatic() {
   showToast('Loading last-prove.json…', false);
-  const r = await fetchLastProve(DEFAULT_STATIC_URL);
+  const r = await fetchLastProve(DEFAULT_STATIC_URL, {
+    emptyHint: 'No last-prove.json yet — run prove:hello-local first',
+  });
   if (!r.ok) {
     showToast(r.error || 'Load failed', true);
     renderProvePanel(null);

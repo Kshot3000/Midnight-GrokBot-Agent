@@ -2,7 +2,7 @@
   "name": "midnight-grokbot-agent",
   "private": true,
   "version": "0.1.0",
-  "description": "Midnight GrokBot Agent — 24/7 build lab (static site, Compact starters incl. Agent Escrow, Lace connector kit)",
+  "description": "Midnight GrokBot Agent \u2014 24/7 build lab (static site, Compact starters incl. Agent Escrow, Lace connector kit)",
   "workspaces": [
     "packages/*",
     "apps/lace-connect-demo"
@@ -25,13 +25,14 @@
     "stub:deploy-preprod": "npm run preprod:deploy -w @kshot/preprod-hello-stub",
     "stub:wallet-gen": "npm run wallet:gen -w @kshot/preprod-hello-stub",
     "stub:faucet-attempt": "npm run faucet:attempt -w @kshot/preprod-hello-stub",
-    "test:all": "npm test -w @kshot/lace-midnight-kit && npm test -w @kshot/preprod-hello-stub && npm test --prefix apps/agent-escrow-stub && npm test --prefix apps/hello-studio && npm test --prefix apps/auth-lab && npm test --prefix apps/compact-atelier && npm test --prefix apps/night-market && npm test --prefix apps/nocturne-messenger && npm test --prefix apps/private-ballot && npm test --prefix apps/proof-playground && npm test --prefix apps/sealed-invite && npm test --prefix apps/shield-board && npm test --prefix apps/veil-passport && npm test --prefix apps/veil-pledge",
+    "test:all": "npm test -w @kshot/lace-midnight-kit && npm test -w @kshot/prove-metrics && npm test -w @kshot/preprod-hello-stub && npm test --prefix apps/agent-escrow-stub && npm test --prefix apps/hello-studio && npm test --prefix apps/auth-lab && npm test --prefix apps/compact-atelier && npm test --prefix apps/night-market && npm test --prefix apps/nocturne-messenger && npm test --prefix apps/private-ballot && npm test --prefix apps/proof-playground && npm test --prefix apps/sealed-invite && npm test --prefix apps/shield-board && npm test --prefix apps/veil-passport && npm test --prefix apps/veil-pledge",
     "prove:hello-local": "npm run prove:hello-local -w @kshot/preprod-hello-stub",
     "artifacts:list": "node contracts/list-compiled-artifacts.mjs",
     "prove:escrow-local": "npm run prove:escrow-local -w @kshot/preprod-hello-stub",
     "prove:escrow-all": "npm run prove:escrow-all -w @kshot/preprod-hello-stub",
     "stub:check-escrow": "npm run check:escrow-artifacts -w @kshot/preprod-hello-stub",
-    "prove-bridge": "npm run prove-bridge --prefix apps/agent-escrow-stub"
+    "prove-bridge": "npm run prove-bridge --prefix apps/agent-escrow-stub",
+    "sync:prove-metrics": "npm run sync -w @kshot/prove-metrics"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",

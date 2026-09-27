@@ -53,6 +53,7 @@ Until then the URL may 404.
 │   └── nocturne-messenger/    # Nocturne Messenger — sealed DMs preview studio
 ├── packages/
 │   ├── lace-midnight-kit/     # Typed DApp connector helpers (official API types)
+│   ├── prove-metrics/         # Shared local ZK prove metrics (hello+escrow; sync into apps)
 │   ├── studio-craft/          # Canonical design tokens + donate dock (sync into apps)
 │   └── preprod-hello-stub/    # Off-chain Compact artifacts + midnight-js 4.1.1 (NOT a deploy)
 ├── contracts/
@@ -71,8 +72,8 @@ Until then the URL may 404.
 | --- | --- |
 | `apps/midnight-lab-site` | **Midnight Studio Hub** — starfield, studio gallery + live status, Compat Explorer, **⌘K command palette**, donate dock |
 | `apps/lace-connect-demo` | **Lace Connect Studio** — real Lace discover/connect, localStorage prefs, reconnect, balances, health · **no transfers** |
-| `apps/hello-studio` | **LOCAL prove** Hello Studio — `prove:hello-local` metrics panel (`last-prove.json` / prove-bridge `:6399` `POST /prove?contract=hello`), vitest · not on-chain |
-| `apps/agent-escrow-stub` | **LOCAL-TRUE** escrow role theater — localStorage v2, multi-tab sync, export/import, optional local ZK prove metrics (`last-prove.json` / prove-bridge `:6399`), vitest · not on-chain |
+| `apps/hello-studio` | **LOCAL prove** Hello Studio — `prove:hello-local` metrics panel (`last-prove.json` / prove-bridge `:6399` `POST /prove?contract=hello`), shared `@kshot/prove-metrics`, vitest · not on-chain |
+| `apps/agent-escrow-stub` | **LOCAL-TRUE** escrow role theater — localStorage v2, multi-tab sync, export/import, optional local ZK prove metrics (`last-prove.json` / prove-bridge `:6399`, path selector), shared `@kshot/prove-metrics`, vitest · not on-chain |
 | `apps/auth-lab` | **LOCAL-TRUE** Auth Forge — localStorage v2, multi-tab sync, export/import, vitest · MPS-0029 · not on-chain |
 | `apps/shield-board` | **LOCAL-TRUE** dual-state bulletin — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
 | `apps/veil-pledge` | **LOCAL-TRUE** Veil Pledge — localStorage v2, multi-tab sync, export/import, vitest · not on-chain |
@@ -85,6 +86,7 @@ Until then the URL may 404.
 | `apps/nocturne-messenger` | **LOCAL-TRUE** Nocturne Messenger — localStorage v2, multi-tab sync, export/import, vitest · sealed DMs · not a relay / not on-chain |
 | `packages/lace-midnight-kit` | **v0.3.0** — discover, connect, prefs, reconnect, balance refresh, health watch, capability probe, vitest |
 | `packages/studio-craft` | Canonical `:root` tokens + donate dock / footer CSS (copy into apps for Pages) |
+| `packages/prove-metrics` | **@kshot/prove-metrics** — shared hello+escrow local ZK prove metrics helpers (sync into apps for Pages) |
 | `packages/preprod-hello-stub` | Preprod path — off-chain hello + **providers wiring** + clear-fail deploy gate · banners + exit-code legend · **not a confirmed Preprod deploy** |
 | Hub `#preprod` panel | Honest Compact / proof-server / deploy status (compiled yes · proof optional · blocked pending tDUST) |
 | `@kshot/lace-midnight-kit` | **0.3.1** — install guide + `ERROR_CATALOG` surfaced in Lace Connect Studio |
@@ -114,7 +116,7 @@ Serve each app from its own folder (or assemble for Pages). Default lab ports:
 | **5185** | Compact Atelier | `/atelier/` | `cd apps/compact-atelier && python3 -m http.server 5185` |
 | **5186** | Nocturne Messenger | `/nocturne/` | `cd apps/nocturne-messenger && python3 -m http.server 5186` |
 
-Hub status pills probe sibling paths on the **same origin** (assembled Pages artifact). Serving only the Hub on 5173 correctly reports **Not found** for siblings — that is honest, not a bug. Shared craft tokens live in [`packages/studio-craft/`](./packages/studio-craft/) (copied into each app’s CSS because Pages cannot resolve cross-package links).
+Hub status pills probe sibling paths on the **same origin** (assembled Pages artifact). Serving only the Hub on 5173 correctly reports **Not found** for siblings — that is honest, not a bug. Shared craft tokens live in [`packages/studio-craft/`](./packages/studio-craft/) (copied into each app’s CSS because Pages cannot resolve cross-package links). Shared prove metrics live in [`packages/prove-metrics/`](./packages/prove-metrics/) — sync with `npm run sync:prove-metrics` into Hello + Escrow Studios.
 
 ## Quick start — Studio Hub (flagship homepage)
 

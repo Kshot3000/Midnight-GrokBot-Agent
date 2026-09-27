@@ -231,7 +231,17 @@
         <button type="button" class="btn primary small" id="btn-load-last-prove" title="Fetch ./last-prove.json written by CLI">Load last local prove</button>
         <button type="button" class="btn ghost small" id="btn-probe-bridge" title="GET http://127.0.0.1:6399/health">Probe prove-bridge :6399</button>
         <button type="button" class="btn ghost small" id="btn-bridge-last" title="GET :6399/last-prove">Load from bridge</button>
-        <button type="button" class="btn ghost small" id="btn-bridge-prove-init" title="POST :6399/prove?path=initialize (needs proof-server)">Bridge prove initialize</button>
+        <label class="muted small" for="prove-path-select">Path
+          <select id="prove-path-select" title="Escrow prove-bridge path (POST /prove?path=)">
+            <option value="initialize" selected>initialize</option>
+            <option value="happy">happy</option>
+            <option value="cancel">cancel</option>
+            <option value="dispute-release">dispute-release</option>
+            <option value="dispute-refund">dispute-refund</option>
+            <option value="all">all (12/12)</option>
+          </select>
+        </label>
+        <button type="button" class="btn ghost small" id="btn-bridge-prove" title="POST :6399/prove?path=… (needs proof-server)">Bridge prove</button>
         <button type="button" class="btn ghost small" id="btn-import-prove" title="Import a last-prove.json file">Import prove JSON</button>
         <input type="file" id="prove-import-file" accept="application/json,.json" hidden />
         <span class="muted small" id="proveBridgePill">bridge: unknown</span>
@@ -254,7 +264,7 @@
         </table>
       </div>
       <pre class="log prove-raw" id="proveRaw" hidden></pre>
-      <p class="muted small">CLI: <code>npm run prove:escrow-local</code> → writes <code>apps/agent-escrow-stub/last-prove.json</code> + <code>/tmp/midnight-escrow-last-prove.json</code>. Bridge: <code>npm run prove-bridge</code> (port 6399, CORS).</p>
+      <p class="muted small">CLI: <code>npm run prove:escrow-local</code> → writes <code>apps/agent-escrow-stub/last-prove.json</code> + <code>/tmp/midnight-escrow-last-prove.json</code>. Bridge: <code>npm run prove-bridge</code> (port 6399, CORS). Metrics helpers: shared <code>@kshot/prove-metrics</code> (synced).</p>
     </section>
 
     <section id="donate" class="panel donate">

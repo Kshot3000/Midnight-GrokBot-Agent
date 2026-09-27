@@ -40,6 +40,7 @@ import {
   DEFAULT_BRIDGE_URL,
   DEFAULT_STATIC_URL,
   PROVE_CLAIM,
+  ESCROW_BRIDGE_PATHS,
 } from './prove-metrics.mjs';
 
 const ROLE_HINTS = {
@@ -542,7 +543,7 @@ const proveEl = {
 
 function renderProvePanel(report, meta = {}) {
   lastProveReport = report || null;
-  const status = summarizeProveStatus(report, meta);
+  const status = summarizeProveStatus(report, { studio: 'escrow', ...meta });
   if (proveEl.pill) {
     proveEl.pill.textContent = status.state;
     proveEl.pill.className = 'pill ' + (status.state === 'loaded' ? 'ok' : 'warn');
@@ -625,7 +626,9 @@ function renderProvePanel(report, meta = {}) {
 
 async function loadLastProveStatic() {
   showToast('Loading last-prove.json…', false);
-  const r = await fetchLastProve(DEFAULT_STATIC_URL);
+  const r = await fetchLastProve(DEFAULT_STATIC_URL, {
+    emptyHint: 'No last-prove.json yet — run prove:escrow-local first',
+  });
   if (!r.ok) {
     showToast(r.error || 'Load failed', true);
     renderProvePanel(null);
@@ -659,18 +662,29 @@ async function doProbeBridge() {
   showToast(`prove-bridge up · ${exists}`, false);
 }
 
-async function doBridgeProveInit() {
-  showToast('Bridge proving initialize (may take ~1–3s)…', false);
-  if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: proving…';
-  const r = await requestBridgeProve(DEFAULT_BRIDGE_URL, { path: 'initialize' });
+function selectedEscrowProvePath() {
+  const sel = document.getElementById('prove-path-select');
+  const v = sel?.value || 'initialize';
+  return ESCROW_BRIDGE_PATHS.includes(v) ? v : 'initialize';
+}
+
+async function doBridgeProve() {
+  const pathName = selectedEscrowProvePath();
+  const slow = pathName === 'all' || pathName === 'happy';
+  showToast(
+    `Bridge proving path=${pathName}${slow ? ' (may take longer)' : ' (may take ~1–3s)'}…`,
+    false,
+  );
+  if (proveEl.bridgePill) proveEl.bridgePill.textContent = `bridge: proving ${pathName}…`;
+  const r = await requestBridgeProve(DEFAULT_BRIDGE_URL, { path: pathName, contract: 'escrow' });
   if (!r.ok) {
     if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: prove failed';
-    showToast(r.error || 'Bridge prove failed', true);
+    showToast(r.error || 'Bridge prove failed (soft-fail)', true);
     return;
   }
-  if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: up · proved';
-  renderProvePanel(r.report, { sourceLabel: 'bridge POST /prove' });
-  showToast('initialize proved via bridge — LOCAL ≠ on-chain', false);
+  if (proveEl.bridgePill) proveEl.bridgePill.textContent = `bridge: up · proved ${pathName}`;
+  renderProvePanel(r.report, { sourceLabel: `bridge POST /prove?path=${pathName}` });
+  showToast(`path=${pathName} proved via bridge — LOCAL ≠ on-chain`, false);
 }
 
 function importProveFile(file) {
@@ -698,8 +712,8 @@ document.getElementById('btn-probe-bridge')?.addEventListener('click', () => {
 document.getElementById('btn-bridge-last')?.addEventListener('click', () => {
   loadLastProveBridge().catch((e) => showToast(String(e?.message || e), true));
 });
-document.getElementById('btn-bridge-prove-init')?.addEventListener('click', () => {
-  doBridgeProveInit().catch((e) => showToast(String(e?.message || e), true));
+document.getElementById('btn-bridge-prove')?.addEventListener('click', () => {
+  doBridgeProve().catch((e) => showToast(String(e?.message || e), true));
 });
 document.getElementById('btn-import-prove')?.addEventListener('click', () => {
   document.getElementById('prove-import-file')?.click();

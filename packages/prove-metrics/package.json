@@ -1,0 +1,40 @@
+{
+  "name": "@kshot/prove-metrics",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared local ZK prove metrics helpers for Hello + Escrow Studios (last-prove.json / prove-bridge). LOCAL ≠ on-chain.",
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "sync": "node scripts/sync.mjs"
+  },
+  "keywords": [
+    "midnight",
+    "zk",
+    "prove",
+    "studio"
+  ],
+  "author": "Kshot (@kshot9000)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kshot3000/Midnight-GrokBot-Agent.git",
+    "directory": "packages/prove-metrics"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.7"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false
+}

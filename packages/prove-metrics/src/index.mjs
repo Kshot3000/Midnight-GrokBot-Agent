@@ -1,4 +1,3 @@
-/* SYNCED from packages/prove-metrics/src/index.mjs — do not edit by hand; run npm run sync:prove-metrics */
 /**
  * @kshot/prove-metrics — shared local ZK prove metrics helpers for Hello + Escrow Studios.
  * Parses last-prove.json / prove-bridge responses. LOCAL ≠ on-chain / NOT a Preprod deploy.

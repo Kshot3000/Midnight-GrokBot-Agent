@@ -9,6 +9,9 @@ import {
   probeProveBridge,
   proveStepRows,
   PROVE_CLAIM,
+  ESCROW_BRIDGE_PATHS,
+  requestBridgeProve,
+  detectProveKind,
 } from '../prove-metrics.mjs';
 
 const sample = {
@@ -111,6 +114,31 @@ describe('prove-metrics', () => {
     const r = await fetchLastProve('./last-prove.json', { fetchImpl });
     expect(r.ok).toBe(false);
     expect(r.error).toMatch(/prove:escrow-local/);
+  });
+
+  it('shared package accepts hello reports too', () => {
+    const hello = {
+      kind: 'hello-local-prove',
+      ok: true,
+      circuit: 'increment',
+      greetings: { before: '0', after: '1' },
+      proofBytes: 2940,
+      proveMs: 100,
+      claim: PROVE_CLAIM,
+    };
+    expect(detectProveKind(hello)).toBe('hello');
+    const r = parseLastProve(hello);
+    expect(r.ok).toBe(true);
+    expect(ESCROW_BRIDGE_PATHS).toContain('initialize');
+  });
+
+  it('requestBridgeProve rejects unknown path softFail', async () => {
+    const r = await requestBridgeProve('http://127.0.0.1:6399', {
+      path: 'nope',
+      fetchImpl: async () => ({ ok: true, status: 200, text: async () => '{}' }),
+    });
+    expect(r.ok).toBe(false);
+    expect(r.softFail).toBe(true);
   });
 
   it('probeProveBridge', async () => {
