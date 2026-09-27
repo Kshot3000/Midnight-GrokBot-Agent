@@ -1,0 +1,27 @@
+{
+  "claim": "Preprod hello callTx.increment CONFIRMED via public.txId + blockHeight",
+  "networkId": "preprod",
+  "contractAddress": "bfbe9b7b17f23bf85513d3d2b05f7a020c2ffd836b22f50a0097d7530e6d87f9",
+  "circuit": "increment",
+  "txId": "0095c40235431eb47fb75be8480c56c29a2878a05282dfd20884419c24593b5c8b",
+  "txHash": "185363a4d51bd3a387f18ac4258f00b65123ff338766ad9454dd5294a59fcbe8",
+  "blockHeight": 2739171,
+  "blockHash": "81a2c23d8ffd44e7da73283a38c0b78114952ee001c3888a4795286f7ce9f138",
+  "status": "SucceedEntirely",
+  "greetings": {
+    "before": "0",
+    "after": "1"
+  },
+  "unshieldedAddress": "mn_addr_preprod1ex8d8jusga4wpex65nc7uerarjhhfh0yl0z725h30vfcwnr3tztsujaew3",
+  "calledAt": "2026-09-27T23:45:13.893Z",
+  "explorers": [
+    "https://midnightexplorer.com",
+    "https://midnight.subscan.io"
+  ],
+  "brand": {
+    "donate": "addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v",
+    "x": "@kshot9000",
+    "xUrl": "https://x.com/kshot9000",
+    "nightdream": "https://nightdream.io"
+  }
+}

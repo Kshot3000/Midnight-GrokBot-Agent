@@ -44,10 +44,13 @@ npm run preprod:require-wallet -w @kshot/preprod-hello-stub
 # 6) Deploy gate (honest stops — see exit codes)
 npm run preprod:deploy -w @kshot/preprod-hello-stub
 
+# 7) Call increment on deployed hello (ALLOW_SUBMIT=1)
+npm run preprod:call -w @kshot/preprod-hello-stub
+
 npm test -w @kshot/preprod-hello-stub
 ```
 
-Root aliases: `stub:check`, `stub:offchain`, `stub:preprod-config`, `stub:providers`, `stub:require-wallet`, `stub:wallet-gen`, `stub:faucet-attempt`, `stub:deploy-preprod`, `stub:test`.
+Root aliases: `stub:check`, `stub:offchain`, `stub:preprod-config`, `stub:providers`, `stub:require-wallet`, `stub:wallet-gen`, `stub:faucet-attempt`, `stub:deploy-preprod`, `stub:call-preprod`, `stub:test`.
 
 ## Local ZK prove (no wallet)
 
@@ -153,6 +156,7 @@ curl -sS http://127.0.0.1:6300/health
 | Local ZK prove | **yes** — `prove:hello-local` (circuit `/prove`, no wallet) |
 | Faucet / tDUST | **funded + registered** — see docs/PREPROD-FUNDING.md |
 | On-chain deploy | **yes** — see `docs/PREPROD-HELLO-DEPLOY.md` |
+| On-chain call (`increment`) | **yes** — see `docs/preprod-hello-call.json` (greetings 0→1) |
 
 ## Hello Studio last-prove
 

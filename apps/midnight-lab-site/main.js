@@ -780,9 +780,10 @@
     }
     const deployPill = document.getElementById("preprod-deploy-pill");
     if (deployPill) {
-      deployPill.className = "status-pill is-miss";
-      deployPill.textContent = "Blocked · tDUST";
-      deployPill.title = "Faucet captcha / tDUST pending — no on-chain deploy claimed";
+      deployPill.className = "status-pill is-ok";
+      deployPill.textContent = "Live · called";
+      deployPill.title =
+        "hello DEPLOYED + increment CONFIRMED — tx 0095c402…5c8b · greetings 0→1 · block 2739171";
     }
     document.getElementById("btn-probe-proof")?.addEventListener("click", () => {
       probeProofServerOptional().catch(() => {});

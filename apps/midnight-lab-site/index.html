@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain. Honest Preprod status: Compact compiled, local prove ready (hello+escrow), proof-server :6300 + prove-bridge :6399 optional soft-fail probes, deploy blocked pending tDUST." />
+  <meta name="description" content="Midnight Studio Hub — flagship homepage for Nocturne Messenger, Compact Atelier, Lace Connect, Auth Forge, Shield Board, Veil Pledge, Night Market, Sealed Invite, Proof Playground, Private Ballot, Veil Passport, and Agent Escrow. Dual-state privacy studios by @kshot9000. LOCAL-TRUE / CONNECT ONLY — not on-chain. Honest Preprod status: Compact compiled, local prove ready (hello+escrow), proof-server :6300 + prove-bridge :6399 optional soft-fail probes, hello DEPLOYED + callable on Preprod (live contract address)." />
   <meta name="theme-color" content="#05070f" />
   <meta name="author" content="@kshot9000 / Kshot3000" />
   <title>Midnight Studio Hub — Flagship Labs · @kshot9000</title>
@@ -395,10 +395,10 @@
       <div class="section-head tight">
         <h2 id="preprod-heading">Compact · proof-server · Preprod <span class="badge badge-research">honest status</span></h2>
         <p class="muted">
-          Offline-readable lab status while faucet captcha blocks funding.
+          Honest Preprod lab status.
           <strong>Compiled yes</strong> · local prove ready (hello + escrow) ·
           proof-server local health optional ·
-          <strong>deploy blocked pending tDUST</strong>. No on-chain claim.
+          <strong>hello DEPLOYED on Preprod</strong> — live contract address below (call only after tx confirm).
         </p>
       </div>
 
@@ -472,17 +472,19 @@
 
         <article class="preprod-card" role="listitem" data-preprod-item="deploy">
           <div class="preprod-card-top">
-            <h3>Preprod deploy</h3>
-            <span class="status-pill is-miss" id="preprod-deploy-pill">Blocked</span>
+            <h3>Preprod hello — live</h3>
+            <span class="status-pill is-ok" id="preprod-deploy-pill">Deployed</span>
           </div>
           <p class="muted">
-            Providers wiring + clear-fail gate landed (<code>stub:providers</code> /
-            <code>stub:deploy-preprod</code>). Faucet captcha blocks tNIGHT → tDUST.
-            <strong>No on-chain deploy claimed.</strong>
+            On-chain hello confirmed on Midnight <strong>Preprod</strong>.
+            On-chain <code>increment</code> CONFIRMED (greetings 0→1). CLI: <code>stub:call-preprod</code>. Brand: donate ADA + @kshot9000.
           </p>
-          <ul class="preprod-meta">
-            <li>Faucet (captcha): <a href="https://midnight-tmnight-preprod.nethermind.dev/" rel="noopener noreferrer">Nethermind preprod faucet</a></li>
-            <li>Docs: <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/blob/main/docs/PREPROD-FUNDING.md" rel="noopener noreferrer">PREPROD-FUNDING.md</a></li>
+          <ul class="preprod-meta" id="preprod-deploy-meta">
+            <li>Contract: <code id="preprod-contract-addr" title="Preprod contract address">bfbe9b7b17f23bf85513d3d2b05f7a020c2ffd836b22f50a0097d7530e6d87f9</code></li>
+            <li>Deploy tx: <code id="preprod-deploy-tx" title="Deploy transaction id">0091f8c7ef78f37583a2fc34505425d53e36bad0cd6f655d13e69ce37b411fae4f</code></li>
+            <li>Call tx (increment): <code id="preprod-call-tx" title="Confirmed increment call">0095c40235431eb47fb75be8480c56c29a2878a05282dfd20884419c24593b5c8b</code> · greetings 0→1 · block 2739171</li>
+            <li>Docs: <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/blob/main/docs/PREPROD-HELLO-DEPLOY.md" rel="noopener noreferrer">PREPROD-HELLO-DEPLOY.md</a></li>
+            <li>Explorers: <a href="https://midnightexplorer.com" rel="noopener noreferrer">midnightexplorer</a> · <a href="https://midnight.subscan.io" rel="noopener noreferrer">subscan</a></li>
           </ul>
         </article>
       </div>
@@ -495,7 +497,8 @@
       <aside class="preprod-honesty" role="note">
         <strong>Honest bar:</strong> Compact compiled <em>yes</em> · local prove
         <em>ready (hello + escrow multi-circuit)</em> · proof-server <code>:6300</code> + prove-bridge <code>:6399</code>
-        <em>optional live probes (soft-fail)</em> · deploy <em>blocked pending tDUST</em>.
+        <em>optional live probes (soft-fail)</em> · hello <em>DEPLOYED on Preprod</em>
+        (contract <code>bfbe9b7b…87f9</code>) · on-chain call only after tx confirm.
         Brand: donate ADA + <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>.
       </aside>
     </section>

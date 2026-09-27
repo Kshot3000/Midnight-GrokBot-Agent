@@ -15,3 +15,16 @@
 Explorers: [https://midnightexplorer.com](https://midnightexplorer.com) · [https://midnight.subscan.io](https://midnight.subscan.io)
 
 Secrets were never written to this file.
+
+## On-chain call — CONFIRMED
+
+| Field | Value |
+| --- | --- |
+| Circuit | `increment` |
+| Call tx | `0095c40235431eb47fb75be8480c56c29a2878a05282dfd20884419c24593b5c8b` |
+| Block | `2739171` |
+| Status | `SucceedEntirely` |
+| Greetings | `0 → 1` |
+| Called at (UTC) | `2026-09-27T23:45:13.893Z` |
+
+Public call JSON: [`preprod-hello-call.json`](./preprod-hello-call.json). Secrets were never written.

@@ -20,7 +20,8 @@
     "prove:hello-local": "node src/prove-hello-local.mjs",
     "prove:escrow-local": "node src/prove-escrow-local.mjs",
     "prove:escrow-all": "node src/prove-escrow-local.mjs --path=all",
-    "check:escrow-artifacts": "node src/check-escrow-artifacts.mjs"
+    "check:escrow-artifacts": "node src/check-escrow-artifacts.mjs",
+    "preprod:call": "node src/call-preprod.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

@@ -2,7 +2,7 @@
   "name": "midnight-grokbot-agent",
   "private": true,
   "version": "0.1.0",
-  "description": "Midnight GrokBot Agent \u2014 24/7 build lab (static site, Compact starters incl. Agent Escrow, Lace connector kit)",
+  "description": "Midnight GrokBot Agent — 24/7 build lab (static site, Compact starters incl. Agent Escrow, Lace connector kit)",
   "workspaces": [
     "packages/*",
     "apps/lace-connect-demo"
@@ -33,7 +33,8 @@
     "stub:check-escrow": "npm run check:escrow-artifacts -w @kshot/preprod-hello-stub",
     "prove-bridge": "npm run prove-bridge --prefix apps/agent-escrow-stub",
     "sync:prove-metrics": "npm run sync -w @kshot/prove-metrics",
-    "smoke:local-prove": "node scripts/smoke-local-prove.mjs"
+    "smoke:local-prove": "node scripts/smoke-local-prove.mjs",
+    "stub:call-preprod": "npm run preprod:call -w @kshot/preprod-hello-stub"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",
@@ -45,6 +46,7 @@
     "node": ">=22"
   },
   "overrides": {
-    "@midnight-ntwrk/wallet-sdk": "1.2.0"
+    "@midnight-ntwrk/wallet-sdk": "1.2.0",
+    "@midnight-ntwrk/onchain-runtime-v3": "3.1.1"
   }
 }
