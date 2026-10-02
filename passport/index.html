@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Veil Passport Studio — confidential credentials. Real localStorage + multi-tab sync + export/import by @kshot9000. LOCAL-TRUE educational — not on-chain." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Veil Passport Studio — LOCAL-TRUE · Midnight GrokBot Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Crect x='12' y='16' width='40' height='32' rx='6' fill='none' stroke='%22a78bfa' stroke-width='2.2'/%3E%3Ccircle cx='26' cy='32' r='6' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Cpath d='M36 28h12M36 36h8' stroke='%236ee7b7' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Veil<span>Passport</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#journey">Journey</a>
+      <a href="#lesson">Lesson</a>
+      <a href="#issue">Issue</a>
+      <a href="#disclose">Disclose</a>
+      <a href="#predicate">Predicate</a>
+      <a href="#board">Board</a>
+      <a href="#snippets">Snippets</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="help-overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <div class="help-card">
+      <h3 id="help-title">Keyboard shortcuts</h3>
+      <ul>
+        <li><span>Focus issue form</span><span>I</span></li>
+        <li><span>Focus selective disclose</span><span>S</span></li>
+        <li><span>Run predicate theater</span><span>P</span></li>
+        <li><span>Open / close this help</span><span>?</span></li>
+        <li><span>Copy donate address</span><span>D</span></li>
+        <li><span>Seed demo passport</span><span>Shift+N</span></li>
+        <li><span>Close overlay</span><span>Esc</span></li>
+      </ul>
+      <p class="muted small" style="margin:0.85rem 0 0">Shortcuts idle when typing in inputs. Press <kbd style="font-family:var(--mono)">?</kbd> anytime.</p>
+      <div class="btn-row" style="margin-top:1rem">
+        <button type="button" class="btn primary small" id="btn-close-help">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main" class="wrap">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Confidential credentials · selective disclosure</p>
+      <h1>Veil Passport Studio</h1>
+      <p class="lede">
+        World-class educational studio for Midnight-style private credentials:
+        <strong>issue</strong> a passport with sealed claims, <strong>present</strong> a public commitment,
+        <strong>selectively disclose</strong> only what a verifier needs, then run
+        <strong>predicate proofs</strong> (age ≥ N, membership ∈ set) — without claiming
+        on-chain settlement, Lace, or a real Compact runtime.
+        By <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.xyz" rel="noopener noreferrer">nightdream.xyz</a>.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#issue">Issue passport</a>
+        <a class="btn ghost" href="#disclose">Selective disclose</a>
+        <a class="btn ghost" href="#predicate">Predicate theater</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="kbd-bar" aria-label="Keyboard hints">
+        <span class="kbd"><kbd>I</kbd> Issue</span>
+        <span class="kbd"><kbd>S</kbd> Disclose</span>
+        <span class="kbd"><kbd>P</kbd> Predicate</span>
+        <span class="kbd"><kbd>?</kbd> Shortcuts</span>
+        <span class="kbd"><kbd>D</kbd> Donate</span>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest scope:</strong> local HTML/JS simulation only.
+        Does <strong>not</strong> run Compact, a proof server, Lace, or real ADA / DUST transfers.
+        Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
+        Commitments, issuer signatures, and predicate π blobs are <strong>teaching stand-ins</strong> — verify against official Compact / Zswap crypto before shipping.
+      </div>
+    </section>
+
+    <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
+      <div class="section-head">
+        <h2 id="journey-heading">Passport journey</h2>
+        <p class="muted">Labeled phases from idle → issued → presented → proven → revoked. Over-disclose and tamper are first-class teaching fails.</p>
+      </div>
+      <ol class="journey" id="journey-steps" aria-label="Passport journey phases">
+        <li class="journey-step is-active" data-phase="idle" aria-current="step">
+          <span class="js-idx">1</span>
+          <div>
+            <strong>Idle</strong>
+            <span class="js-detail">Compose claims</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="issued">
+          <span class="js-idx">2</span>
+          <div>
+            <strong>Issued</strong>
+            <span class="js-detail">Commit + issuer sig (sim)</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="presented">
+          <span class="js-idx">3</span>
+          <div>
+            <strong>Presented</strong>
+            <span class="js-detail">Public surface only</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="proven">
+          <span class="js-idx">4</span>
+          <div>
+            <strong>Proven</strong>
+            <span class="js-detail">Predicate π · selective</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="revoked">
+          <span class="js-idx">5</span>
+          <div>
+            <strong>Revoked</strong>
+            <span class="js-detail">Nullifier burned</span>
+          </div>
+        </li>
+      </ol>
+      <p class="journey-live status" id="journey-live" role="status">Phase: idle — issue a passport to begin.</p>
+    </section>
+
+    <section id="lesson" class="panel reveal" aria-labelledby="lesson-heading">
+      <div class="section-head">
+        <h2 id="lesson-heading">What a confidential passport is really saying</h2>
+        <p class="muted">Observers see the credential commitment, issuer stamp, and optional disclosed claims / predicate results. Raw age, role, membership, and salts stay local until you choose otherwise.</p>
+      </div>
+      <div class="dual-split">
+        <article class="rail-card private">
+          <h4>Private vault</h4>
+          <p class="muted small">Never leave the client in the dual-state model. Teaching stand-in: values you type below.</p>
+          <ul>
+            <li>Claim openings (name, age, role…)</li>
+            <li>Credential salt &amp; holder secret</li>
+            <li>Full issuer witness material</li>
+          </ul>
+        </article>
+        <article class="rail-card public">
+          <h4>Public surface</h4>
+          <p class="muted small">What the simulated verifier / registry is allowed to see.</p>
+          <ul>
+            <li>Credential commitment hash</li>
+            <li>Issuer signature (simulated)</li>
+            <li>Selected disclosed claims</li>
+            <li>Predicate results (age≥N, etc.)</li>
+            <li>Revocation nullifier (if burned)</li>
+          </ul>
+        </article>
+      </div>
+      <div class="threat-rail" style="margin-top:1.1rem" aria-label="Passport privacy rails">
+        <div class="rail sealed-rail">
+          <h4>Claim veil</h4>
+          <p class="muted small">How veiled individual claims stay after the last action.</p>
+          <div class="rail-meter" id="rail-veil" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Claim veil meter">
+            <div class="rail-fill" style="width:100%"></div>
+          </div>
+          <p class="rail-label" id="rail-veil-label">100% veiled (no disclose)</p>
+        </div>
+        <div class="rail disclose-rail">
+          <h4>Public rail</h4>
+          <p class="muted small">How much the verifier learned from commits + proofs.</p>
+          <div class="rail-meter warn" id="rail-public" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Public surface meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <p class="rail-label" id="rail-public-label">0% public surface</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="issue" class="panel reveal" aria-labelledby="issue-heading">
+      <div class="section-head">
+        <h2 id="issue-heading">Issue &amp; seal a passport</h2>
+        <p class="muted">Private claims → credential commit + simulated issuer stamp. Press <kbd style="font-family:var(--mono)">I</kbd> to focus.</p>
+      </div>
+      <div class="compose-layout">
+        <div class="compose-card">
+          <h3>Claims (vault)</h3>
+          <div class="claim-grid">
+            <div class="field">
+              <label for="claim-name">Display name</label>
+              <input id="claim-name" type="text" maxlength="48" placeholder="e.g. Night Steward" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="claim-age">Age (years)</label>
+              <input id="claim-age" type="number" min="1" max="120" placeholder="21" />
+            </div>
+            <div class="field">
+              <label for="claim-role">Role</label>
+              <select id="claim-role">
+                <option value="builder">Builder</option>
+                <option value="auditor">Auditor</option>
+                <option value="steward">Steward</option>
+                <option value="guest">Guest</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="claim-membership">Membership</label>
+              <select id="claim-membership">
+                <option value="night">Night</option>
+                <option value="dusk">Dusk</option>
+                <option value="dawn">Dawn</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" style="margin-top:0.75rem">
+            <label for="claim-region">Region (optional)</label>
+            <input id="claim-region" type="text" maxlength="32" placeholder="e.g. Midgard" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="claim-salt">Credential salt (private)</label>
+            <input id="claim-salt" type="text" maxlength="64" placeholder="Auto-filled if blank" autocomplete="off" />
+            <span class="field-hint">Binds openings into the commitment without publishing them.</span>
+          </div>
+          <div class="field">
+            <label for="holder-secret">Holder secret (private)</label>
+            <input id="holder-secret" type="text" maxlength="64" placeholder="Identity stand-in · never published" autocomplete="off" />
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-issue">Issue &amp; seal</button>
+            <button type="button" class="btn ghost" id="btn-seed">Seed demo</button>
+            <button type="button" class="btn ghost" id="btn-present" disabled>Present (public)</button>
+          </div>
+          <p class="status" id="issue-status" role="status"></p>
+        </div>
+        <div class="thresh-card">
+          <h3>Live passport card</h3>
+          <div class="passport-card" id="passport-card" aria-live="polite">
+            <div class="pp-brand">
+              <strong>Midnight Veil Passport</strong>
+              <span class="pp-status-pill is-idle" id="pp-status">Idle</span>
+            </div>
+            <div class="holo-strip" aria-hidden="true"></div>
+            <div id="pp-fields">
+              <p class="muted small" style="margin:0">Issue a passport to seal claims into a commitment. Fields stay veiled until selective disclose.</p>
+            </div>
+            <div class="pp-commit" id="pp-commit">commit: —</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="disclose" class="panel reveal" aria-labelledby="disclose-heading">
+      <div class="section-head">
+        <h2 id="disclose-heading">Selective disclosure</h2>
+        <p class="muted">Pick only the claims a verifier needs. Over-disclose is a teaching warn. Press <kbd style="font-family:var(--mono)">S</kbd>.</p>
+      </div>
+      <div class="compose-layout">
+        <div class="compose-card">
+          <h3>Reveal set</h3>
+          <p class="muted small">Default: all veiled. Check claims to open locally (simulated selective disclose).</p>
+          <div class="claim-chip-row" id="disclose-chips" role="group" aria-label="Claims to disclose">
+            <label class="claim-chip" data-claim="displayName"><input type="checkbox" value="displayName" /> Name</label>
+            <label class="claim-chip" data-claim="age"><input type="checkbox" value="age" /> Age</label>
+            <label class="claim-chip" data-claim="role"><input type="checkbox" value="role" /> Role</label>
+            <label class="claim-chip" data-claim="membership"><input type="checkbox" value="membership" /> Membership</label>
+            <label class="claim-chip" data-claim="region"><input type="checkbox" value="region" /> Region</label>
+          </div>
+          <div class="btn-row" style="margin-top:1rem">
+            <button type="button" class="btn primary" id="btn-disclose" disabled>Apply disclosure</button>
+            <button type="button" class="btn ghost" id="btn-veil-all" disabled>Veil all</button>
+            <button type="button" class="btn danger" id="btn-overdisclose" disabled>Over-disclose (warn)</button>
+          </div>
+          <p class="status" id="disclose-status" role="status"></p>
+        </div>
+        <div class="thresh-card">
+          <h3>Disclosure theater</h3>
+          <ol class="prove-stages" id="disclose-stages" aria-label="Disclosure stages">
+            <li data-stage="bind">
+              <span class="ps-idx">1</span>
+              <div><strong>Bind reveal set</strong><div class="ps-meta">selected claim keys</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="open">
+              <span class="ps-idx">2</span>
+              <div><strong>Open selected</strong><div class="ps-meta">openings stay scoped</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="keep">
+              <span class="ps-idx">3</span>
+              <div><strong>Keep rest veiled</strong><div class="ps-meta">vault retains salts</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="surface">
+              <span class="ps-idx">4</span>
+              <div><strong>Update public rail</strong><div class="ps-meta">meters refresh</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+          </ol>
+          <pre class="log" id="disclose-log" aria-live="polite">Awaiting disclosure…</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="predicate" class="panel reveal" aria-labelledby="predicate-heading">
+      <div class="section-head">
+        <h2 id="predicate-heading">Predicate / prove theater</h2>
+        <p class="muted">Prove age ≥ N or membership ∈ set without revealing the raw claim. Simulated π only. Press <kbd style="font-family:var(--mono)">P</kbd>.</p>
+      </div>
+      <div class="compose-layout">
+        <div class="compose-card">
+          <h3>Choose predicate</h3>
+          <div class="pred-cards" role="radiogroup" aria-label="Predicate type">
+            <div class="pred-card is-selected" data-pred="age" tabindex="0" role="radio" aria-checked="true">
+              <strong>Age ≥ threshold</strong>
+              <p>Prove majority without publishing exact age.</p>
+            </div>
+            <div class="pred-card" data-pred="membership" tabindex="0" role="radio" aria-checked="false">
+              <strong>Membership ∈ set</strong>
+              <p>Prove Night or Dusk without naming the tier.</p>
+            </div>
+          </div>
+          <div class="field" id="pred-age-field">
+            <label for="pred-age-threshold">Age threshold</label>
+            <input id="pred-age-threshold" type="number" min="1" max="120" value="18" />
+            <span class="field-hint">Verifier learns only whether age ≥ this number.</span>
+          </div>
+          <div class="field" id="pred-mem-field" hidden>
+            <label for="pred-mem-set">Allowed membership set</label>
+            <select id="pred-mem-set">
+              <option value="night,dusk">Night ∪ Dusk</option>
+              <option value="night">Night only</option>
+              <option value="dusk,dawn">Dusk ∪ Dawn</option>
+              <option value="dawn">Dawn only</option>
+            </select>
+          </div>
+          <ol class="prove-stages" id="pred-stages" aria-label="Predicate stages">
+            <li data-stage="witness">
+              <span class="ps-idx">1</span>
+              <div><strong>Load witness</strong><div class="ps-meta">claim + salt local</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="gate">
+              <span class="ps-idx">2</span>
+              <div><strong>Evaluate gate</strong><div class="ps-meta">predicate true/false</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="bind-commit">
+              <span class="ps-idx">3</span>
+              <div><strong>Bind to commit</strong><div class="ps-meta">credential hash</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+            <li data-stage="prove">
+              <span class="ps-idx">4</span>
+              <div><strong>Emit π</strong><div class="ps-meta">SIMULATED · SHA-256</div></div>
+              <span class="ps-meta" data-stage-meta>—</span>
+            </li>
+          </ol>
+          <div class="proof-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="pred-meter" aria-label="Prove progress">
+            <div class="proof-meter-fill" id="pred-meter-fill"></div>
+          </div>
+          <p class="muted small" id="pred-meter-label">0% — idle</p>
+          <div class="btn-row" style="margin-top:0.85rem">
+            <button type="button" class="btn primary" id="btn-prove" disabled>Run predicate</button>
+            <button type="button" class="btn ghost" id="btn-verify" disabled>Verify presentation</button>
+            <button type="button" class="btn danger" id="btn-tamper" disabled>Tamper π (demo fail)</button>
+            <button type="button" class="btn danger" id="btn-revoke" disabled>Revoke passport</button>
+          </div>
+          <div class="proof-result-card" id="pred-result-card">
+            <p class="pr-title" id="pred-result-title">No predicate yet</p>
+            <p class="pr-hash" id="pred-result-hash">—</p>
+            <p class="muted small" id="pred-result-note">LOCAL STUB · simulated certification only.</p>
+          </div>
+        </div>
+        <div class="thresh-card">
+          <h3>Verifier view</h3>
+          <div class="preview-box" id="verifier-view">
+            <strong>Waiting for presentation</strong>
+            Issue and present a passport. The verifier sees commit + issuer stamp — not vault claims — until you disclose or prove.
+          </div>
+          <pre class="log" id="pred-log" aria-live="polite" style="margin-top:1rem">Awaiting prove…</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="board" class="panel reveal" aria-labelledby="board-heading">
+      <div class="section-head">
+        <h2 id="board-heading">Passport board</h2>
+        <p class="muted">Schema v2 localStorage · BroadcastChannel sync · JSON export/import. LOCAL-TRUE ≠ on-chain. Clear anytime — nothing left the browser.</p>
+      </div>
+      <div class="board-toolbar">
+        <div class="board-stats">
+          <span>Issued: <strong id="stat-issued">0</strong></span>
+          <span>Presented: <strong id="stat-presented">0</strong></span>
+          <span>Proven: <strong id="stat-proven">0</strong></span>
+          <span>Revoked: <strong id="stat-revoked">0</strong></span>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+          <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
+          <button type="button" class="btn ghost small" id="btn-seed-board">Seed demo board</button>
+          <button type="button" class="btn danger small" id="btn-reset">Reset studio</button>
+        </div>
+      </div>
+      <ul class="pledge-list" id="passport-list" aria-label="Issued passports"></ul>
+    </section>
+
+    <section id="snippets" class="panel reveal" aria-labelledby="snip-heading">
+      <div class="section-head">
+        <h2 id="snip-heading">Anti-pattern vs safe pattern</h2>
+        <p class="muted">Teaching sketches — not deployable Compact. Always verify against official docs.</p>
+      </div>
+      <div class="snip-grid">
+        <article class="snip bad">
+          <div class="snip-label">✗ Anti-pattern — publish all claims</div>
+          <pre><code>// BAD: verifier sees every attribute
+ledger {
+  holder: Bytes&lt;32&gt;;
+  age: Uint&lt;8&gt;;       // exact age leaked
+  role: Bytes&lt;16&gt;;    // role leaked
+  membership: Bytes&lt;8&gt;;
+}</code></pre>
+        </article>
+        <article class="snip ok">
+          <div class="snip-label">✓ Safer sketch — commit + selective + predicate</div>
+          <pre><code>// BETTER (sketch): public commit only
+ledger {
+  credCommit: Bytes&lt;32&gt;;
+  issuerSig: Bytes&lt;64&gt;;
+  revokeNull: Bytes&lt;32&gt;; // optional
+}
+witness age: Uint&lt;8&gt;;
+witness salt: Bytes&lt;32&gt;;
+// prove age &gt;= 18 without publishing age
+// selectively open role only when needed</code></pre>
+        </article>
+      </div>
+      <p class="snip-note muted">These snippets are educational illustrations. Official Compact syntax, circuits, and Zswap commitments may differ — check Midnight docs before shipping.</p>
+    </section>
+
+    <section id="donate" class="panel reveal" aria-labelledby="donate-heading">
+      <div class="section-head">
+        <h2 id="donate-heading">Support the lab</h2>
+        <p class="muted">Cardano donation address — always visible in the dock and here. No on-chain tip from this UI.</p>
+      </div>
+      <div class="jar-layout">
+        <div class="jar-visual" aria-hidden="true">
+          <div class="pp-seal passport-seal">
+            <div class="seal-glow"></div>
+            <div class="seal-face">◈</div>
+          </div>
+          <p class="jar-label">Veil Passport</p>
+        </div>
+        <div class="jar-copy">
+          <h3>Donate ADA to keep the midnight craft going</h3>
+          <p class="muted">Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> · creator of <a href="https://nightdream.xyz" rel="noopener noreferrer">nightdream.xyz</a>.</p>
+          <div class="footer-donate">
+            <code id="donate-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+            <button type="button" class="btn primary small" id="btn-copy-donate">Copy address</button>
+          </div>
+          <p class="status" id="donate-status" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p><strong>Veil Passport Studio</strong> · Midnight GrokBot Agent lab ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent">GitHub</a> ·
+        <a href="https://x.com/kshot9000">@kshot9000</a>
+      </p>
+      <p class="disclaimer">
+        LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Educational only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        No claim of live GitHub Pages, on-chain settlement, Compact runtime, or real proof-server verification.
+      </p>
+    </footer>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

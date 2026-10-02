@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Nocturne Messenger Studio — sealed DMs with real localStorage, multi-tab sync, export/import by @kshot9000. LOCAL-TRUE educational — not a relay, not on-chain." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>LOCAL-TRUE · Nocturne Messenger Studio — Sealed DMs · Midnight Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M14 20c0-3 2.5-6 8-6h20c5.5 0 8 3 8 6v18c0 3-2.5 6-8 6H28l-8 8v-8c-5.5 0-6-3-6-6V20z' fill='none' stroke='%22a78bfa' stroke-width='2.2' stroke-linejoin='round'/%3E%3Ccircle cx='28' cy='30' r='2' fill='%2322d3ee'/%3E%3Ccircle cx='36' cy='30' r='2' fill='%2322d3ee'/%3E%3Ccircle cx='44' cy='30' r='2' fill='%2322d3ee'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-aurora"></div>
+    <div class="bg-aurora bg-aurora-2"></div>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Nocturne<span>Messenger</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#journey">Journey</a>
+      <a href="#identity">Identity</a>
+      <a href="#messenger">Messenger</a>
+      <a href="#reveal">Reveal</a>
+      <a href="#glossary">Glossary</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not a relay / not on-chain">LOCAL-TRUE · not a relay · not on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="help-overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <div class="help-card">
+      <h3 id="help-title">Keyboard shortcuts</h3>
+      <ul>
+        <li><span>Focus identity</span><span>I</span></li>
+        <li><span>Focus thread list</span><span>T</span></li>
+        <li><span>Focus compose</span><span>N</span></li>
+        <li><span>Seal &amp; commit message</span><span>S</span></li>
+        <li><span>Run reveal theater</span><span>R</span></li>
+        <li><span>Seed demo thread</span><span>Shift+N</span></li>
+        <li><span>Copy donate address</span><span>D</span></li>
+        <li><span>Open / close this help</span><span>?</span></li>
+        <li><span>Close overlay</span><span>Esc</span></li>
+      </ul>
+      <p class="muted small" style="margin:0.85rem 0 0">Shortcuts idle when typing in inputs. Press <kbd style="font-family:var(--mono)">?</kbd> anytime.</p>
+      <div class="btn-row" style="margin-top:1rem">
+        <button type="button" class="btn primary small" id="btn-close-help">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main" class="wrap">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Private messenger · sealed envelopes · selective reveal</p>
+      <h1>Nocturne Messenger Studio</h1>
+      <p class="lede">
+        World-class educational preview of Midnight-style <strong>private messaging</strong>:
+        claim a handle, seal DM bodies in an <strong>envelope veil</strong>, publish only a
+        <strong>commitment</strong> on the ledger rail, then run a
+        <strong>selective reveal</strong> theater — without claiming a relay, Lace, Compact
+        compiler, or on-chain settlement.
+        By <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.xyz" rel="noopener noreferrer">nightdream.xyz</a>
+        · inspired by the standalone
+        <a href="https://github.com/Kshot3000/nocturne" rel="noopener noreferrer">Nocturne</a> product vision.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#identity">Claim identity</a>
+        <a class="btn ghost" href="#messenger">Open messenger</a>
+        <a class="btn ghost" href="#reveal">Reveal theater</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="kbd-bar" aria-label="Keyboard hints">
+        <span class="kbd"><kbd>I</kbd> Identity</span>
+        <span class="kbd"><kbd>T</kbd> Threads</span>
+        <span class="kbd"><kbd>N</kbd> Compose</span>
+        <span class="kbd"><kbd>S</kbd> Seal</span>
+        <span class="kbd"><kbd>R</kbd> Reveal</span>
+        <span class="kbd"><kbd>?</kbd> Shortcuts</span>
+        <span class="kbd"><kbd>D</kbd> Donate</span>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest scope:</strong> local HTML/JS teaching studio only.
+        Does <strong>not</strong> relay messages across devices, connect Lace, compile Compact,
+        start a proof server, or settle ADA / NIGHT / DUST.
+        Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
+        Seeded residents and canned replies are <strong>simulated</strong>. Sealing uses
+        WebCrypto SHA-256 + localStorage — teaching stand-in, not a Midnight network messenger.
+      </div>
+    </section>
+
+    <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
+      <div class="section-head">
+        <h2 id="journey-heading">Messenger journey</h2>
+        <p class="muted">Labeled phases from idle → identity → thread → sealed → committed → revealed. Reveal is a teaching theater, not a decrypt-on-chain claim.</p>
+      </div>
+      <ol class="journey" id="journey-steps" aria-label="Messenger journey phases">
+        <li class="journey-step is-active" data-phase="idle" aria-current="step">
+          <span class="js-idx">1</span>
+          <div><strong>Idle</strong><span class="js-detail">Claim a handle</span></div>
+        </li>
+        <li class="journey-step" data-phase="identity">
+          <span class="js-idx">2</span>
+          <div><strong>Identity</strong><span class="js-detail">Local device seal</span></div>
+        </li>
+        <li class="journey-step" data-phase="thread">
+          <span class="js-idx">3</span>
+          <div><strong>Thread</strong><span class="js-detail">Peer selected</span></div>
+        </li>
+        <li class="journey-step" data-phase="sealed">
+          <span class="js-idx">4</span>
+          <div><strong>Sealed</strong><span class="js-detail">Body in veil</span></div>
+        </li>
+        <li class="journey-step" data-phase="committed">
+          <span class="js-idx">5</span>
+          <div><strong>Committed</strong><span class="js-detail">Hash on rail</span></div>
+        </li>
+        <li class="journey-step" data-phase="revealed">
+          <span class="js-idx">6</span>
+          <div><strong>Revealed</strong><span class="js-detail">Selective open</span></div>
+        </li>
+      </ol>
+      <p class="journey-live status" id="journey-live" role="status">Phase: idle — claim a Nocturne handle to begin.</p>
+    </section>
+
+    <section id="identity" class="panel reveal" aria-labelledby="identity-heading">
+      <div class="section-head">
+        <h2 id="identity-heading">Local identity</h2>
+        <p class="muted">Handle + device commitment stay in this browser (schema v2 localStorage · BroadcastChannel sync · JSON export/import). Press <kbd style="font-family:var(--mono)">I</kbd>. No passphrase leaves the box; no relay. LOCAL-TRUE ≠ on-chain.</p>
+      </div>
+      <div class="identity-grid">
+        <form id="identity-form" class="identity-form" autocomplete="off">
+          <label for="handle-input">Handle</label>
+          <div class="input-row">
+            <span class="input-prefix" aria-hidden="true">@</span>
+            <input id="handle-input" name="handle" type="text" maxlength="24" placeholder="moon_whisper" spellcheck="false" required />
+          </div>
+          <label for="pass-input">Optional device passphrase (local wrap)</label>
+          <input id="pass-input" name="pass" type="password" maxlength="64" placeholder="optional · never sent" autocomplete="new-password" />
+          <div class="btn-row" style="margin-top:0.85rem">
+            <button type="submit" class="btn primary" id="btn-claim">Claim identity</button>
+            <button type="button" class="btn ghost" id="btn-seed-demo">Seed demo (Shift+N)</button>
+            <button type="button" class="btn ghost" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+            <button type="button" class="btn ghost" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+            <input type="file" id="import-file" accept="application/json,.json" hidden />
+            <button type="button" class="btn ghost" id="btn-reset-id">Reset studio</button>
+          </div>
+        </form>
+        <aside class="identity-card" aria-labelledby="id-card-heading">
+          <h3 id="id-card-heading">Device card</h3>
+          <dl class="id-dl">
+            <div><dt>Handle</dt><dd id="id-handle">—</dd></div>
+            <div><dt>Device commit</dt><dd class="mono" id="id-commit">—</dd></div>
+            <div><dt>Sealed at</dt><dd id="id-sealed-at">—</dd></div>
+            <div><dt>Status</dt><dd id="id-status">No identity</dd></div>
+          </dl>
+          <p class="muted small" id="id-hint">Claiming derives a SHA-256 device commitment tagged <code>nocturne:device:</code> — teaching only.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="messenger" class="panel reveal messenger-panel" aria-labelledby="messenger-heading">
+      <div class="section-head">
+        <h2 id="messenger-heading">Sealed messenger</h2>
+        <p class="muted">Dual rails: envelope veil (private body) vs ledger commit (public hash). Seeded residents reply locally — simulated, not networked.</p>
+      </div>
+
+      <div class="threat-rail" aria-label="Messenger dual-state rails">
+        <div class="rail sealed-rail">
+          <h4>Envelope veil</h4>
+          <p class="muted small">Private message bodies + typing theater stay local. Never declared as ledger.</p>
+          <div class="rail-meter" id="rail-veil" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Envelope veil meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <p class="rail-label" id="rail-veil-label">0% veil surface</p>
+        </div>
+        <div class="rail disclose-rail">
+          <h4>Ledger commit rail</h4>
+          <p class="muted small">Public commitments + thread ids observers could see. Bodies stay veiled.</p>
+          <div class="rail-meter" id="rail-ledger" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Ledger commit meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <p class="rail-label" id="rail-ledger-label">0% ledger surface</p>
+        </div>
+      </div>
+
+      <div class="messenger-split">
+        <aside class="thread-pane" aria-labelledby="threads-heading">
+          <div class="pane-head">
+            <h3 id="threads-heading">Threads</h3>
+            <span class="badge badge-sim" id="presence-badge">sim presence</span>
+          </div>
+          <ul class="thread-list" id="thread-list" role="listbox" aria-label="Conversation threads" tabindex="0"></ul>
+        </aside>
+
+        <div class="chat-pane">
+          <div class="pane-head chat-head">
+            <div>
+              <h3 id="chat-peer">Select a thread</h3>
+              <p class="muted small" id="chat-presence">—</p>
+            </div>
+            <span class="badge badge-lab" id="chat-badge">local</span>
+          </div>
+          <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-relevant="additions"></div>
+          <div class="typing-line" id="typing-line" hidden aria-live="polite">
+            <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span id="typing-text">peer is typing…</span>
+          </div>
+          <form class="compose" id="compose-form" autocomplete="off">
+            <label class="sr-only" for="compose-input">Sealed message body</label>
+            <textarea id="compose-input" rows="2" maxlength="500" placeholder="Write a private body… sealed locally, commit published" disabled></textarea>
+            <div class="compose-actions">
+              <span class="toolbar-meta" id="compose-meta">Claim identity + pick a thread</span>
+              <div class="btn-row">
+                <button type="submit" class="btn primary small" id="btn-seal" disabled>Seal &amp; commit</button>
+                <button type="button" class="btn ghost small" id="btn-clear-compose" disabled>Clear</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <aside class="envelope-pane" aria-labelledby="envelope-heading">
+          <div class="pane-head">
+            <h3 id="envelope-heading">Last envelope</h3>
+            <span class="badge badge-sim">SIMULATED</span>
+          </div>
+          <div class="envelope-body" id="envelope-body">
+            <p class="muted">Seal a message to see the public commitment vs private body split.</p>
+          </div>
+          <pre class="log" id="seal-log" aria-label="Seal theater log">Awaiting seal theater…</pre>
+        </aside>
+      </div>
+    </section>
+
+    <section id="reveal" class="panel reveal" aria-labelledby="reveal-heading">
+      <div class="section-head">
+        <h2 id="reveal-heading">Selective reveal theater</h2>
+        <p class="muted">Prove you can open a sealed envelope without dumping every body on the rail. Press <kbd style="font-family:var(--mono)">R</kbd>. Teaching only — not on-chain decrypt.</p>
+      </div>
+      <div class="reveal-layout">
+        <div class="reveal-scorecard">
+          <div class="score-ring" id="reveal-ring" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-track" cx="60" cy="60" r="52" />
+              <circle class="ring-fill" id="reveal-ring-fill" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="score-num" id="reveal-score">—</div>
+          </div>
+          <div>
+            <h3 style="margin:0 0 0.35rem">Reveal score</h3>
+            <p class="muted small" id="reveal-summary">Awaiting reveal theater.</p>
+            <p class="status" id="reveal-status" role="status">Idle</p>
+            <div class="btn-row" style="margin-top:0.75rem">
+              <button type="button" class="btn primary small" id="btn-run-reveal">Run reveal theater</button>
+            </div>
+          </div>
+        </div>
+        <div class="reveal-findings" id="reveal-findings" aria-live="polite">
+          <p class="muted">Findings appear after you run selective reveal against the latest sealed envelope.</p>
+        </div>
+      </div>
+      <pre class="log" id="reveal-log" aria-label="Reveal log">Awaiting reveal theater…</pre>
+    </section>
+
+    <section id="glossary" class="panel reveal" aria-labelledby="glossary-heading">
+      <div class="section-head">
+        <h2 id="glossary-heading">Messenger privacy glossary</h2>
+        <p class="muted">Concepts this studio annotates. Prefer official Midnight docs for normative dual-state semantics.</p>
+      </div>
+      <div class="glossary-grid" id="glossary-grid"></div>
+    </section>
+
+    <section id="snippets" class="panel reveal" aria-labelledby="snippets-heading">
+      <div class="section-head">
+        <h2 id="snippets-heading">Teaching Compact sketch</h2>
+        <p class="muted">Illustrative sealed-message pattern — <strong>not</strong> a compilable contract. Verify helpers against Compact docs before any real work.</p>
+      </div>
+      <pre class="snippet mono" id="compact-snippet" tabindex="0">pragma language_version &gt;= 0.23;
+
+import CompactStandardLibrary;
+
+/* Public: thread id + message commitment. Private body is a witness. */
+export ledger threadCommit: Bytes&lt;32&gt;;
+export ledger msgCount: Counter;
+
+witness sealedBody(): Bytes&lt;32&gt;;
+
+export circuit postSealed(threadTag: Bytes&lt;32&gt;): [] {
+  /* Teaching stand-in — verify persistentHash / pad before compile. */
+  const body = sealedBody();
+  threadCommit = persistentHash&lt;Bytes&lt;32&gt;&gt;(
+    pad(32, "nocturne:msg:") || threadTag || body
+  );
+  msgCount.increment(1);
+  disclose(threadCommit);
+  disclose(msgCount);
+  /* Body never becomes ledger. */
+}
+</pre>
+      <div class="btn-row" style="margin-top:0.75rem">
+        <button type="button" class="btn ghost small" id="btn-copy-snippet">Copy sketch</button>
+        <a class="btn ghost small" href="../atelier/">Open Compact Atelier →</a>
+      </div>
+    </section>
+
+    <section id="donate" class="panel donate reveal" aria-labelledby="donate-heading">
+      <div class="section-head">
+        <h2 id="donate-heading">Support the lab</h2>
+        <p class="muted">Cardano (ADA) donations keep the 24/7 Midnight Studio Hub going. Tip only — this UI never moves ADA / NIGHT / DUST.</p>
+      </div>
+      <div class="donate-card">
+        <p class="mono donate-addr" id="donate-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</p>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-copy-donate">Copy address</button>
+          <a class="btn ghost" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+          <a class="btn ghost" href="https://nightdream.xyz" rel="noopener noreferrer">nightdream.xyz</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p>
+        <strong>Nocturne Messenger Studio</strong>
+        · LOCAL-TRUE · not a relay · not on-chain ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Midnight-GrokBot-Agent</a>
+        · <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+      </p>
+      <p class="muted small">Educational lab for Midnight programmable privacy. Prefer official docs over any teaching stand-in in this UI.</p>
+    </footer>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

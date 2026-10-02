@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Auth Forge Studio — MPS-0029 interactive lab. Real localStorage + multi-tab sync + export/import by @kshot9000. LOCAL-TRUE educational — not on-chain." />
+  <meta name="theme-color" content="#05070f" />
+  <meta name="author" content="@kshot9000 / Kshot3000" />
+  <title>Auth Forge Studio — LOCAL-TRUE · MPS-0029 · Midnight Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c1a'/%3E%3Cpath d='M20 42 L32 16 L44 42 Z' fill='none' stroke='%23a78bfa' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='38' r='5' fill='%2322d3ee'/%3E%3Cpath d='M26 38h12' stroke='%237c9cff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <canvas id="starfield" class="starfield" width="1" height="1"></canvas>
+    <div class="bg-nebula bg-nebula-a"></div>
+    <div class="bg-nebula bg-nebula-b"></div>
+    <div class="bg-nebula bg-nebula-c"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar" id="topbar">
+    <a class="logo" href="../" aria-label="Midnight Lab home">Auth<span>Forge</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#journey">Journey</a>
+      <a href="#lesson">Lesson</a>
+      <a href="#forge">Forge</a>
+      <a href="#scorecard">Scorecard</a>
+      <a href="#board">Board</a>
+      <a href="#wallets">Wallets</a>
+      <a href="#snippets">Snippets</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab home</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-stub" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+  <main id="main" class="wrap">
+    <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <section class="hero" id="top">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> MPS-0029 · Compact caller identity</p>
+      <h1>Auth Forge Studio</h1>
+      <p class="lede">
+        World-class educational lab for the Midnight auth trap:
+        <code>ownPublicKey()</code> is a <strong>prover-supplied witness</strong> — not bound to the transaction signer.
+        Any <code>assert(ownPublicKey() == owner)</code> is theater. Prefer witness-derived keys
+        (<a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a>
+        / <code>create-mn-app --template bboard</code>).
+        By <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.xyz" rel="noopener noreferrer">nightdream.xyz</a>.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#forge">Open forge theater</a>
+        <a class="btn ghost" href="https://github.com/midnightntwrk/midnight-improvement-proposals/blob/main/mps/mps-0029-compact-caller-identity.md" rel="noopener noreferrer">Read MPS-0029</a>
+        <a class="btn ghost" href="#scorecard">Auth scorecard</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+      <div class="honesty" role="note">
+        <strong>Honest scope:</strong> LOCAL-TRUE browser persistence (schema v2 localStorage, multi-tab sync, JSON export/import).
+        Does <strong>not</strong> run Compact, a proof server, or Lace <code>makeTransfer</code>.
+        Does <strong>not</strong> claim GitHub Pages is live until Actions are enabled.
+        SHA-256 “derive” here is a teaching stand-in — verify against official Compact crypto before shipping.
+        <strong>LOCAL-TRUE ≠ on-chain.</strong>
+      </div>
+    </section>
+
+    <section class="panel journey-panel reveal" id="journey" aria-labelledby="journey-heading">
+      <div class="section-head">
+        <h2 id="journey-heading">Attack journey</h2>
+        <p class="muted">Labeled phases for the unsafe forge path. Error / reject is a first-class state — never silent.</p>
+      </div>
+      <ol class="journey" id="journey-steps" aria-label="Forge journey phases">
+        <li class="journey-step is-active" data-phase="idle" aria-current="step">
+          <span class="js-idx">1</span>
+          <div>
+            <strong>Idle</strong>
+            <span class="js-detail">No unsafe contract deployed</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="deployed">
+          <span class="js-idx">2</span>
+          <div>
+            <strong>Deployed</strong>
+            <span class="js-detail">owner ← claimed ownPublicKey</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="forged">
+          <span class="js-idx">3</span>
+          <div>
+            <strong>Forged</strong>
+            <span class="js-detail">Mallory bypasses admin gate</span>
+          </div>
+        </li>
+        <li class="journey-step" data-phase="safe">
+          <span class="js-idx">4</span>
+          <div>
+            <strong>Witness-bound</strong>
+            <span class="js-detail">Safe path rejects forger</span>
+          </div>
+        </li>
+      </ol>
+      <p class="journey-live status" id="journey-live" role="status">Phase: idle — deploy the unsafe contract to begin.</p>
+    </section>
+
+    <section id="lesson" class="panel reveal" aria-labelledby="lesson-heading">
+      <div class="section-head">
+        <h2 id="lesson-heading">The rule in one screen</h2>
+        <p class="muted">Safe uses of <code>ownPublicKey()</code> are token <em>routing</em> after a real auth gate — never the gate itself.</p>
+      </div>
+      <div class="rule-grid">
+        <article class="rule-card bad">
+          <div class="rule-tag">Unsafe</div>
+          <h3>Auth via <code>ownPublicKey()</code></h3>
+          <p>Prover picks any 32-byte value. Assertions that compare it to a stored owner are theater.</p>
+          <ul>
+            <li><code>assert(ownPublicKey() == admin)</code></li>
+            <li>Blacklists keyed only by <code>ownPublicKey()</code></li>
+            <li>Role maps filled from <code>ownPublicKey()</code> at register</li>
+          </ul>
+        </article>
+        <article class="rule-card ok">
+          <div class="rule-tag">Safe</div>
+          <h3>Witness-derived identity</h3>
+          <p>Caller proves knowledge of a secret. Derive a public commitment in-circuit (bboard / zkloan pattern).</p>
+          <ul>
+            <li><code>witness localSecretKey(): Bytes&lt;32&gt;</code></li>
+            <li><code>publicKey(sk)</code> / <code>persistentHash</code> with domain sep</li>
+            <li><code>ownPublicKey()</code> only to <em>route</em> shielded coins</li>
+          </ul>
+        </article>
+      </div>
+      <div class="threat-rail" aria-label="Dual-rail threat comparison">
+        <div class="rail unsafe-rail">
+          <h4>Public claim rail</h4>
+          <p class="muted small">Anyone can assert “I am Alice” by stuffing Alice’s pk into the witness.</p>
+          <div class="rail-meter" id="rail-unsafe" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Forge success meter">
+            <div class="rail-fill" style="width:0%"></div>
+          </div>
+          <span class="rail-label" id="rail-unsafe-label">0% forge pressure</span>
+        </div>
+        <div class="rail safe-rail">
+          <h4>Secret-bound rail</h4>
+          <p class="muted small">Without Alice’s secret, Mallory’s derived pk never matches <code>owner</code>.</p>
+          <div class="rail-meter ok" id="rail-safe" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Auth integrity meter">
+            <div class="rail-fill" style="width:100%"></div>
+          </div>
+          <span class="rail-label" id="rail-safe-label">100% integrity (until safe deploy)</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="forge" class="panel reveal" aria-labelledby="forge-heading">
+      <div class="section-head">
+        <h2 id="forge-heading">Forge theater <span class="badge badge-sim">simulated</span></h2>
+        <p class="muted">Local model of a naive “owner = ownPublicKey” contract. No Compact runtime — educational only.</p>
+      </div>
+      <div class="forge-layout">
+        <div class="forge-card">
+          <h3>1. Deploy (honest Alice)</h3>
+          <p class="muted">Alice deploys and stores her claimed public key as <code>owner</code>.</p>
+          <div class="field">
+            <label for="alice-pk">Alice claimed pk (hex)</label>
+            <input id="alice-pk" type="text" spellcheck="false" autocomplete="off" aria-describedby="alice-pk-hint" />
+            <span class="field-hint" id="alice-pk-hint">64 hex chars · 32 bytes</span>
+          </div>
+          <button type="button" class="btn primary" id="btn-deploy">Deploy as Alice</button>
+          <p class="status" id="deploy-status" role="status">Not deployed.</p>
+        </div>
+        <div class="forge-card">
+          <h3>2. Attack (Mallory)</h3>
+          <p class="muted">Mallory calls <code>adminOnly()</code> while supplying Alice’s public key as her “ownPublicKey”.</p>
+          <div class="field">
+            <label for="mallory-claim">Mallory supplies as ownPublicKey</label>
+            <input id="mallory-claim" type="text" spellcheck="false" autocomplete="off" />
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn ghost" id="btn-copy-alice">Copy Alice pk → claim</button>
+            <button type="button" class="btn danger" id="btn-forge">Call adminOnly()</button>
+          </div>
+          <p class="status" id="forge-status" role="status">Waiting…</p>
+        </div>
+        <div class="forge-card wide">
+          <h3>3. Same call with witness binding</h3>
+          <p class="muted">With a secret-bound owner, Mallory cannot reproduce Alice’s derived key without Alice’s secret.</p>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="btn-safe-deploy">Deploy safe (Alice secret)</button>
+            <button type="button" class="btn danger" id="btn-safe-forge">Mallory tries adminOnly()</button>
+            <button type="button" class="btn ghost" id="btn-safe-alice">Alice calls adminOnly()</button>
+            <button type="button" class="btn ghost" id="btn-reset-forge">Reset theater</button>
+          </div>
+          <p class="status" id="safe-status" role="status">Safe contract not deployed.</p>
+          <pre class="log" id="forge-log" tabindex="0" aria-label="Forge activity log" aria-live="polite"></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="scorecard" class="panel reveal" aria-labelledby="score-heading">
+      <div class="section-head">
+        <h2 id="score-heading">Auth scorecard</h2>
+        <p class="muted">Interactive checklist — tick what your Compact design actually does. Local only; nothing leaves the browser.</p>
+      </div>
+      <div class="score-layout">
+        <ul class="score-list" id="score-list" role="list">
+          <li>
+            <label class="score-item">
+              <input type="checkbox" data-score="safe" data-id="s1" />
+              <span>Owner / admin gate uses <code>witness</code> secret → derived pk (bboard-style)</span>
+            </label>
+          </li>
+          <li>
+            <label class="score-item">
+              <input type="checkbox" data-score="safe" data-id="s2" />
+              <span>Domain separation on hashes / <code>persistentHash</code> labels</span>
+            </label>
+          </li>
+          <li>
+            <label class="score-item">
+              <input type="checkbox" data-score="safe" data-id="s3" />
+              <span><code>ownPublicKey()</code> used only to route shielded coins after auth</span>
+            </label>
+          </li>
+          <li>
+            <label class="score-item">
+              <input type="checkbox" data-score="safe" data-id="s4" />
+              <span>Take-down / revoke requires matching derived commitment</span>
+            </label>
+          </li>
+          <li>
+            <label class="score-item danger">
+              <input type="checkbox" data-score="unsafe" data-id="u1" />
+              <span>Still have <code>assert(ownPublicKey() == storedOwner)</code></span>
+            </label>
+          </li>
+          <li>
+            <label class="score-item danger">
+              <input type="checkbox" data-score="unsafe" data-id="u2" />
+              <span>Roles / blacklist keyed only by claimed <code>ownPublicKey()</code></span>
+            </label>
+          </li>
+          <li>
+            <label class="score-item danger">
+              <input type="checkbox" data-score="unsafe" data-id="u3" />
+              <span>Constructor stores <code>owner = ownPublicKey()</code> as the auth root</span>
+            </label>
+          </li>
+        </ul>
+        <div class="score-panel" aria-live="polite">
+          <div class="score-ring" id="score-ring" role="img" aria-label="Auth health score">
+            <span class="score-num" id="score-num">—</span>
+            <span class="score-cap">health</span>
+          </div>
+          <p class="status" id="score-verdict">Check items to grade your design.</p>
+          <button type="button" class="btn ghost small" id="btn-score-reset">Clear scorecard</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="board" class="panel reveal" aria-labelledby="board-heading">
+      <div class="section-head">
+        <h2 id="board-heading">Safe local bulletin board</h2>
+        <p class="muted">bboard-inspired LOCAL-TRUE board: posts bind to <code>publicKey(localSecret)</code>. Schema v2 localStorage · BroadcastChannel sync · JSON export/import. Not on-chain.</p>
+      </div>
+      <div class="persist-bar btn-row" style="margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+        <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+        <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+        <button type="button" class="btn danger small" id="btn-reset-studio" title="Clear scorecard, board, forge, secret">Reset studio</button>
+        <span class="muted small">Donate + @kshot9000 · sensitive secrets may be in exports</span>
+      </div>
+      <div class="board-layout">
+        <div class="board-side">
+          <div class="ident-card">
+            <h3>Your local secret</h3>
+            <p class="muted small">Generated in-browser. Never sent anywhere. Mimics <code>localSecretKey</code> witness.</p>
+            <code class="mono block" id="my-sk">—</code>
+            <code class="mono block muted" id="my-pk">pk: —</code>
+            <div class="btn-row">
+              <button type="button" class="btn ghost small" id="btn-rotate-sk">Rotate secret</button>
+              <button type="button" class="btn ghost small" id="btn-copy-pk">Copy pk</button>
+            </div>
+          </div>
+          <div class="post-form">
+            <h3>Post message</h3>
+            <label class="sr-only" for="post-body">Post body</label>
+            <textarea id="post-body" rows="3" maxlength="280" placeholder="Privacy-preserving note…"></textarea>
+            <div class="char-count muted small" id="char-count">0 / 280</div>
+            <button type="button" class="btn primary" id="btn-post">Post (bound to my pk)</button>
+          </div>
+        </div>
+        <div class="board-main">
+          <div class="board-head">
+            <h3>Board <span class="muted" id="post-count">(0)</span></h3>
+            <button type="button" class="btn ghost small" id="btn-clear-board">Clear all (local)</button>
+          </div>
+          <p class="error-honesty" id="board-error" role="alert" hidden></p>
+          <ul class="post-list" id="post-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="wallets" class="panel reveal" aria-labelledby="wallets-heading">
+      <div class="section-head">
+        <h2 id="wallets-heading">Wallet discovery</h2>
+        <p class="muted">Enumerate <code>Object.entries(window.midnight)</code>. Do <strong>not</strong> hardcode <code>mnLace</code> — keys are often UUIDs. Read-only — no connect / transfer.</p>
+      </div>
+      <div class="wallet-toolbar">
+        <button type="button" class="btn primary" id="btn-scan-wallets">Scan window.midnight</button>
+        <label class="toggle">
+          <input type="checkbox" id="chk-watch" />
+          <span>Watch injection (2s poll)</span>
+        </label>
+        <span class="status" id="wallet-status" role="status">Not scanned yet.</span>
+      </div>
+      <div class="wallet-grid" id="wallet-grid"></div>
+    </section>
+
+    <section id="snippets" class="panel reveal" aria-labelledby="snip-heading">
+      <div class="section-head">
+        <h2 id="snip-heading">Compact snippets</h2>
+        <p class="muted">Illustrative — verify against current Compact docs / <code>example-bboard</code> before shipping.</p>
+      </div>
+      <div class="snip-grid">
+        <div class="snip bad">
+          <div class="snip-label">✗ Forgeable</div>
+<pre><code>export ledger owner: ZswapCoinPublicKey;
+
+constructor() {
+  owner = ownPublicKey(); // anyone can later claim this
+}
+
+export circuit adminOnly(): [] {
+  assert(ownPublicKey() == owner, "not owner"); // bypassable
+}</code></pre>
+        </div>
+        <div class="snip ok">
+          <div class="snip-label">✓ Witness-derived (bboard-style)</div>
+<pre><code>witness localSecretKey(): Bytes&lt;32&gt;;
+
+export ledger owner: Bytes&lt;32&gt;;
+
+constructor() {
+  owner = publicKey(localSecretKey());
+}
+
+export circuit adminOnly(): [] {
+  assert(
+    disclose(publicKey(localSecretKey()) == owner),
+    "not owner"
+  );
+}</code></pre>
+        </div>
+      </div>
+      <p class="muted snip-note">
+        Prefer starters: <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a>
+        · <a href="https://github.com/midnightntwrk/create-mn-app" rel="noopener noreferrer">create-mn-app</a>
+        · Counter is <strong>archived</strong>. Official security:
+        <a href="https://docs.midnight.network/guides/security-best-practices" rel="noopener noreferrer">security best practices</a>.
+      </p>
+    </section>
+
+    <footer class="site-footer" id="donate">
+      <div>
+        <strong>Auth Forge Studio</strong>
+        · part of <a href="../">Midnight GrokBot Agent</a>
+        · MIT · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        · <a href="https://nightdream.xyz" rel="noopener noreferrer">nightdream.xyz</a>
+        · <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">GitHub</a>
+      </div>
+      <div class="footer-donate">
+        <span>Donate ADA:</span>
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" class="btn ghost small" id="copy-addr">Copy address</button>
+      </div>
+      <p class="disclaimer">
+        LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Educational only. Not affiliated with Midnight / IOG / Lace beyond public docs.
+        Does not claim live GitHub Pages until Actions are enabled.
+        Verify against official docs before mainnet use.
+      </p>
+    </footer>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

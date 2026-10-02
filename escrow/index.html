@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Agent Escrow Studio — role theater + dual-state proofs. Real localStorage + multi-tab sync + export/import by @kshot9000. Not on-chain."
+  />
+  <meta name="theme-color" content="#05070f" />
+  <title>Agent Escrow Studio — LOCAL-TRUE · Midnight GrokBot Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%237c9cff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23a78bfa'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="bg-scene" aria-hidden="true">
+    <div class="bg-aurora"></div>
+    <div class="bg-aurora bg-aurora-2"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </div>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" id="site-header">
+    <a class="logo" href="./">Agent<span>Escrow</span></a>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+    <nav id="site-nav" aria-label="Primary">
+      <a href="#roles">Roles</a>
+      <a href="#proofs">Proofs</a>
+      <a href="#local-prove">Local prove</a>
+      <a href="#donate">Donate</a>
+      <a href="../">Lab site</a>
+      <a href="../board/">Shield Board</a>
+      <a href="../auth/">Auth Lab</a>
+      <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    </nav>
+    <span class="badge badge-sim" title="Real localStorage + multi-tab sync + export/import — not on-chain">LOCAL-TRUE · not on-chain</span>
+  </header>
+
+  <aside class="donate-dock" aria-label="Always-visible donate">
+    <a class="dock-x" href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+    <span class="dock-sep" aria-hidden="true">·</span>
+    <button type="button" class="dock-copy" id="dock-copy-addr" title="Copy Cardano donation address">Donate ADA</button>
+  </aside>
+
+
+
+  <main id="main">
+    <div class="hero-block">
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Midnight Compact · milestone escrow UX</p>
+      <h1>Agent Escrow — role theater + dual-state proofs</h1>
+      <p class="lede">
+        Walk a milestone escrow state machine as <strong>Client</strong>, <strong>Agent</strong>, or <strong>Approver</strong>.
+        Proof submissions mint a <em>public</em> commitment hash while the work note stays in a <em>private</em> vault —
+        Midnight dual-state UX, browser-local. Compact skeleton:
+        <code>contracts/agent-escrow</code> (witness-derived roles · MPS-0029).
+        Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000
+        (Midnight GrokBot Agent).
+      </p>
+      <div class="cta-row hero-cta">
+        <a class="btn primary" href="#roles">Enter role theater</a>
+        <a class="btn ghost" href="#proofs">Dual-state proofs</a>
+        <a class="btn ghost" href="#local-prove">Local ZK metrics</a>
+        <a class="btn ghost" href="#donate">Donate ADA</a>
+      </div>
+    </div>
+
+    <div class="banner" role="status">
+      <strong>LOCAL-TRUE persistence — not on-chain Compact.</strong>
+      Escrow state lives in <code>localStorage</code> (schema v2) with multi-tab sync + JSON export/import.
+      Compile with Compact ~0.31.1 before any real circuit work. Auth on Midnight must use
+      witness + <code>persistentHash</code>, not <code>ownPublicKey()</code> for authorization (MPS-0029).
+    </div>
+
+    <section id="roles" class="panel role-theater" aria-labelledby="roles-heading">
+      <div class="section-head">
+        <h2 id="roles-heading">Role theater</h2>
+        <p class="muted">Act as one party. Actions outside your role stay disabled — mirrors witness-bound circuits.</p>
+      </div>
+      <div class="role-picker" role="radiogroup" aria-label="Active escrow role">
+        <button type="button" class="role-card active" data-role="client" aria-pressed="true">
+          <span class="role">You are</span>
+          <h3>Client</h3>
+          <p>Fund, start, dispute, settle, refund. Always an approver in this stub.</p>
+        </button>
+        <button type="button" class="role-card" data-role="agent" aria-pressed="false">
+          <span class="role">You are</span>
+          <h3>Agent</h3>
+          <p>Submit proof hashes + private work notes. Never release your own milestones.</p>
+        </button>
+        <button type="button" class="role-card" data-role="approver" aria-pressed="false">
+          <span class="role">You are</span>
+          <h3>Approver</h3>
+          <p>Release or reject after a public proof exists. Sees commitment, not the private note.</p>
+        </button>
+      </div>
+      <p class="hint" id="roleHint" aria-live="polite">Acting as <strong>Client</strong> — fund / start / settle / dispute enabled when state allows.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading">Escrow timeline</h2>
+      <p class="muted timeline-intro">Visual stepper for the escrow state (not ASCII). Branches for dispute are shown below the main path.</p>
+      <ol class="stepper" id="escrowStepper" aria-label="Escrow state timeline">
+        <li class="step" data-state="created"><span class="step-dot"></span><span class="step-label">Created</span></li>
+        <li class="step" data-state="funded"><span class="step-dot"></span><span class="step-label">Funded</span></li>
+        <li class="step" data-state="in_progress"><span class="step-dot"></span><span class="step-label">In progress</span></li>
+        <li class="step" data-state="settled"><span class="step-dot"></span><span class="step-label">Settled</span></li>
+      </ol>
+      <div class="branch-row" aria-label="Dispute branch">
+        <div class="branch-chip" data-branch="disputed">
+          <span class="branch-label">Disputed</span>
+          <span class="branch-hint">from funded / in progress</span>
+        </div>
+        <div class="branch-chip" data-branch="refunded">
+          <span class="branch-label">Refunded</span>
+          <span class="branch-hint">dispute → refund</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="milestone-heading">
+      <h2 id="milestone-heading">Milestone progress</h2>
+      <div class="milestone-track" id="milestoneTrack" aria-live="polite"></div>
+    </section>
+
+
+    <section id="proofs" class="panel" aria-labelledby="proofs-heading">
+      <div class="section-head">
+        <h2 id="proofs-heading">Dual-state proofs <span class="badge badge-sim">simulated</span></h2>
+        <p class="muted">Public pane = commitment the ledger would store. Private pane = agent work notes that never leave this browser until you reset.</p>
+      </div>
+      <div class="dual-pane" role="group" aria-label="Public commitments and private work notes">
+        <article class="pane pane-public">
+          <header class="pane-head">
+            <div>
+              <p class="pane-eyebrow">Public ledger</p>
+              <h3>Proof commitments</h3>
+            </div>
+            <span class="pane-pill public">Visible</span>
+          </header>
+          <ul class="proof-list" id="publicProofs" aria-live="polite"></ul>
+          <p class="empty" id="publicProofsEmpty">No proofs yet — switch to Agent and submit m1 / m2.</p>
+        </article>
+        <article class="pane pane-private">
+          <header class="pane-head">
+            <div>
+              <p class="pane-eyebrow">Private vault</p>
+              <h3>Agent work notes</h3>
+            </div>
+            <span class="pane-pill private">Shielded</span>
+          </header>
+          <ul class="proof-list" id="privateProofs" aria-live="polite"></ul>
+          <p class="empty" id="privateProofsEmpty">Vault empty. Agent notes appear here when you submit a proof.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="controls-heading">
+      <h2 id="controls-heading">Local demo controls</h2>
+      <div class="status-row">
+        <span>State: <span id="statePill" class="pill">created</span></span>
+        <span>Funded: <code id="funded">0</code> L</span>
+        <span>Released: <code id="released">0</code> L</span>
+        <span>Refunded: <code id="refunded">0</code> L</span>
+        <span>Balance: <code id="balance">0</code> L</span>
+      </div>
+
+      <p class="hint" id="nextHint">Next: fund the escrow to leave <strong>created</strong>.</p>
+
+      <div class="persist-toolbar btn-row" style="margin:0.75rem 0 1rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center">
+        <button type="button" class="btn ghost small" id="btn-export" title="Download JSON snapshot">Export JSON</button>
+        <button type="button" class="btn ghost small" id="btn-import" title="Import JSON snapshot">Import JSON</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+        <span class="muted small">localStorage schema v2 · BroadcastChannel sync · not Compact</span>
+      </div>
+
+      <div class="actions" role="group" aria-label="Escrow actions">
+        <button type="button" class="primary" data-act="fund" data-label="Fund 5 ADA" title="Client funds the escrow">Fund 5 ADA</button>
+        <button type="button" data-act="start" data-label="Start" title="Client starts work">Start</button>
+        <button type="button" data-act="proof1" data-label="Agent: proof m1" title="Agent submits proof for m1">Agent: proof m1</button>
+        <button type="button" data-act="approve1" data-label="Approver: release m1" title="Approver releases m1">Approver: release m1</button>
+        <button type="button" data-act="proof2" data-label="Agent: proof m2" title="Agent submits proof for m2">Agent: proof m2</button>
+        <button type="button" data-act="reject2" data-label="Approver: reject m2" title="Approver rejects m2 (demo path)">Approver: reject m2</button>
+        <button type="button" data-act="settle" data-label="Settle" title="Client settles when all milestones decided">Settle</button>
+        <button type="button" data-act="dispute" data-label="Dispute" title="Client opens a dispute">Dispute</button>
+        <button type="button" data-act="resume" data-label="Resume" title="Resume after dispute">Resume</button>
+        <button type="button" data-act="refund" data-label="Dispute refund" title="Refund remaining after dispute">Dispute refund</button>
+        <button type="button" class="danger" data-act="reset" data-label="Reset" title="Reset local demo state">Reset</button>
+      </div>
+      <p class="disabled-help" id="disabledHelp" aria-live="polite"></p>
+      <div id="err" class="banner error" style="display:none" role="alert"></div>
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Description</th><th>Amount</th><th>Status</th><th>Proof</th></tr>
+          </thead>
+          <tbody id="miles"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Audit log (local)</h2>
+      <pre class="log" id="log">(empty)</pre>
+    </section>
+
+
+
+    <section id="local-prove" class="panel local-prove-panel" aria-labelledby="local-prove-heading">
+      <div class="section-head">
+        <h2 id="local-prove-heading">Local ZK prove metrics <span class="badge badge-live">REAL vs :6300</span></h2>
+        <p class="muted">
+          Optional bridge to real <code>prove:escrow-local</code> output — preimage size, proof bytes, prove ms.
+          Browser cannot CORS to proof-server; load <code>last-prove.json</code> (CLI writes it) or use prove-bridge <code>:6399</code>.
+          <strong>LOCAL prove ≠ on-chain.</strong>
+        </p>
+      </div>
+      <div class="prove-status-row" role="status" aria-live="polite">
+        <span>Status: <span id="proveStatusPill" class="pill warn">empty</span></span>
+        <span id="proveStatusLabel" class="muted">No local prove loaded</span>
+      </div>
+      <p class="hint" id="proveStatusDetail">Run <code>npm run prove:escrow-local</code> then Load, or start <code>npm run prove-bridge</code>.</p>
+      <p class="muted small" id="proveHonestClaim">local ZK prove against proof-server — NOT a Preprod deploy / NOT on-chain</p>
+      <div class="btn-row prove-actions">
+        <button type="button" class="btn primary small" id="btn-load-last-prove" title="Fetch ./last-prove.json written by CLI">Load last local prove</button>
+        <button type="button" class="btn ghost small" id="btn-probe-bridge" title="GET http://127.0.0.1:6399/health">Probe prove-bridge :6399</button>
+        <button type="button" class="btn ghost small" id="btn-bridge-last" title="GET :6399/last-prove">Load from bridge</button>
+        <label class="muted small" for="prove-path-select">Path
+          <select id="prove-path-select" title="Escrow prove-bridge path (POST /prove?path=)">
+            <option value="initialize" selected>initialize</option>
+            <option value="happy">happy</option>
+            <option value="cancel">cancel</option>
+            <option value="dispute-release">dispute-release</option>
+            <option value="dispute-refund">dispute-refund</option>
+            <option value="all">all (12/12)</option>
+          </select>
+        </label>
+        <button type="button" class="btn ghost small" id="btn-bridge-prove" title="POST :6399/prove?path=… (needs proof-server)">Bridge prove</button>
+        <button type="button" class="btn ghost small" id="btn-import-prove" title="Import a last-prove.json file">Import prove JSON</button>
+        <input type="file" id="prove-import-file" accept="application/json,.json" hidden />
+        <span class="muted small" id="proveBridgePill">bridge: unknown</span>
+      </div>
+      <div class="prove-summary" id="proveSummary" hidden>
+        <div class="status-row">
+          <span>Path: <code id="provePath">—</code></span>
+          <span>Steps: <code id="proveSteps">—</code></span>
+          <span>Σ proof: <code id="proveTotalProof">—</code></span>
+          <span>Σ prove: <code id="proveTotalMs">—</code></span>
+          <span>Written: <code id="proveWrittenAt">—</code></span>
+        </div>
+      </div>
+      <div class="table-wrap" id="proveTableWrap" hidden>
+        <table>
+          <thead>
+            <tr><th>Circuit</th><th>Role</th><th>Preimage</th><th>Proof</th><th>Prove</th><th>Ledger</th></tr>
+          </thead>
+          <tbody id="proveStepsBody"></tbody>
+        </table>
+      </div>
+      <pre class="log prove-raw" id="proveRaw" hidden></pre>
+      <p class="muted small">CLI: <code>npm run prove:escrow-local</code> → writes <code>apps/agent-escrow-stub/last-prove.json</code> + <code>/tmp/midnight-escrow-last-prove.json</code>. Bridge: <code>npm run prove-bridge</code> (port 6399, CORS). Metrics helpers: shared <code>@kshot/prove-metrics</code> (synced).</p>
+    </section>
+
+    <section id="donate" class="panel donate">
+      <h2>Support the lab</h2>
+      <p class="muted">Built by @kshot9000 / Kshot3000 (Midnight GrokBot Agent). Cardano donations keep the 24/7 Midnight build lab going.</p>
+      <div class="addr-box">
+        <code id="donation-addr">addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+        <button type="button" class="btn ghost small" id="copy-addr">Copy</button>
+      </div>
+      <p class="muted small">
+        <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a>
+        ·
+        <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+        ·
+        <a href="../board/">Shield Board</a>
+        ·
+        <a href="../auth/">Auth Lab</a>
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Next steps</h2>
+      <ol>
+        <li>Read <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent/tree/main/contracts/agent-escrow" rel="noopener noreferrer">contracts/agent-escrow</a> (Compact ~0.31.1 pin + MPS-0029).</li>
+        <li>Install Compact from the <a href="https://docs.midnight.network/getting-started/installation" rel="noopener noreferrer">official install guide</a>.</li>
+        <li><code>cd contracts/agent-escrow && npm run compact</code></li>
+        <li>Follow <a href="https://github.com/midnightntwrk/example-bboard" rel="noopener noreferrer">example-bboard</a> / <a href="https://github.com/midnightntwrk/create-mn-app" rel="noopener noreferrer">create-mn-app</a> for witnesses + UI wiring.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Agent Escrow</strong> · Midnight GrokBot Agent · MIT
+      · by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000
+      · <a href="https://github.com/Kshot3000/Midnight-GrokBot-Agent" rel="noopener noreferrer">Repo</a>
+      · <a href="../">Lab home</a>
+    </div>
+    <div class="footer-donate">
+      <span>Donate ADA:</span>
+      <code>addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v</code>
+    </div>
+    <p class="disclaimer">LOCAL-TRUE — real browser persistence ≠ on-chain Compact. Optional local-prove panel shows REAL CLI/bridge metrics when available — still NOT on-chain.</p>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
