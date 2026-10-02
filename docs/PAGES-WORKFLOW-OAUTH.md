@@ -1,10 +1,13 @@
 # GitHub Pages workflow — OAuth / PAT scope (honest)
 
-**Status:** Pages URL may still **404**. This doc does **not** claim Pages is live.
+**Status (2026-10-02): Pages is LIVE** at
+https://kshot3000.github.io/Midnight-GrokBot-Agent/ — deployed from the
+`gh-pages` branch (legacy branch source), assembled by
+`scripts/build-pages-site.sh`. Branch deploys only need the `repo` scope, so
+the site no longer waits on the workflow-scope problem below. This doc now
+covers only the *optional* future move to Actions-based deploys.
 Workflow file is staged at [`pages.workflow.yml`](./pages.workflow.yml); it is **not**
 under `.github/workflows/` until a token with the `workflow` scope pushes it.
-
-Documented (future) URL: https://kshot3000.github.io/Midnight-GrokBot-Agent/
 
 ## Why CI cannot push the workflow yet
 

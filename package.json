@@ -34,7 +34,8 @@
     "prove-bridge": "npm run prove-bridge --prefix apps/agent-escrow-stub",
     "sync:prove-metrics": "npm run sync -w @kshot/prove-metrics",
     "smoke:local-prove": "node scripts/smoke-local-prove.mjs",
-    "stub:call-preprod": "npm run preprod:call -w @kshot/preprod-hello-stub"
+    "stub:call-preprod": "npm run preprod:call -w @kshot/preprod-hello-stub",
+    "build:pages-site": "bash scripts/build-pages-site.sh"
   },
   "author": "Kshot (@kshot9000)",
   "license": "MIT",

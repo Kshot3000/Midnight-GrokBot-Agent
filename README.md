@@ -6,10 +6,18 @@ Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https
 
 > This repo does **not** invent Midnight APIs. Prefer official docs and examples linked below.
 
-## GitHub Pages (when Actions enabled)
+## GitHub Pages — LIVE
 
-Documented URL (may 404 until workflow scope + Pages source are set):
-**https://kshot3000.github.io/Midnight-GrokBot-Agent/**
+**https://kshot3000.github.io/Midnight-GrokBot-Agent/** — live since 2026-10-02,
+deployed from the `gh-pages` branch (legacy branch source). The site is
+assembled by [`scripts/build-pages-site.sh`](./scripts/build-pages-site.sh)
+(runtime files only — no tests, manifests, or node_modules) after building the
+Lace demo with `PAGES_BASE=/Midnight-GrokBot-Agent/lace/`. To redeploy: run
+those two steps, then publish the assembled `site/` to `gh-pages`.
+An Actions workflow is also staged at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml)
+for a future move to CI deploys — it cannot be pushed yet because the lab
+OAuth token lacks the `workflow` scope (see
+[`docs/PAGES-WORKFLOW-OAUTH.md`](./docs/PAGES-WORKFLOW-OAUTH.md)).
 
 | Path | App |
 | --- | --- |
@@ -27,10 +35,6 @@ Documented URL (may 404 until workflow scope + Pages source are set):
 | `/passport/` | **Veil Passport Studio** — confidential credentials & selective disclosure |
 | `/atelier/` | **Compact Atelier** — editable Compact snippets + explain panel |
 | `/nocturne/` | **Nocturne Messenger Studio** — sealed DMs (LOCAL-TRUE) |
-
-Pages workflow is ready at [`docs/pages.workflow.yml`](./docs/pages.workflow.yml) (copy to `.github/workflows/pages.yml`).
-The lab OAuth token lacks the `workflow` scope, so CI cannot push the workflow file yet — add it once with a PAT that has **workflow** scope, then set **Settings → Pages → Source: GitHub Actions**.
-Until then the URL may 404.
 
 ## What’s inside
 

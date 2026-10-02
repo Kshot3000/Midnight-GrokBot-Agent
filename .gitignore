@@ -45,3 +45,6 @@ apps/hello-studio/last-prove.json
 # Midnight.js private state / LevelDB (local only)
 **/midnight-level-db/
 *.leveldb/
+
+# Pages assembly output (deployed from the gh-pages branch, never committed to main)
+site/
