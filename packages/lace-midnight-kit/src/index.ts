@@ -188,7 +188,7 @@ export const LAB_BRANDING = {
     'addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v',
   xHandle: '@kshot9000',
   xUrl: 'https://x.com/kshot9000',
-  nightDreamUrl: 'https://nightdream.io',
+  nightDreamUrl: 'https://nightdream.xyz',
   repoUrl: 'https://github.com/Kshot3000/Midnight-GrokBot-Agent',
   laceInstallUrl: 'https://www.lace.io/',
   laceChromeUrl:

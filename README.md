@@ -2,7 +2,7 @@
 
 **24/7 Midnight build lab** — scaffolding, Compact starters (incl. Agent Escrow), Lace connector kit, and a developer landing site for [Midnight](https://midnight.network/), the Cardano partner chain focused on **programmable privacy** with zero-knowledge smart contracts.
 
-Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream.io](https://nightdream.io)).
+Built by [@kshot9000](https://x.com/kshot9000) (creator of [NightDream](https://nightdream.xyz)).
 
 > This repo does **not** invent Midnight APIs. Prefer official docs and examples linked below.
 
@@ -321,7 +321,7 @@ Canonical copy lives in [`BRANDING.md`](./BRANDING.md).
 - **Cardano donation:**  
   `addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
 - **X:** [@kshot9000](https://x.com/kshot9000) — https://x.com/kshot9000
-- **NightDream.io:** https://kshot3000.github.io/NightDream.io/ (custom domain `nightdream.io` pending DNS — see NightDream `docs/DNS.md`)
+- **NightDream:** https://nightdream.xyz/ (live custom domain; `nightdream.io` is NXDOMAIN — see `contracts/AUDIT-NOTES.md`)
 
 ## License
 

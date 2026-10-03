@@ -842,7 +842,7 @@ function render(): void {
           and official <code>@midnight-ntwrk/dapp-connector-api@4.0.1</code>.
           Journey stepper, injection watch, status matrix, and read-only capability radar.
           By <a href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>
-          · <a href="${LAB_BRANDING.nightDreamUrl}" rel="noopener noreferrer">NightDream.io</a>.
+          · <a href="${LAB_BRANDING.nightDreamUrl}" rel="noopener noreferrer">nightdream.xyz</a>.
         </p>
         <div class="cta-row">
           <a class="btn primary" href="#wallets">Open wallets</a>
@@ -1049,7 +1049,7 @@ function render(): void {
         <div>
           <strong>Midnight GrokBot Agent</strong>
           · MIT · by <a href="${LAB_BRANDING.xUrl}" rel="noopener noreferrer">${LAB_BRANDING.xHandle}</a>
-          · <a href="${LAB_BRANDING.nightDreamUrl}" rel="noopener noreferrer">NightDream.io</a>
+          · <a href="${LAB_BRANDING.nightDreamUrl}" rel="noopener noreferrer">nightdream.xyz</a>
           · <a href="${LAB_BRANDING.repoUrl}" rel="noopener noreferrer">GitHub</a>
         </div>
         <div class="footer-donate">

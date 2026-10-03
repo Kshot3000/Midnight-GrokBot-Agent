@@ -15,7 +15,7 @@ addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udn
 
 ## Related
 
-- Creator of [NightDream.io](https://nightdream.io)
+- Creator of [NightDream](https://nightdream.xyz)
 - Lab repo: https://github.com/Kshot3000/Midnight-GrokBot-Agent
 
 ## Official Midnight (do not invent)
