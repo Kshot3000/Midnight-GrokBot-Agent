@@ -69,8 +69,8 @@ export function freshEscrow() {
     released: 0,
     refunded: 0,
     milestones: [
-      { id: 'm1', description: 'scaffold', amount: 1 * L, status: 'pending', proofHash: null, privateNote: null },
-      { id: 'm2', description: 'app', amount: 4 * L, status: 'pending', proofHash: null, privateNote: null },
+      { id: 'm1', description: 'scaffold', amount: 1 * L, status: 'pending', proofHash: null, privateNote: null, deadline: 0 },
+      { id: 'm2', description: 'app', amount: 4 * L, status: 'pending', proofHash: null, privateNote: null, deadline: 0 },
     ],
     audit: [],
   };
@@ -131,6 +131,21 @@ export function restorableDisputeState(escrow) {
   return escrow?.resumeTo === 'funded' || escrow?.resumeTo === 'in_progress';
 }
 
+/**
+ * Compact blockTimeLt is strict-before. deadline 0 means unset (no cutoff).
+ * nowSec is Unix seconds (payload.now in the studio; block time on-chain).
+ */
+export function deadlineOpen(milestone, nowSec) {
+  const deadline = finiteNonNeg(milestone?.deadline);
+  if (!deadline) return true;
+  return Number(nowSec) < deadline;
+}
+
+function nowSeconds(payload) {
+  if (payload && Number.isFinite(Number(payload.now))) return Math.floor(Number(payload.now));
+  return Math.floor(Date.now() / 1000);
+}
+
 export function stateAllows(escrow, act) {
   const m1 = findMilestone(escrow, 'm1');
   const m2 = findMilestone(escrow, 'm2');
@@ -181,6 +196,7 @@ export function nextAction(escrow, role) {
  * slot reopens so settle still waits until the new proof is decided.
  * dispute/resume match Compact resolveDisputeResume: resume restores FUNDED
  * or IN_PROGRESS only. A missing resumeTo fails closed (does not skip start()).
+ * Non-zero milestone.deadline uses the same strict-before rule as blockTimeLt.
  * LOCAL-TRUE studio stand-in — not an on-chain call.
  */
 export function applyAction(escrow, act, payload = {}) {
@@ -210,6 +226,7 @@ export function applyAction(escrow, act, payload = {}) {
         if (!m || (m.status !== 'pending' && m.status !== 'rejected')) {
           throw new Error(`${id} has no open proof slot`);
         }
+        if (!deadlineOpen(m, nowSeconds(payload))) throw new Error('milestone deadline passed');
         if (!payload.proofHash) throw new Error('proofHash required');
         const resubmit = m.status === 'rejected';
         m.privateNote = payload.privateNote || PROOF_NOTES[id] || null;
@@ -225,6 +242,7 @@ export function applyAction(escrow, act, payload = {}) {
         if (s.state !== 'in_progress') throw new Error('need in_progress');
         const m = s.milestones.find((x) => x.id === 'm1');
         if (!m || m.status !== 'proof_submitted') throw new Error('m1 needs proof');
+        if (!deadlineOpen(m, nowSeconds(payload))) throw new Error('milestone deadline passed');
         m.status = 'released';
         s.released += m.amount;
         s = pushAudit(s, 'milestone_released', 'approver', { milestone: 'm1', amount: m.amount });
@@ -298,6 +316,7 @@ function normalizeMilestone(m) {
     status: MILESTONE_STATUSES.includes(m.status) ? m.status : 'pending',
     proofHash: m.proofHash ? String(m.proofHash) : null,
     privateNote: m.privateNote != null ? String(m.privateNote) : null,
+    deadline: finiteNonNeg(m.deadline),
   };
 }
 

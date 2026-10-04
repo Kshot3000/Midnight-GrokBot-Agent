@@ -9,6 +9,7 @@ import {
   escapeHtml,
   listingCommit,
   bidCommit,
+  proveBidClearsReserve,
 } from './market-core.mjs';
 import {
   loadStudioState,
@@ -529,7 +530,7 @@ function proveBid() {
     announce("Proof rejected: missing selection");
     return;
   }
-  const ok = bid.amount >= listing.reserve;
+  const ok = proveBidClearsReserve(listing, bid).ok;
   if (ok) {
     bid.disclosure = bid.disclosure === "full" ? "full" : "range";
     if (listing.disclosure === "sealed") listing.disclosure = "range";
@@ -556,7 +557,7 @@ function awardBid() {
     setStatus("bid-status", "Select listing + bid to award.", "fail");
     return;
   }
-  if (bid.amount < listing.reserve) {
+  if (!proveBidClearsReserve(listing, bid).ok) {
     setProofResult("Cannot award — bid below reserve. Prove first or pick another.", "fail");
     pushLog(`AWARD reject ${bid.handle} — below reserve`);
     announce("Award rejected: bid below reserve");
