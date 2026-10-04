@@ -7,6 +7,7 @@ import type { ConnectedAPI, Configuration, ConnectionStatus, InitialAPI } from '
 
 import type { ConnectedSession } from './connect.js';
 import type { DiscoveredProvider } from './discover.js';
+import { injectionKindForKey } from './discover.js';
 import { MidnightNetworkIds } from './networks.js';
 import type { CapabilityProbe } from './capabilities.js';
 
@@ -35,6 +36,7 @@ export function createDemoSession(
 ): ConnectedSession {
   const provider: DiscoveredProvider = {
     injectionKey: 'demo-simulated-key',
+    injectionKind: injectionKindForKey('demo-simulated-key'),
     api: demoInitialApi(),
   };
 
