@@ -9,6 +9,8 @@ import {
   PROVE_CLAIM,
   detectProveKind,
   ESCROW_BRIDGE_PATHS,
+  HELLO_BRIDGE_CIRCUITS,
+  requestBridgeProveHello,
 } from '../prove-metrics.mjs';
 
 const sample = {
@@ -90,3 +92,47 @@ describe('hello prove-metrics', () => {
     expect(s.honest).toMatch(/NOT on-chain/);
   });
 });
+
+describe('hello recordNote metrics', () => {
+  const noteReport = {
+    ok: true,
+    circuit: 'recordNote',
+    greetings: { before: '0', after: '0' },
+    noteCount: { before: '0', after: '1' },
+    preimageBytes: 480,
+    proofBytes: 3100,
+    proveMs: 800,
+    checkMs: 14,
+    witness: { kind: 'localNote Bytes<32>', noteOnLedger: false, emptyRejected: true, fundedWallet: false },
+    claim: 'local ZK prove against proof-server — NOT a Preprod deploy',
+  };
+
+  it('detects recordNote even without relying on increment', () => {
+    expect(detectProveKind({ circuit: 'recordNote', noteCount: { before: '0', after: '1' }, proofBytes: 1 })).toBe('hello');
+    expect(HELLO_BRIDGE_CIRCUITS).toEqual(['increment', 'recordNote']);
+  });
+
+  it('keeps noteCount and witness flags', () => {
+    const r = parseLastProve(noteReport);
+    expect(r.ok).toBe(true);
+    expect(r.report.circuit).toBe('recordNote');
+    expect(r.report.noteCount).toEqual({ before: '0', after: '1' });
+    expect(r.report.circuitsProved).toEqual(['recordNote']);
+    expect(r.report.witness.noteOnLedger).toBe(false);
+    expect(r.report.witness.emptyRejected).toBe(true);
+    expect(summarizeProveStatus(r.report).label).toMatch(/recordNote/);
+    expect(summarizeProveStatus(r.report).label).toMatch(/notes 0→1/);
+  });
+
+  it('requestBridgeProveHello rejects an unknown circuit before fetch', async () => {
+    const r = await requestBridgeProveHello('http://127.0.0.1:6399', {
+      circuit: 'settle',
+      fetchImpl: async () => {
+        throw new Error('fetch should not run');
+      },
+    });
+    expect(r.ok).toBe(false);
+    expect(r.error).toMatch(/recordNote/);
+  });
+});
+
