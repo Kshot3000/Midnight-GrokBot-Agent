@@ -19,8 +19,8 @@
  * THIS IS AN EDUCATIONAL SKELETON. Lab-compiled with Compact 0.31.1 / lang 0.23
  * (2026-09-26 CT); managed artifacts are gitignored. NOT deployed on-chain.
  * Recompile with Compact ~0.31.1 (see README) before any deploy.
- * Resubmit-after-reject and dispute-resume restore are source-only until the
- * next local compile. LOCAL-TRUE.
+ * Resubmit-after-reject, dispute-resume restore, and the fund/addMilestone
+ * budget asserts are source-only until the next local compile. LOCAL-TRUE.
  *
  * Official docs:
  *   https://docs.midnight.network/compact
@@ -204,6 +204,11 @@ export circuit addMilestone(amount: Uint<64>, deadline: Uint<64>): [] {
   milestoneCount.increment(1);
   const id = disclose(milestoneCount.read() as Uint<64>);
   const amt = disclose(amount);
+  /* start() requires milestoneTotal <= funded. Enforce that here so a FUNDED
+   * escrow cannot accumulate milestones that make start() unreachable. */
+  if (state == EscrowState.FUNDED) {
+    assert((milestoneTotal + amt) as Uint<64> <= funded, "milestone total exceeds funded amount");
+  }
   milestones.insert(id, Milestone {
     amount: amt,
     status: MilestoneStatus.PENDING,
@@ -213,14 +218,19 @@ export circuit addMilestone(amount: Uint<64>, deadline: Uint<64>): [] {
   milestoneTotal = (milestoneTotal + amt) as Uint<64>;
 }
 
-/** Client funds the escrow budget (single funding event in this skeleton). */
+/**
+ * Client funds the escrow budget (single funding event in this skeleton).
+ * Amount must already cover milestones added in CREATED; start() repeats the check.
+ */
 export circuit fund(amount: Uint<64>): [] {
   assertIsClient();
   assert(state == EscrowState.CREATED, "can only fund in CREATED");
   assert(clientPk != pad(32, ""), "call initialize before fund");
-  assert((disclose(amount) as Uint<64>) > 0, "fund amount must be positive");
+  const amt = disclose(amount);
+  assert((amt as Uint<64>) > 0, "fund amount must be positive");
+  assert(amt >= milestoneTotal, "fund amount must cover existing milestones");
 
-  funded = disclose(amount);
+  funded = amt;
   state = EscrowState.FUNDED;
 }
 
