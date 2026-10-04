@@ -6,7 +6,7 @@ Placeholder / starter Compact contracts for the Midnight GrokBot lab.
 
 | Path | Purpose |
 | --- | --- |
-| `hello-midnight/hello.compact` | Well-commented starter skeleton (public counter + notes on private state) |
+| `hello-midnight/hello.compact` | Starter: public Counter `increment` plus witness/`disclose` `recordNote` (source-only until recompile, LOCAL-TRUE) |
 | `agent-escrow/` | **Agent Escrow** Compact skeleton (milestone escrow, MPS-0029 auth) + compile notes pinned to Compact **~0.31.1** |
 | `AUDIT-NOTES.md` | Audit-shift findings (archived Counter listing, MPS-0029 reinforcement, Lace `window.midnight`) |
 
@@ -59,6 +59,8 @@ npm run compact:escrow:skip-zk
 
 Artifacts under `**/managed/` and `contracts/hello-midnight/out*` are **gitignored**. Re-run compile locally. **No on-chain deploy** is claimed.
 
+`recordNote` (witness `localNote`, ledger `lastNoteHash` / `noteCount`) is in source only. Existing `increment` keys stay valid until the next `npm run compact:hello`. After that compile, expect `keys/recordNote.prover` as well. LOCAL-TRUE.
+
 Lab box now has **Podman 5.4.2** + proof-server **8.1.0** on `:6300`, and **Node 22.23.3 via fnm** (system node may stay v20). Local circuit prove works (`npm run prove:hello-local`). Still blocked for *on-chain* Preprod: funded wallet + captcha faucet / tDUST.
 
 Consumer packaging: [`ARTIFACT-CONSUMERS.md`](./ARTIFACT-CONSUMERS.md) · inventory: `npm run artifacts:list`.
@@ -67,6 +69,7 @@ Exact CLI flags and output layout can change between Compact releases — always
 
 - Compact overview: https://docs.midnight.network/compact
 - Compact language reference: https://docs.midnight.network/compact/reference/compact-reference
+- Explicit disclosure: https://docs.midnight.network/compact/explicit_disclosure
 - Bulletin board example: https://docs.midnight.network/examples/dapps/bboard
 - Leaderboard tutorial (full DApp): https://docs.midnight.network/tutorials/leaderboard/overview
 - create-mn-app: https://github.com/midnightntwrk/create-mn-app

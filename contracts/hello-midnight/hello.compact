@@ -6,16 +6,19 @@
  *   https://docs.midnight.network/getting-started/installation
  *   https://docs.midnight.network/compact
  *   https://docs.midnight.network/compact/reference/compact-reference
+ *   https://docs.midnight.network/compact/explicit_disclosure
  *
  * Compact contracts typically combine:
  *   1) public ledger state (on-chain, replicated)
  *   2) ZK circuits (prove valid transitions without revealing private inputs)
  *   3) local / off-chain witnesses (private data that never leaves the client)
  *
- * This skeleton only demonstrates a tiny public Counter so the file stays
- * readable while you install the toolchain. Extend toward witnesses,
- * disclose(), ownership checks, and Maps using the official tutorials
- * (e.g. leaderboard / writing-a-contract guides on docs.midnight.network).
+ * increment is the public Counter path. recordNote is the witness + disclose()
+ * path from the explicit-disclosure guide: the note stays private; only a
+ * domain-separated persistentHash is written to the ledger.
+ *
+ * recordNote is source-only until the next `npm run compact:hello`.
+ * LOCAL-TRUE. No on-chain deploy is claimed.
  *
  * Preferred live starters (example-counter is archived upstream):
  *   https://github.com/midnightntwrk/example-bboard
@@ -32,6 +35,22 @@ import CompactStandardLibrary;
 // Public, on-chain counter. Counter is a Compact standard-library ledger type.
 export ledger greetings: Counter;
 
+// Commitment of the last private note. The note itself is never stored.
+export ledger lastNoteHash: Bytes<32>;
+
+// How many non-empty notes have been committed. Counter defaults to 0.
+export ledger noteCount: Counter;
+
+/**
+ * Host-supplied private note. Implement in the TypeScript witness provider;
+ * Compact only declares the callback. Docs: explicit disclosure / witnesses.
+ */
+witness localNote(): Bytes<32>;
+
+constructor() {
+  lastNoteHash = pad(32, "");
+}
+
 /**
  * increment — public circuit that bumps the on-chain counter by 1.
  * Callers pay fees in DUST (tDUST on testnets). No private inputs here.
@@ -43,12 +62,24 @@ export circuit increment(): [] {
   greetings.increment(1);
 }
 
+/**
+ * recordNote — prove a non-empty local note and disclose only its hash.
+ * Domain separator matches the agent-escrow roleCommitment pattern so the
+ * commitment is not reusable as a bare hash of the note bytes.
+ * Witness data must be wrapped in disclose() before a ledger write:
+ *   https://docs.midnight.network/compact/explicit_disclosure
+ */
+export circuit recordNote(): [] {
+  const note = localNote();
+  assert(note != pad(32, ""), "local note must be non-empty");
+  lastNoteHash = disclose(persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "hello-midnight:note:"),
+    note
+  ]));
+  noteCount.increment(1);
+}
+
 /*
- * Next steps (official paths — do not invent APIs):
- * - Add a witness for private client state (see example-bboard)
- * - Use disclose() when a private value must become public
- * - Gate privileged circuits with ownership checks derived from witnesses
- *
  * Auth warning (MPS-0029):
  *   NEVER authorize privileged circuits with ownPublicKey() alone.
  *   ownPublicKey() is prover-supplied and bypassable if you only compare it
