@@ -45,7 +45,7 @@ import {
 
 const ROLE_HINTS = {
   client:
-    'Acting as <strong>Client</strong> — fund / start / settle / dispute when state allows. Client is also an approver here.',
+    'Acting as <strong>Client</strong> — fund / start / settle / dispute / cancel before work starts. Client is also an approver here.',
   agent:
     'Acting as <strong>Agent</strong> — submit proof hashes + private work notes. You cannot release your own milestones.',
   approver:
@@ -154,6 +154,7 @@ function hintText() {
   const next = nextAction(s, activeRole);
   if (s.state === 'settled') return 'Escrow settled. Reset to walk the flow again.';
   if (s.state === 'refunded') return 'Escrow refunded after dispute. Reset to walk again.';
+  if (s.state === 'cancelled') return 'Escrow cancelled before work started. Reset to walk again.';
   if (s.state === 'disputed') return 'Disputed — resume work or refund the remaining balance.';
   if (!next) return 'No primary action right now — try Dispute or Reset.';
   const labels = {
@@ -166,6 +167,7 @@ function hintText() {
     settle: 'Next: <strong>Settle</strong> — all milestones decided.',
     resume: 'Next: <strong>Resume</strong> after dispute.',
     refund: 'Next: <strong>Dispute refund</strong> remaining balance.',
+    cancel: 'Next: <strong>Cancel</strong> before work starts (refunds any deposit).',
   };
   return labels[next] || 'Continue with an enabled action.';
 }
@@ -198,8 +200,8 @@ function renderStepper() {
   if (!el.stepper) return;
   const steps = el.stepper.querySelectorAll('.step');
   let idx = MAIN_PATH.indexOf(s.state);
-  if (s.state === 'disputed' || s.state === 'refunded') {
-    idx = s.state === 'refunded' ? MAIN_PATH.indexOf('settled') : MAIN_PATH.indexOf('in_progress');
+  if (s.state === 'disputed' || s.state === 'refunded' || s.state === 'cancelled') {
+    idx = s.state === 'refunded' || s.state === 'cancelled' ? MAIN_PATH.indexOf('settled') : MAIN_PATH.indexOf('in_progress');
     if (s.funded === 0) idx = 0;
     else if (
       s.state === 'disputed' &&
@@ -213,7 +215,7 @@ function renderStepper() {
   if (idx < 0) idx = 0;
 
   const progressPct =
-    s.state === 'settled' || s.state === 'refunded'
+    s.state === 'settled' || s.state === 'refunded' || s.state === 'cancelled'
       ? 100
       : s.state === 'disputed'
         ? Math.max(0, (idx / (MAIN_PATH.length - 1)) * 100)
@@ -232,7 +234,7 @@ function renderStepper() {
     if (
       si < idx ||
       (s.state === 'settled' && si <= idx) ||
-      (s.state === 'refunded' && si < MAIN_PATH.length - 1 && si <= idx)
+      ((s.state === 'refunded' || s.state === 'cancelled') && si < MAIN_PATH.length - 1 && si <= idx)
     ) {
       step.classList.add('done');
     }
@@ -315,7 +317,7 @@ function render() {
   el.statePill.textContent = s.state;
   el.statePill.className =
     'pill' +
-    (s.state === 'settled' || s.state === 'refunded'
+    (s.state === 'settled' || s.state === 'refunded' || s.state === 'cancelled'
       ? ' ok'
       : s.state === 'disputed'
         ? ' warn'

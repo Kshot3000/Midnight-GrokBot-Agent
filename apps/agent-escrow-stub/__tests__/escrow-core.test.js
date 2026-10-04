@@ -150,6 +150,30 @@ describe('happy path + reject branch', () => {
     expect(r.ok).toBe(false);
     expect(r.error).toMatch(/in_progress/);
   });
+
+  it('cancel before work starts refunds the deposit (Compact cancel)', () => {
+    const created = applyAction(freshEscrow(), 'cancel');
+    expect(created.ok).toBe(true);
+    expect(created.escrow.state).toBe('cancelled');
+    expect(created.escrow.refunded).toBe(0);
+    expect(balance(created.escrow)).toBe(0);
+    expect(created.escrow.audit.at(-1).type).toBe('cancelled');
+    // cancel is an exit, not the primary next action while created.
+    expect(nextAction(freshEscrow(), 'client')).toBe('fund');
+    expect(can(freshEscrow(), 'agent', 'cancel')).toBe(false);
+
+    let funded = applyAction(freshEscrow(), 'fund').escrow;
+    funded = applyAction(funded, 'cancel').escrow;
+    expect(funded.state).toBe('cancelled');
+    expect(funded.refunded).toBe(5 * L);
+    expect(balance(funded)).toBe(0);
+
+    const started = applyAction(applyAction(freshEscrow(), 'fund').escrow, 'start').escrow;
+    const blocked = applyAction(started, 'cancel');
+    expect(blocked.ok).toBe(false);
+    expect(blocked.error).toMatch(/before work starts/);
+    expect(blocked.escrow.state).toBe('in_progress');
+  });
 });
 
 describe('normalize + export/import', () => {
@@ -205,6 +229,20 @@ describe('normalize + export/import', () => {
     // Audit entries are normalized to objects; junk and array data dropped.
     expect(parsed.state.escrow.audit).toHaveLength(1);
     expect(parsed.state.escrow.audit[0].data).toEqual({});
+  });
+
+  it('keeps a cancelled import instead of falling back to created', () => {
+    const parsed = parseImportDocument({
+      kind: EXPORT_KIND,
+      state: {
+        activeRole: 'client',
+        escrow: { state: 'cancelled', funded: 5 * L, refunded: 5 * L, released: 0 },
+      },
+    });
+    expect(parsed.ok).toBe(true);
+    expect(parsed.state.escrow.state).toBe('cancelled');
+    expect(ESCROW_STATES).toContain('cancelled');
+    expect(balance(parsed.state.escrow)).toBe(0);
   });
 
   it('hostile import: non-finite and negative money becomes 0', () => {
