@@ -3,6 +3,7 @@
  * These are NOT fake APIs — they describe real failure modes and mitigations.
  *
  * Sources (public issues / docs):
+ * - https://docs.midnight.network/sdks/community/wallets/community-wallets-integration
  * - https://docs.midnight.network/guides/react-wallet-connect
  * - https://github.com/midnightntwrk/midnight-dapp-connector-api
  * - https://github.com/input-output-hk/lace/issues/2243 (Wallet unavailable after connect)
@@ -20,14 +21,26 @@ export type Workaround = {
 export const LACE_MIDNIGHT_WORKAROUNDS: readonly Workaround[] = [
   {
     id: 'enumerate-not-mnLace',
-    title: 'Enumerate window.midnight — do not hardcode mnLace',
+    title: 'Support friendly keys and the v4 rdns scan',
     symptom:
-      'window.midnight.mnLace is undefined even though Lace is installed.',
+      'A hardcoded window.midnight.mnLace read is undefined, or a UUID-only scan misses Lace / 1AM.',
     mitigation:
-      'Use Object.entries/Object.values on window.midnight. Wallets inject under a fresh UUID key each load. Filter by apiVersion / rdns and let the user choose.',
+      'Official integration supports both paths: fixed keys window.midnight.mnLace and window.midnight["1am"], plus v4 keys with a stable rdns. Scan Object.keys(window.midnight), keep entries whose connect is a function, filter apiVersion, and match rdns. Do not assume only UUIDs exist.',
     references: [
+      'https://docs.midnight.network/sdks/community/wallets/community-wallets-integration',
       'https://docs.midnight.network/guides/react-wallet-connect',
-      'https://docs.midnight.network/api-reference/dapp-connector',
+    ],
+  },
+  {
+    id: 'lace-no-getProvingProvider',
+    title: 'Lace does not expose getProvingProvider or signData',
+    symptom:
+      'Calling getProvingProvider() or signData() throws, or a DApp hard-codes Configuration.proverServerUri.',
+    mitigation:
+      'Feature-detect with typeof api.getProvingProvider === "function" (same for signData) and do not call when absent. Lace proves via the local proof server at http://localhost:6300 (Settings → Midnight → Local). 1AM implements getProvingProvider. LOCAL-TRUE until a proof is actually produced.',
+    references: [
+      'https://docs.midnight.network/sdks/community/wallets/community-wallets-integration',
+      'https://docs.midnight.network/getting-started/installation',
     ],
   },
   {

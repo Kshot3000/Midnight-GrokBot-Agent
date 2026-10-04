@@ -5,12 +5,29 @@ import { KitErrorCodes, LaceMidnightKitError } from './errors.js';
 import { semverSatisfies } from './semver.js';
 
 /**
- * Discovered provider entry. Prefer this over hardcoded `window.midnight.mnLace`.
- * Lace (and other wallets) inject under a fresh UUID key each page load.
+ * Fixed keys documented for Lace and 1AM.
+ * v4 also injects under per-load keys; match those on rdns, do not drop these.
+ * @see https://docs.midnight.network/sdks/community/wallets/community-wallets-integration
+ */
+export const FRIENDLY_INJECTION_KEYS = ['mnLace', '1am'] as const;
+
+export type InjectionKind = 'friendly' | 'v4';
+
+export function injectionKindForKey(key: string): InjectionKind {
+  return (FRIENDLY_INJECTION_KEYS as readonly string[]).includes(key)
+    ? 'friendly'
+    : 'v4';
+}
+
+/**
+ * Discovered provider entry.
+ * Support both discovery paths: friendly keys (`mnLace`, `1am`) and v4 keys with stable rdns.
  */
 export type DiscoveredProvider = {
-  /** UUID (or other) key under window.midnight */
+  /** Key under window.midnight (friendly name or v4 identifier). */
   injectionKey: string;
+  /** `friendly` for documented fixed keys; `v4` for every other key. */
+  injectionKind: InjectionKind;
   api: InitialAPI;
 };
 
@@ -46,10 +63,11 @@ function assertBrowser(): void {
 
 /**
  * Enumerate wallets injected on `window.midnight`.
- * Do NOT use `window.midnight.mnLace` — keys are UUIDs; hardcoded names are often undefined.
+ * Keep friendly keys (`mnLace`, `1am`) and v4 keys. Match products on rdns / name,
+ * and check apiVersion before connect. Do not assume only UUIDs exist.
  *
+ * @see https://docs.midnight.network/sdks/community/wallets/community-wallets-integration
  * @see https://docs.midnight.network/guides/react-wallet-connect
- * @see https://github.com/midnightntwrk/midnight-dapp-connector-api
  */
 export function discoverProviders(
   options: DiscoverOptions = {},
@@ -72,7 +90,11 @@ export function discoverProviders(
   for (const key of injectionKeys) {
     const api = midnight[key];
     if (!api || typeof api.connect !== 'function') continue;
-    providers.push({ injectionKey: key, api });
+    providers.push({
+      injectionKey: key,
+      injectionKind: injectionKindForKey(key),
+      api,
+    });
   }
 
   const range = options.apiVersionRange === undefined ? '^4.0.0' : options.apiVersionRange;
@@ -126,7 +148,7 @@ export function findProvider(
   if (compatible.length === 0) {
     throw new LaceMidnightKitError(
       KitErrorCodes.NoProviders,
-      'No Midnight wallet found. Install Lace with Midnight enabled and refresh the page. Do not hardcode window.midnight.mnLace.',
+      'No Midnight wallet found. Install Lace with Midnight enabled and refresh the page. Scan window.midnight (mnLace, 1am, and v4 keys) — do not assume a single key.',
       { recoverable: true },
     );
   }

@@ -42,7 +42,22 @@ describe('discoverProviders', () => {
     expect(r.injectionKeys).toContain(key);
     expect(r.providers).toHaveLength(1);
     expect(r.compatible).toHaveLength(1);
+    expect(r.compatible[0]!.injectionKind).toBe('v4');
     expect(safeWalletLabel(r.compatible[0]!.api)).toBe('Lace');
+  });
+
+  it('keeps friendly keys mnLace and 1am next to v4 keys', () => {
+    // @ts-expect-error test mock
+    window.midnight = {
+      mnLace: mockProvider({ name: 'Lace', rdns: 'io.lace.midnight' }),
+      '1am': mockProvider({ name: '1AM', rdns: 'xyz.1am.midnight' }),
+      'uuid-1': mockProvider({ name: 'Other', rdns: 'example.wallet' }),
+    };
+    const r = discoverProviders();
+    const byKey = Object.fromEntries(r.compatible.map((p) => [p.injectionKey, p.injectionKind]));
+    expect(byKey).toEqual({ mnLace: 'friendly', '1am': 'friendly', 'uuid-1': 'v4' });
+    const lace = findProvider({ injectionKey: 'mnLace' });
+    expect(lace.api.name).toBe('Lace');
   });
 
   it('finds by rdns', () => {
