@@ -17,6 +17,8 @@ contract skeleton from the JS/Python reference protocol:
 > (gitignored). Local ZK prove: `npm run prove:escrow-local` (default multi-circuit
 > **happy** path with synthetic client/agent/approver secrets vs `:6300`;
 > `prove:escrow-all` covers all 12 impure). **Not** an on-chain deploy.
+> Resubmit-after-reject (below) is **LOCAL-TRUE** source until the next
+> `compact compile` — managed keys are gitignored and were not regenerated here.
 
 ## Layout
 
@@ -37,12 +39,13 @@ UI stub (local state machine only — no wallet / no deploy):
 | --- | --- | --- |
 | **Compact compiler** | **~0.31.1** | Matches `create-mn-app` remote examples (`bboard`, `battleship`, `leaderboard`). Install / pin via Midnight’s install guide + compatibility matrix — do not guess. |
 | **Language pragma** | `pragma language_version >= 0.23;` | Preferred here. Official `example-bboard` often pins exact `0.23`. If your compiler rejects `>=`, change the pragma to `pragma language_version 0.23;` and recompile. |
-| **Proof server** | Docker image/tag from the install guide | Required to generate ZK proofs for real circuits. |
+| **Proof server** | Docker image/tag from the install guide | Required to generate ZK proofs for real circuits. Lab pin: proof-server **8.1.0** on `:6300`. |
 | **midnight-js / connector** | Matrix peers (lab Lace kit uses `@midnight-ntwrk/dapp-connector-api@4.0.1`) | Verify against the current Midnight compatibility matrix before wiring a DApp. |
 
 Official install: https://docs.midnight.network/getting-started/installation  
 Compact overview: https://docs.midnight.network/compact  
 Language reference: https://docs.midnight.network/compact/reference/compact-reference  
+Ledger ADTs (`Counter.decrement`): https://docs.midnight.network/develop/reference/compact/ledger-adt  
 Bboard tutorial: https://docs.midnight.network/examples/dapps/bboard  
 Leaderboard contract: https://docs.midnight.network/tutorials/leaderboard/smart-contract
 
@@ -59,7 +62,8 @@ npm run compact
 
 Artifacts land under `src/managed/agent-escrow/` (ZKIR, keys, TS bindings).
 Gitignored. Lab verification (2026-09-26 CT): **12 circuits** compiled with
-prover/verifier keys (~38MB managed tree).
+prover/verifier keys (~38MB managed tree). Circuit count is unchanged by the
+resubmit path (still `submitProof`).
 
 ### Compact 0.23 fixes applied so this skeleton compiles
 
@@ -69,6 +73,10 @@ prover/verifier keys (~38MB managed tree).
 2. **Explicit disclosure on dual-role OR** — `assertIsApprover` discloses
    derived role commitments before `clientPk == … || approverPk == …`
    (see Midnight explicit-disclosure docs). Secret key stays private.
+3. **Resubmit after reject** — `submitProof` accepts `PENDING` or `REJECTED`.
+   A rejected slot calls `decidedCount.decrement(1)` (`Counter.decrement`,
+   `Uint<16>` amount) before writing `PROOF_SUBMITTED`, so `settle()` still
+   requires every milestone to be released or rejected again.
 
 ## Auth: MPS-0029 (do not use `ownPublicKey()` alone)
 
@@ -87,8 +95,10 @@ roleCommitment(sk, tag) =
 - **Agent** proves the `"agent"` tag against `agentPk` (submit proofs only)
 - **Approver** proves `"approver"` **or** `"client"` against stored commitments
 
-Separation of duties: `initialize` requires `agentPk` ≠ `clientPk` and
-`agentPk` ≠ `approverPk`, so the agent cannot satisfy `assertIsApprover`.
+Separation of duties: `initialize` requires `agentPk` ≠ `clientPk`,
+`agentPk` ≠ `approverPk`, and `clientPk` ≠ `approverPk`, and rejects the
+empty `pad(32, "")` commitment for all three roles, so the agent cannot
+satisfy `assertIsApprover` and an empty pad cannot stand in as approver.
 
 Same family of pattern as bboard’s `publicKey(sk, sequence)` and the
 leaderboard’s `ownerCommitment(sk)`.
@@ -97,13 +107,13 @@ leaderboard’s `ownerCommitment(sk)`.
 
 | Circuit | Who | Effect |
 | --- | --- | --- |
-| `initialize(agent, approver)` | client (witness) | Register role commitments |
+| `initialize(agent, approver)` | client (witness) | Register non-empty, pairwise-distinct role commitments |
 | `addMilestone(amount, deadline)` | client | Insert milestone into `Map` |
 | `fund(amount)` | client | `CREATED → FUNDED` |
 | `start()` | client | `FUNDED → IN_PROGRESS` (milestones ≤ funded) |
-| `submitProof(id, proofHash)` | agent | `PENDING → PROOF_SUBMITTED` |
+| `submitProof(id, proofHash)` | agent | `PENDING` or `REJECTED` → `PROOF_SUBMITTED` (reopen decrements `decidedCount`) |
 | `approve(id)` | client or approver | Release milestone funds |
-| `reject(id)` | client or approver | Reject proof; funds stay escrowed |
+| `reject(id)` | client or approver | Reject proof; funds stay escrowed; agent may resubmit |
 | `dispute()` | client | Freeze → `DISPUTED` |
 | `resolveDisputeRefund()` | client | Full remaining refund → `REFUNDED` |
 | `resolveDisputeResume()` | client | Back to `IN_PROGRESS` |

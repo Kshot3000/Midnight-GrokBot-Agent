@@ -19,11 +19,13 @@
  * THIS IS AN EDUCATIONAL SKELETON. Lab-compiled with Compact 0.31.1 / lang 0.23
  * (2026-09-26 CT); managed artifacts are gitignored. NOT deployed on-chain.
  * Recompile with Compact ~0.31.1 (see README) before any deploy.
+ * Resubmit-after-reject is source-only until the next local compile. LOCAL-TRUE.
  *
  * Official docs:
  *   https://docs.midnight.network/compact
  *   https://docs.midnight.network/examples/dapps/bboard
  *   https://docs.midnight.network/tutorials/leaderboard/smart-contract
+ *   https://docs.midnight.network/develop/reference/compact/ledger-adt
  *   https://github.com/midnightntwrk/example-bboard
  *   https://github.com/midnightntwrk/create-mn-app
  */
@@ -179,8 +181,10 @@ export circuit initialize(
 
   assert(agentPk != clientPk, "agent and client commitments must differ");
   assert(agentPk != approverPk, "agent cannot also be the registered approver");
+  assert(clientPk != approverPk, "client and approver commitments must differ");
   assert(clientPk != pad(32, ""), "client commitment must be non-empty");
   assert(agentPk != pad(32, ""), "agent commitment must be non-empty");
+  assert(approverPk != pad(32, ""), "approver commitment must be non-empty");
 }
 
 /** Client adds a milestone before work starts. Amounts are integer subunits (e.g. lovelace). */
@@ -225,7 +229,12 @@ export circuit start(): [] {
   state = EscrowState.IN_PROGRESS;
 }
 
-/** Agent submits a proof commitment (hash) for a pending milestone. */
+/**
+ * Agent submits a proof commitment (hash) for a pending milestone, or replaces
+ * a rejected proof. Resubmit reopens the slot: decidedCount is decremented so
+ * settle() still waits until every milestone is released or rejected again.
+ * Counter.decrement is the Compact standard-library op (Uint<16> amount).
+ */
 export circuit submitProof(milestoneId: Uint<64>, proofHash: Bytes<32>): [] {
   assertIsAgent();
   assert(state == EscrowState.IN_PROGRESS, "can only submit proofs while IN_PROGRESS");
@@ -233,8 +242,16 @@ export circuit submitProof(milestoneId: Uint<64>, proofHash: Bytes<32>): [] {
   const id = disclose(milestoneId);
   assert(milestones.member(id), "unknown milestone");
   const m = milestones.lookup(id);
-  assert(m.status == MilestoneStatus.PENDING, "milestone has no open proof slot");
+  assert(
+    m.status == MilestoneStatus.PENDING || m.status == MilestoneStatus.REJECTED,
+    "milestone has no open proof slot"
+  );
   assert(disclose(proofHash) != pad(32, ""), "proof hash must be non-empty");
+
+  if (m.status == MilestoneStatus.REJECTED) {
+    assert((decidedCount.read() as Uint<64>) > 0, "decided count underflow");
+    decidedCount.decrement(1);
+  }
 
   milestones.insert(id, Milestone {
     amount: m.amount,
@@ -267,7 +284,7 @@ export circuit approve(milestoneId: Uint<64>): [] {
   decidedCount.increment(1);
 }
 
-/** Approver rejects a proof; funds stay escrowed. */
+/** Approver rejects a proof; funds stay escrowed. Agent may submitProof again. */
 export circuit reject(milestoneId: Uint<64>): [] {
   assertIsApprover();
   assert(state == EscrowState.IN_PROGRESS, "can only reject while IN_PROGRESS");
