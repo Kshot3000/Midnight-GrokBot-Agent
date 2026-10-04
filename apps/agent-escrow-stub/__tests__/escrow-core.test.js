@@ -12,6 +12,7 @@ import {
   normalizeStudioState,
   buildExportDocument,
   parseImportDocument,
+  deadlineOpen,
   ESCROW_STATES,
   MILESTONE_STATUSES,
   EXPORT_KIND,
@@ -120,6 +121,28 @@ describe('happy path + reject branch', () => {
     expect(resumed.error).toMatch(/no restorable state/);
     expect(resumed.escrow.state).toBe('disputed');
     expect(resumed.escrow.resumeTo).toBe(null);
+  });
+
+  it('rejects proof and approve at or after a milestone deadline', () => {
+    // Compact blockTimeLt is strict-before. deadline 0 (fresh milestones) stays open.
+    const cutoff = 1_700_000_000;
+    expect(deadlineOpen({ deadline: 0 }, cutoff)).toBe(true);
+    expect(deadlineOpen({ deadline: cutoff }, cutoff - 1)).toBe(true);
+    expect(deadlineOpen({ deadline: cutoff }, cutoff)).toBe(false);
+    let s = applyAction(freshEscrow(), 'fund').escrow;
+    s = applyAction(s, 'start').escrow;
+    s.milestones[0].deadline = cutoff;
+    const late = applyAction(s, 'proof1', { proofHash: '0xaaa', now: cutoff });
+    expect(late.ok).toBe(false);
+    expect(late.error).toMatch(/deadline passed/);
+    expect(late.escrow.milestones[0].status).toBe('pending');
+    const early = applyAction(s, 'proof1', { proofHash: '0xaaa', now: cutoff - 1 });
+    expect(early.ok).toBe(true);
+    expect(early.escrow.milestones[0].status).toBe('proof_submitted');
+    const lateApprove = applyAction(early.escrow, 'approve1', { now: cutoff });
+    expect(lateApprove.ok).toBe(false);
+    expect(lateApprove.error).toMatch(/deadline passed/);
+    expect(lateApprove.escrow.released).toBe(0);
   });
 
   it('rejects illegal transition', () => {
