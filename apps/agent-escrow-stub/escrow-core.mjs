@@ -27,7 +27,7 @@ export const WHY_DISABLED = {
   reject2: 'Needs m2 in proof_submitted (demo path: reject after proof).',
   settle: 'Needs every milestone released or rejected while in_progress.',
   dispute: 'Available from funded or in_progress only.',
-  resume: 'Available only while disputed. Restores funded or in_progress.',
+  resume: 'Available only while disputed, and only if the pre-dispute state was funded or in_progress.',
   refund: 'Available only while disputed.',
   reset: 'Always available — clears local demo state.',
 };
@@ -116,6 +116,11 @@ function proofSlotOpen(milestone) {
   return milestone?.status === 'pending' || milestone?.status === 'rejected';
 }
 
+/** Compact resolveDisputeResume only restores FUNDED or IN_PROGRESS. */
+export function restorableDisputeState(escrow) {
+  return escrow?.resumeTo === 'funded' || escrow?.resumeTo === 'in_progress';
+}
+
 export function stateAllows(escrow, act) {
   const m1 = findMilestone(escrow, 'm1');
   const m2 = findMilestone(escrow, 'm2');
@@ -140,6 +145,7 @@ export function stateAllows(escrow, act) {
     case 'dispute':
       return escrow.state === 'funded' || escrow.state === 'in_progress';
     case 'resume':
+      return escrow.state === 'disputed' && restorableDisputeState(escrow);
     case 'refund':
       return escrow.state === 'disputed';
     case 'reset':
@@ -163,7 +169,9 @@ export function nextAction(escrow, role) {
  * Returns { ok, escrow, error }.
  * proof1/proof2 match Compact submitProof: PENDING or REJECTED. A rejected
  * slot reopens so settle still waits until the new proof is decided.
- * dispute/resume match Compact: resume restores FUNDED or IN_PROGRESS.
+ * dispute/resume match Compact resolveDisputeResume: resume restores FUNDED
+ * or IN_PROGRESS only. A missing resumeTo fails closed (does not skip start()).
+ * LOCAL-TRUE studio stand-in — not an on-chain call.
  */
 export function applyAction(escrow, act, payload = {}) {
   let s = cloneEscrow(escrow || freshEscrow());
@@ -239,7 +247,10 @@ export function applyAction(escrow, act, payload = {}) {
       }
       case 'resume': {
         if (s.state !== 'disputed') throw new Error('not disputed');
-        const back = s.resumeTo === 'funded' || s.resumeTo === 'in_progress' ? s.resumeTo : 'in_progress';
+        if (!restorableDisputeState(s)) {
+          throw new Error('dispute has no restorable state');
+        }
+        const back = s.resumeTo;
         s.state = back;
         s.resumeTo = null;
         s = pushAudit(s, 'dispute_resolved_resume', 'client', { to: back });

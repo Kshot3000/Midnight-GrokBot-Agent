@@ -99,6 +99,22 @@ describe('happy path + reject branch', () => {
     expect(can(s, 'agent', 'proof1')).toBe(true);
   });
 
+  it('resume without a restorable state fails closed', () => {
+    const broken = {
+      ...applyAction(freshEscrow(), 'fund').escrow,
+      state: 'disputed',
+      resumeTo: null,
+    };
+    expect(stateAllows(broken, 'resume')).toBe(false);
+    expect(can(broken, 'client', 'resume')).toBe(false);
+    expect(can(broken, 'client', 'refund')).toBe(true);
+    const resumed = applyAction(broken, 'resume');
+    expect(resumed.ok).toBe(false);
+    expect(resumed.error).toMatch(/no restorable state/);
+    expect(resumed.escrow.state).toBe('disputed');
+    expect(resumed.escrow.resumeTo).toBe(null);
+  });
+
   it('rejects illegal transition', () => {
     const r = applyAction(freshEscrow(), 'settle');
     expect(r.ok).toBe(false);
