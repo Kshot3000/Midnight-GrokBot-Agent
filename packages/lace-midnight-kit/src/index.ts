@@ -5,7 +5,8 @@
  * Types from official `@midnight-ntwrk/dapp-connector-api` (pinned 4.0.1).
  *
  * Safety: does not implement or claim transfers / submit.
- * Scope = discover, connect, prefs, reconnect, refresh, capability + balance reads.
+ * Scope = discover (friendly keys + v4 rdns), connect, prefs, reconnect,
+ * refresh, capability + balance reads, proving/sign feature-detect.
  */
 
 import '@midnight-ntwrk/dapp-connector-api';
@@ -32,11 +33,14 @@ export {
 } from './networks.js';
 
 export {
+  FRIENDLY_INJECTION_KEYS,
+  injectionKindForKey,
   discoverProviders,
   listCompatibleWallets,
   findProvider,
   safeWalletLabel,
   safeIconUrl,
+  type InjectionKind,
   type DiscoveredProvider,
   type DiscoverOptions,
   type DiscoverResult,
@@ -117,6 +121,8 @@ export {
 } from './connectJourney.js';
 
 export {
+  OPTIONAL_CONNECTOR_METHODS,
+  featureDetectOptionalMethods,
   probeSessionCapabilities,
   type CapabilityStatus,
   type CapabilityProbeRow,
@@ -194,8 +200,8 @@ export const LAB_BRANDING = {
   laceChromeUrl:
     'https://chromewebstore.google.com/detail/lace/gafhhkghbfjjkeiendhlofajokpaflmk',
   officialConnectGuideUrl:
-    'https://docs.midnight.network/guides/react-wallet-connect',
+    'https://docs.midnight.network/sdks/community/wallets/community-wallets-integration',
 } as const;
 
 /** Kit semver for UI badges. */
-export const KIT_VERSION = '0.3.2';
+export const KIT_VERSION = '0.3.3';
