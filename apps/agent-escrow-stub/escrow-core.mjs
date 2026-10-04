@@ -21,9 +21,9 @@ export const ROLE_ACTS = {
 export const WHY_DISABLED = {
   fund: 'Available only while state is created.',
   start: 'Fund the escrow first (state must be funded).',
-  proof1: 'Needs in_progress and milestone m1 still pending.',
+  proof1: 'Needs in_progress and m1 pending or rejected (resubmit after reject).',
   approve1: 'Needs m1 in proof_submitted (agent must submit proof first).',
-  proof2: 'Needs in_progress and milestone m2 still pending.',
+  proof2: 'Needs in_progress and m2 pending or rejected (resubmit after reject).',
   reject2: 'Needs m2 in proof_submitted (demo path: reject after proof).',
   settle: 'Needs every milestone released or rejected while in_progress.',
   dispute: 'Available from funded or in_progress only.',
@@ -38,7 +38,7 @@ export const SUCCESS_MSG = {
   proof1: 'Agent submitted proof for m1.',
   approve1: 'Approver released m1.',
   proof2: 'Agent submitted proof for m2.',
-  reject2: 'Approver rejected m2 (demo path).',
+  reject2: 'Approver rejected m2 (demo path). Agent may resubmit.',
   settle: 'Escrow settled — remaining balance refunded locally.',
   dispute: 'Dispute opened.',
   resume: 'Dispute resolved — resumed in_progress.',
@@ -110,6 +110,10 @@ export function roleAllows(role, act) {
   return (ROLE_ACTS[role] || []).includes(act);
 }
 
+function proofSlotOpen(milestone) {
+  return milestone?.status === 'pending' || milestone?.status === 'rejected';
+}
+
 export function stateAllows(escrow, act) {
   const m1 = findMilestone(escrow, 'm1');
   const m2 = findMilestone(escrow, 'm2');
@@ -119,11 +123,11 @@ export function stateAllows(escrow, act) {
     case 'start':
       return escrow.state === 'funded';
     case 'proof1':
-      return escrow.state === 'in_progress' && m1?.status === 'pending';
+      return escrow.state === 'in_progress' && proofSlotOpen(m1);
     case 'approve1':
       return escrow.state === 'in_progress' && m1?.status === 'proof_submitted';
     case 'proof2':
-      return escrow.state === 'in_progress' && m2?.status === 'pending';
+      return escrow.state === 'in_progress' && proofSlotOpen(m2);
     case 'reject2':
       return escrow.state === 'in_progress' && m2?.status === 'proof_submitted';
     case 'settle':
@@ -155,6 +159,8 @@ export function nextAction(escrow, role) {
 /**
  * Apply a sync or pre-hashed action. For proof1/proof2, pass { proofHash, privateNote }.
  * Returns { ok, escrow, error }.
+ * proof1/proof2 match Compact submitProof: PENDING or REJECTED. A rejected
+ * slot reopens so settle still waits until the new proof is decided.
  */
 export function applyAction(escrow, act, payload = {}) {
   let s = cloneEscrow(escrow || freshEscrow());
@@ -180,12 +186,18 @@ export function applyAction(escrow, act, payload = {}) {
         const id = act === 'proof1' ? 'm1' : 'm2';
         if (s.state !== 'in_progress') throw new Error('need in_progress');
         const m = s.milestones.find((x) => x.id === id);
-        if (!m || m.status !== 'pending') throw new Error(`${id} not pending`);
+        if (!m || (m.status !== 'pending' && m.status !== 'rejected')) {
+          throw new Error(`${id} has no open proof slot`);
+        }
         if (!payload.proofHash) throw new Error('proofHash required');
+        const resubmit = m.status === 'rejected';
         m.privateNote = payload.privateNote || PROOF_NOTES[id] || null;
         m.proofHash = payload.proofHash;
         m.status = 'proof_submitted';
-        s = pushAudit(s, 'proof_submitted', 'agent', { milestone: id, proofHash: m.proofHash });
+        s = pushAudit(s, resubmit ? 'proof_resubmitted' : 'proof_submitted', 'agent', {
+          milestone: id,
+          proofHash: m.proofHash,
+        });
         break;
       }
       case 'approve1': {

@@ -48,9 +48,9 @@ Documented Pages path (when Actions enabled): `/escrow/`.
 | Step | Teaching point |
 |------|----------------|
 | Fund / Start | Client funds 5 ADA (local units) and starts work |
-| Proof m1 / m2 | Agent submits public H + private vault note |
+| Proof m1 / m2 | Agent submits public H + private vault note. A rejected slot can be resubmitted (matches Compact `submitProof`) |
 | Release / Reject | Approver decides milestones (demo reject path on m2) |
-| Settle / Dispute | Close escrow or branch into dispute → resume/refund |
+| Settle / Dispute | Close escrow or branch into dispute → resume/refund. Settle waits if a rejected proof was reopened |
 | Export / Import | Portable JSON snapshot across browsers/tabs |
 | Multi-tab | Other tabs refresh when this tab saves |
 

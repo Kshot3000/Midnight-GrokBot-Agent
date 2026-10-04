@@ -47,6 +47,26 @@ describe('happy path + reject branch', () => {
     expect(balance(s)).toBe(0);
   });
 
+  it('agent can resubmit a rejected proof before settle', () => {
+    let s = applyAction(freshEscrow(), 'fund').escrow;
+    s = applyAction(s, 'start').escrow;
+    s = applyAction(s, 'proof2', { proofHash: '0xbbb' }).escrow;
+    s = applyAction(s, 'reject2').escrow;
+    expect(s.milestones[1].status).toBe('rejected');
+    expect(can(s, 'agent', 'proof2')).toBe(true);
+    expect(stateAllows(s, 'settle')).toBe(false);
+    const again = applyAction(s, 'proof2', { proofHash: '0xccc', privateNote: 'retry' });
+    expect(again.ok).toBe(true);
+    expect(again.escrow.milestones[1].status).toBe('proof_submitted');
+    expect(again.escrow.milestones[1].proofHash).toBe('0xccc');
+    expect(again.escrow.milestones[1].privateNote).toBe('retry');
+    expect(again.escrow.audit.at(-1).type).toBe('proof_resubmitted');
+    expect(stateAllows(again.escrow, 'settle')).toBe(false);
+    const blocked = applyAction(s, 'proof1', { proofHash: '0xddd' });
+    expect(blocked.ok).toBe(false);
+    expect(blocked.error).toMatch(/no open proof slot/);
+  });
+
   it('dispute → refund', () => {
     let s = applyAction(freshEscrow(), 'fund').escrow;
     s = applyAction(s, 'dispute').escrow;
