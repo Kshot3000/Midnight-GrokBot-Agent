@@ -11,6 +11,16 @@ export const DONATE_ADDR =
 export const EXPORT_KIND = 'midnight-lab.agent-escrow';
 export const L = 1_000_000;
 export const MAIN_PATH = ['created', 'funded', 'in_progress', 'settled'];
+export const ESCROW_STATES = ['created', 'funded', 'in_progress', 'settled', 'disputed', 'refunded'];
+export const MILESTONE_STATUSES = ['pending', 'proof_submitted', 'released', 'rejected'];
+
+/** Money fields: finite and non-negative, else 0. JSON `1e999` parses to
+ *  Infinity and negative amounts used to pass normalize untouched, making
+ *  balance() return Infinity or an inflated figure. */
+export function finiteNonNeg(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
 
 export const ROLE_ACTS = {
   client: ['fund', 'start', 'settle', 'dispute', 'resume', 'refund', 'reset', 'approve1', 'reject2'],
@@ -77,7 +87,7 @@ export function emptyStudioState() {
 
 export function balance(escrow) {
   if (!escrow) return 0;
-  return (Number(escrow.funded) || 0) - (Number(escrow.released) || 0) - (Number(escrow.refunded) || 0);
+  return finiteNonNeg(escrow.funded) - finiteNonNeg(escrow.released) - finiteNonNeg(escrow.refunded);
 }
 
 export function findMilestone(escrow, id) {
@@ -284,10 +294,21 @@ function normalizeMilestone(m) {
   return {
     id: String(m.id || ''),
     description: String(m.description || ''),
-    amount: Number(m.amount) || 0,
-    status: String(m.status || 'pending'),
+    amount: finiteNonNeg(m.amount),
+    status: MILESTONE_STATUSES.includes(m.status) ? m.status : 'pending',
     proofHash: m.proofHash ? String(m.proofHash) : null,
     privateNote: m.privateNote != null ? String(m.privateNote) : null,
+  };
+}
+
+function normalizeAuditEntry(e) {
+  if (!e || typeof e !== 'object') return null;
+  return {
+    seq: finiteNonNeg(e.seq),
+    type: String(e.type || ''),
+    actor: String(e.actor || ''),
+    state: String(e.state || ''),
+    data: e.data && typeof e.data === 'object' && !Array.isArray(e.data) ? e.data : {},
   };
 }
 
@@ -299,13 +320,15 @@ export function normalizeEscrow(raw) {
     : base.milestones;
   const resumeTo = raw.resumeTo === 'funded' || raw.resumeTo === 'in_progress' ? raw.resumeTo : null;
   return {
-    state: String(raw.state || 'created'),
+    state: ESCROW_STATES.includes(raw.state) ? raw.state : 'created',
     resumeTo,
-    funded: Number(raw.funded) || 0,
-    released: Number(raw.released) || 0,
-    refunded: Number(raw.refunded) || 0,
+    funded: finiteNonNeg(raw.funded),
+    released: finiteNonNeg(raw.released),
+    refunded: finiteNonNeg(raw.refunded),
     milestones: milestones.length ? milestones.slice(0, 8) : base.milestones,
-    audit: Array.isArray(raw.audit) ? raw.audit.filter(Boolean).slice(0, 200) : [],
+    audit: Array.isArray(raw.audit)
+      ? raw.audit.map(normalizeAuditEntry).filter(Boolean).slice(0, 200)
+      : [],
   };
 }
 

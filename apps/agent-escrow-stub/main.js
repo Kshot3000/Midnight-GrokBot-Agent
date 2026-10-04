@@ -264,9 +264,9 @@ function renderMilestones() {
       if (m.status === 'proof_submitted' || m.status === 'pending') cls.push('active');
       return (
         `<article class="${cls.join(' ')}">` +
-        `<div class="m-card-top"><span class="m-id">${m.id}</span>` +
-        `<span class="status-tag ${m.status}">${m.status}</span></div>` +
-        `<p class="m-desc">${m.description} · ${m.amount} L</p>` +
+        `<div class="m-card-top"><span class="m-id">${escapeHtml(m.id)}</span>` +
+        `<span class="status-tag ${escapeHtml(m.status)}">${escapeHtml(m.status)}</span></div>` +
+        `<p class="m-desc">${escapeHtml(m.description)} · ${escapeHtml(m.amount)} L</p>` +
         `<div class="m-bar" aria-hidden="true"><span style="--w:${milestoneWidth(m.status)}"></span></div>` +
         `</article>`
       );
@@ -329,9 +329,9 @@ function render() {
   el.miles.innerHTML = s.milestones
     .map(
       (m) =>
-        `<tr><td><code>${m.id}</code></td><td>${m.description}</td><td>${m.amount}</td>` +
-        `<td><span class="status-tag ${m.status}">${m.status}</span></td>` +
-        `<td><code>${m.proofHash || '—'}</code></td></tr>`,
+        `<tr><td><code>${escapeHtml(m.id)}</code></td><td>${escapeHtml(m.description)}</td><td>${escapeHtml(m.amount)}</td>` +
+        `<td><span class="status-tag ${escapeHtml(m.status)}">${escapeHtml(m.status)}</span></td>` +
+        `<td><code>${escapeHtml(m.proofHash || '—')}</code></td></tr>`,
     )
     .join('');
   el.log.textContent = s.audit.length
@@ -596,7 +596,7 @@ function renderProvePanel(report, meta = {}) {
           (p) =>
             `<tr><td colspan="2"><code>${escapeHtml(p.path)}</code></td>` +
             `<td colspan="2">${escapeHtml((p.circuitsProved || []).join(' → '))}</td>` +
-            `<td>${escapeHtml(formatMs(p.totalProveMs))}</td><td>${p.stepCount}</td></tr>`,
+            `<td>${escapeHtml(formatMs(p.totalProveMs))}</td><td>${escapeHtml(p.stepCount)}</td></tr>`,
         )
         .join('');
     } else {

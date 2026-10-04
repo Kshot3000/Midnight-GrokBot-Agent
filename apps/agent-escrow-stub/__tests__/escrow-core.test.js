@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   freshEscrow,
   applyAction,
@@ -7,9 +8,12 @@ import {
   roleAllows,
   balance,
   nextAction,
+  normalizeEscrow,
   normalizeStudioState,
   buildExportDocument,
   parseImportDocument,
+  ESCROW_STATES,
+  MILESTONE_STATUSES,
   EXPORT_KIND,
   SCHEMA_VERSION,
   L,
@@ -139,5 +143,79 @@ describe('normalize + export/import', () => {
   it('rejects garbage import', () => {
     expect(parseImportDocument('{').ok).toBe(false);
     expect(parseImportDocument({ kind: 'nope' }).ok).toBe(false);
+  });
+
+  it('hostile import: state/status fall back to whitelists, text stays data', () => {
+    const parsed = parseImportDocument(
+      JSON.stringify({
+        kind: EXPORT_KIND,
+        state: {
+          activeRole: 'client',
+          escrow: {
+            state: '<img src=x onerror=alert(1)>',
+            funded: 5 * L,
+            milestones: [
+              {
+                id: 'm1',
+                description: '<svg onload=alert(2)>',
+                amount: 1 * L,
+                status: 'x" onmouseover="alert(3)',
+                proofHash: '<b>h</b>',
+              },
+            ],
+            audit: ['not-an-object', { seq: 1, type: 't', actor: 'a', state: 'funded', data: [] }],
+          },
+        },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    expect(ESCROW_STATES).toContain(parsed.state.escrow.state);
+    expect(parsed.state.escrow.state).toBe('created');
+    expect(MILESTONE_STATUSES).toContain(parsed.state.escrow.milestones[0].status);
+    expect(parsed.state.escrow.milestones[0].status).toBe('pending');
+    // Description/proofHash are preserved as inert data — the render layer
+    // escapes them (guarded below); the core must not silently mangle text.
+    expect(parsed.state.escrow.milestones[0].description).toBe('<svg onload=alert(2)>');
+    // Audit entries are normalized to objects; junk and array data dropped.
+    expect(parsed.state.escrow.audit).toHaveLength(1);
+    expect(parsed.state.escrow.audit[0].data).toEqual({});
+  });
+
+  it('hostile import: non-finite and negative money becomes 0', () => {
+    // JSON 1e999 parses to Infinity in JS.
+    const inf = normalizeEscrow(JSON.parse('{"state":"funded","funded":1e999,"released":0,"refunded":0}'));
+    expect(inf.funded).toBe(0);
+    expect(Number.isFinite(balance(inf))).toBe(true);
+    const neg = normalizeEscrow({
+      state: 'funded',
+      funded: 100,
+      released: -50,
+      refunded: -1,
+      milestones: [{ id: 'm1', description: 'x', amount: -1000000, status: 'released' }],
+    });
+    expect(neg.released).toBe(0);
+    expect(neg.refunded).toBe(0);
+    expect(neg.milestones[0].amount).toBe(0);
+    expect(balance(neg)).toBe(100);
+    expect(balance({ funded: Infinity, released: 0, refunded: 0 })).toBe(0);
+  });
+});
+
+describe('render hygiene (main.js)', () => {
+  const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+  it('milestone renderers escape every interpolated milestone field', () => {
+    for (const needle of [
+      'escapeHtml(m.id)',
+      'escapeHtml(m.description)',
+      'escapeHtml(m.amount)',
+      'escapeHtml(m.status)',
+      "escapeHtml(m.proofHash || '—')",
+      'escapeHtml(p.stepCount)',
+    ]) {
+      expect(main).toContain(needle);
+    }
+    expect(main).not.toContain('${m.description}');
+    expect(main).not.toContain('${m.proofHash ||');
+    expect(main).not.toContain('<td>${p.stepCount}</td>');
   });
 });
