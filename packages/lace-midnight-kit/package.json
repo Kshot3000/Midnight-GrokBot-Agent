@@ -23,6 +23,7 @@
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:node": "npm run build && node --test test/*.test.js",
+    "test:all": "npm run test && npm run test:node",
     "test:watch": "vitest"
   },
   "keywords": [
