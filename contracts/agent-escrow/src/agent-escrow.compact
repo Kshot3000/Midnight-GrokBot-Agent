@@ -19,7 +19,8 @@
  * THIS IS AN EDUCATIONAL SKELETON. Lab-compiled with Compact 0.31.1 / lang 0.23
  * (2026-09-26 CT); managed artifacts are gitignored. NOT deployed on-chain.
  * Recompile with Compact ~0.31.1 (see README) before any deploy.
- * Resubmit-after-reject is source-only until the next local compile. LOCAL-TRUE.
+ * Resubmit-after-reject and dispute-resume restore are source-only until the
+ * next local compile. LOCAL-TRUE.
  *
  * Official docs:
  *   https://docs.midnight.network/compact
@@ -64,6 +65,9 @@ struct Milestone {
 
 export ledger state: EscrowState;
 
+/* State to restore on resolveDisputeResume (FUNDED or IN_PROGRESS). */
+export ledger stateBeforeDispute: EscrowState;
+
 /* Role commitments (domain-separated hashes of private secrets). NOT raw public keys. */
 export ledger clientPk: Bytes<32>;
 export ledger agentPk: Bytes<32>;
@@ -89,6 +93,7 @@ witness localSecretKey(): Bytes<32>;
 
 constructor() {
   state = EscrowState.CREATED;
+  stateBeforeDispute = EscrowState.CREATED;
   clientPk = pad(32, "");
   agentPk = pad(32, "");
   approverPk = pad(32, "");
@@ -303,13 +308,14 @@ export circuit reject(milestoneId: Uint<64>): [] {
   decidedCount.increment(1);
 }
 
-/** Client opens a dispute (freezes releases). */
+/** Client opens a dispute (freezes releases). Remembers FUNDED or IN_PROGRESS. */
 export circuit dispute(): [] {
   assertIsClient();
   assert(
     state == EscrowState.FUNDED || state == EscrowState.IN_PROGRESS,
     "only FUNDED or IN_PROGRESS can be disputed"
   );
+  stateBeforeDispute = state;
   state = EscrowState.DISPUTED;
 }
 
@@ -322,11 +328,22 @@ export circuit resolveDisputeRefund(): [] {
   state = EscrowState.REFUNDED;
 }
 
-/** Client resolves dispute by resuming work. */
+/**
+ * Client resolves dispute by restoring the pre-dispute state.
+ * A dispute opened from FUNDED must not skip start() (milestone / budget checks).
+ */
 export circuit resolveDisputeResume(): [] {
   assertIsClient();
   assert(state == EscrowState.DISPUTED, "escrow is not in dispute");
-  state = EscrowState.IN_PROGRESS;
+  assert(
+    stateBeforeDispute == EscrowState.FUNDED || stateBeforeDispute == EscrowState.IN_PROGRESS,
+    "dispute has no restorable state"
+  );
+  if (stateBeforeDispute == EscrowState.FUNDED) {
+    state = EscrowState.FUNDED;
+  } else {
+    state = EscrowState.IN_PROGRESS;
+  }
 }
 
 /** After every milestone is decided, refund the remainder and settle. */

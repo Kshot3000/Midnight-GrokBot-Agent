@@ -71,9 +71,32 @@ describe('happy path + reject branch', () => {
     let s = applyAction(freshEscrow(), 'fund').escrow;
     s = applyAction(s, 'dispute').escrow;
     expect(s.state).toBe('disputed');
+    expect(s.resumeTo).toBe('funded');
     s = applyAction(s, 'refund').escrow;
     expect(s.state).toBe('refunded');
     expect(s.refunded).toBe(5 * L);
+  });
+
+  it('resume from funded does not skip start', () => {
+    let s = applyAction(freshEscrow(), 'fund').escrow;
+    s = applyAction(s, 'dispute').escrow;
+    s = applyAction(s, 'resume').escrow;
+    expect(s.state).toBe('funded');
+    expect(s.resumeTo).toBe(null);
+    expect(s.audit.at(-1).data.to).toBe('funded');
+    expect(can(s, 'client', 'start')).toBe(true);
+    expect(can(s, 'agent', 'proof1')).toBe(false);
+    expect(stateAllows(s, 'settle')).toBe(false);
+  });
+
+  it('resume from in_progress restores work', () => {
+    let s = applyAction(freshEscrow(), 'fund').escrow;
+    s = applyAction(s, 'start').escrow;
+    s = applyAction(s, 'dispute').escrow;
+    expect(s.resumeTo).toBe('in_progress');
+    s = applyAction(s, 'resume').escrow;
+    expect(s.state).toBe('in_progress');
+    expect(can(s, 'agent', 'proof1')).toBe(true);
   });
 
   it('rejects illegal transition', () => {

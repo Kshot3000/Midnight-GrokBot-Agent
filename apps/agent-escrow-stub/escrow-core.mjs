@@ -27,7 +27,7 @@ export const WHY_DISABLED = {
   reject2: 'Needs m2 in proof_submitted (demo path: reject after proof).',
   settle: 'Needs every milestone released or rejected while in_progress.',
   dispute: 'Available from funded or in_progress only.',
-  resume: 'Available only while disputed.',
+  resume: 'Available only while disputed. Restores funded or in_progress.',
   refund: 'Available only while disputed.',
   reset: 'Always available — clears local demo state.',
 };
@@ -41,7 +41,7 @@ export const SUCCESS_MSG = {
   reject2: 'Approver rejected m2 (demo path). Agent may resubmit.',
   settle: 'Escrow settled — remaining balance refunded locally.',
   dispute: 'Dispute opened.',
-  resume: 'Dispute resolved — resumed in_progress.',
+  resume: 'Dispute resolved — restored the pre-dispute state.',
   refund: 'Dispute refunded remaining balance.',
   reset: 'Local demo reset.',
 };
@@ -54,6 +54,7 @@ export const PROOF_NOTES = {
 export function freshEscrow() {
   return {
     state: 'created',
+    resumeTo: null,
     funded: 0,
     released: 0,
     refunded: 0,
@@ -86,6 +87,7 @@ export function findMilestone(escrow, id) {
 function cloneEscrow(escrow) {
   return {
     state: escrow.state,
+    resumeTo: escrow.resumeTo || null,
     funded: escrow.funded,
     released: escrow.released,
     refunded: escrow.refunded,
@@ -161,6 +163,7 @@ export function nextAction(escrow, role) {
  * Returns { ok, escrow, error }.
  * proof1/proof2 match Compact submitProof: PENDING or REJECTED. A rejected
  * slot reopens so settle still waits until the new proof is decided.
+ * dispute/resume match Compact: resume restores FUNDED or IN_PROGRESS.
  */
 export function applyAction(escrow, act, payload = {}) {
   let s = cloneEscrow(escrow || freshEscrow());
@@ -229,14 +232,17 @@ export function applyAction(escrow, act, payload = {}) {
       }
       case 'dispute': {
         if (s.state !== 'funded' && s.state !== 'in_progress') throw new Error('cannot dispute now');
+        s.resumeTo = s.state;
         s.state = 'disputed';
-        s = pushAudit(s, 'disputed', 'client', {});
+        s = pushAudit(s, 'disputed', 'client', { from: s.resumeTo });
         break;
       }
       case 'resume': {
         if (s.state !== 'disputed') throw new Error('not disputed');
-        s.state = 'in_progress';
-        s = pushAudit(s, 'dispute_resolved_resume', 'client', {});
+        const back = s.resumeTo === 'funded' || s.resumeTo === 'in_progress' ? s.resumeTo : 'in_progress';
+        s.state = back;
+        s.resumeTo = null;
+        s = pushAudit(s, 'dispute_resolved_resume', 'client', { to: back });
         break;
       }
       case 'refund': {
@@ -244,6 +250,7 @@ export function applyAction(escrow, act, payload = {}) {
         const rem = balance(s);
         s.refunded += rem;
         s.state = 'refunded';
+        s.resumeTo = null;
         s = pushAudit(s, 'dispute_resolved_refund', 'client', { refund: rem });
         break;
       }
@@ -279,8 +286,10 @@ export function normalizeEscrow(raw) {
   const milestones = Array.isArray(raw.milestones)
     ? raw.milestones.map(normalizeMilestone).filter((m) => m && m.id)
     : base.milestones;
+  const resumeTo = raw.resumeTo === 'funded' || raw.resumeTo === 'in_progress' ? raw.resumeTo : null;
   return {
     state: String(raw.state || 'created'),
+    resumeTo,
     funded: Number(raw.funded) || 0,
     released: Number(raw.released) || 0,
     refunded: Number(raw.refunded) || 0,
