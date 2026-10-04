@@ -1,4 +1,3 @@
-/* SYNCED from packages/prove-metrics/src/index.mjs — do not edit by hand; run npm run sync:prove-metrics */
 /**
  * @kshot/prove-metrics — shared local ZK prove metrics helpers for Hello + Escrow Studios.
  * Parses last-prove.json / prove-bridge responses. LOCAL ≠ on-chain / NOT a Preprod deploy.
@@ -28,6 +27,13 @@ export const ESCROW_BRIDGE_PATHS = [
 ];
 
 /**
+ * Hello prove-bridge circuits (POST /prove?contract=hello&circuit=…).
+ * recordNote is the disclose() witness path; increment is the public Counter.
+ * Compiled recordNote keys exist only after compact:hello. LOCAL-TRUE.
+ */
+export const HELLO_BRIDGE_CIRCUITS = ['increment', 'recordNote'];
+
+/**
  * @param {unknown} v
  * @returns {number|null}
  */
@@ -51,7 +57,9 @@ export function detectProveKind(data) {
   if (Array.isArray(data.paths) && !Array.isArray(data.steps)) return 'escrow-all';
   if (
     data.circuit === 'increment' ||
-    (data.greetings && (data.proofBytes != null || Array.isArray(data.steps)))
+    data.circuit === 'recordNote' ||
+    (data.greetings && (data.proofBytes != null || Array.isArray(data.steps))) ||
+    (data.noteCount && (data.proofBytes != null || Array.isArray(data.steps)))
   ) {
     return 'hello';
   }
@@ -109,14 +117,14 @@ export function normalizeProveReport(data) {
     const steps =
       Array.isArray(data.steps) && data.steps.length
         ? data.steps.map((s) => ({
-            circuit: s.circuit || 'increment',
+            circuit: s.circuit || data.circuit || 'increment',
             role: s.role || 'caller',
             ok: s.ok !== false,
             preimageBytes: numOrNull(s.preimageBytes),
             checkMs: numOrNull(s.checkMs),
             proofBytes: numOrNull(s.proofBytes),
             proveMs: numOrNull(s.proveMs),
-            ledgerState: s.ledgerState ?? data.greetings?.after ?? null,
+            ledgerState: s.ledgerState ?? data.greetings?.after ?? data.noteCount?.after ?? null,
           }))
         : [
             {
@@ -127,7 +135,7 @@ export function normalizeProveReport(data) {
               checkMs: numOrNull(data.checkMs),
               proofBytes: numOrNull(data.proofBytes),
               proveMs: numOrNull(data.proveMs),
-              ledgerState: data.greetings?.after ?? null,
+              ledgerState: data.greetings?.after ?? data.noteCount?.after ?? null,
             },
           ];
 
@@ -147,9 +155,10 @@ export function normalizeProveReport(data) {
       ok: data.ok !== false,
       contract: data.contract || 'hello-midnight',
       circuit: data.circuit || 'increment',
-      path: data.path || 'increment',
+      path: data.path || data.circuit || 'increment',
       greetings: data.greetings || null,
-      circuitsProved: data.circuitsProved || ['increment'],
+      noteCount: data.noteCount || null,
+      circuitsProved: data.circuitsProved || [data.circuit || 'increment'],
       stepCount: data.stepCount ?? steps.length,
       steps,
       totals: {
@@ -163,6 +172,8 @@ export function normalizeProveReport(data) {
       witness: {
         fundedWallet: false,
         kind: data.witness?.kind || 'hello lab (no wallet)',
+        noteOnLedger: data.witness?.noteOnLedger ?? null,
+        emptyRejected: data.witness?.emptyRejected ?? null,
         note: data.witness?.note || 'NOT Lace / NOT Preprod seed',
       },
       proofServer: data.proofServer || null,
@@ -291,9 +302,12 @@ export function summarizeProveStatus(report, meta = {}) {
     const g = report.greetings
       ? `${report.greetings.before}→${report.greetings.after}`
       : '—';
+    const notes = report.noteCount
+      ? ` · notes ${report.noteCount.before}→${report.noteCount.after}`
+      : '';
     return {
       state: 'loaded',
-      label: `hello · ${report.circuit || 'increment'} · greetings ${g}`,
+      label: `hello · ${report.circuit || 'increment'} · greetings ${g}${notes}`,
       detail: `proof ${formatBytes(report.totals?.proofBytes)} · prove ${formatMs(report.totals?.proveMs)} · ${meta.sourceLabel || report.source || 'file'}`,
       honest: report.claim || PROVE_CLAIM,
     };
@@ -391,12 +405,14 @@ export async function probeProveBridge(baseUrl = DEFAULT_BRIDGE_URL, opts = {}) 
 /**
  * Request a live prove via bridge.
  * - Escrow: POST /prove?path=initialize|happy|…|all
- * - Hello:  POST /prove?contract=hello
+ * - Hello:  POST /prove?contract=hello&circuit=increment|recordNote
+ *   recordNote uses the localNote witness; Lace does not prove it (local proof server :6300).
  *
  * @param {string} [baseUrl]
  * @param {{
  *   contract?: 'hello'|'escrow',
  *   path?: string,
+ *   circuit?: 'increment'|'recordNote',
  *   fetchImpl?: typeof fetch,
  *   signal?: AbortSignal,
  *   timeoutMs?: number,
@@ -409,7 +425,15 @@ export async function requestBridgeProve(baseUrl = DEFAULT_BRIDGE_URL, opts = {}
   const contract = opts.contract || 'escrow';
   let url;
   if (contract === 'hello') {
-    url = `${baseUrl.replace(/\/$/, '')}/prove?contract=hello`;
+    const circuit = opts.circuit || 'increment';
+    if (!HELLO_BRIDGE_CIRCUITS.includes(circuit)) {
+      return {
+        ok: false,
+        error: `Unknown hello circuit "${circuit}" — expected one of: ${HELLO_BRIDGE_CIRCUITS.join(', ')}`,
+        softFail: true,
+      };
+    }
+    url = `${baseUrl.replace(/\/$/, '')}/prove?contract=hello&circuit=${encodeURIComponent(circuit)}`;
   } else {
     const pathName = opts.path || 'initialize';
     if (!ESCROW_BRIDGE_PATHS.includes(pathName)) {
@@ -469,9 +493,10 @@ export async function requestBridgeProve(baseUrl = DEFAULT_BRIDGE_URL, opts = {}
 }
 
 /**
- * Hello-specific alias → POST /prove?contract=hello
+ * Hello-specific alias → POST /prove?contract=hello&circuit=increment|recordNote
+ * Default circuit stays increment. recordNote is LOCAL-TRUE until compact:hello.
  * @param {string} [baseUrl]
- * @param {{ fetchImpl?: typeof fetch, signal?: AbortSignal, timeoutMs?: number }} [opts]
+ * @param {{ circuit?: 'increment'|'recordNote', fetchImpl?: typeof fetch, signal?: AbortSignal, timeoutMs?: number }} [opts]
  */
 export async function requestBridgeProveHello(baseUrl = DEFAULT_BRIDGE_URL, opts = {}) {
   return requestBridgeProve(baseUrl, { ...opts, contract: 'hello' });

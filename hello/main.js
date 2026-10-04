@@ -1,6 +1,6 @@
 /**
- * Hello Studio — local ZK prove metrics for hello.compact increment.
- * Mirrors Agent Escrow #local-prove. LOCAL ≠ on-chain.
+ * Hello Studio — local ZK prove metrics for hello.compact increment and recordNote.
+ * recordNote is the disclose() witness path (local proof server :6300). LOCAL ≠ on-chain.
  */
 import {
   parseLastProve,
@@ -70,6 +70,7 @@ const proveEl = {
   raw: document.getElementById('proveRaw'),
   path: document.getElementById('provePath'),
   greetings: document.getElementById('proveGreetings'),
+  noteCount: document.getElementById('proveNoteCount'),
   totalProof: document.getElementById('proveTotalProof'),
   totalMs: document.getElementById('proveTotalMs'),
   writtenAt: document.getElementById('proveWrittenAt'),
@@ -102,6 +103,13 @@ function renderProvePanel(report, meta = {}) {
     proveEl.greetings.textContent = report.greetings
       ? `${report.greetings.before} → ${report.greetings.after}`
       : '—';
+  }
+  if (proveEl.noteCount) {
+    proveEl.noteCount.textContent = report.noteCount
+      ? `${report.noteCount.before} → ${report.noteCount.after}`
+      : report.circuit === 'recordNote'
+        ? 'missing'
+        : '—';
   }
   if (proveEl.totalProof) proveEl.totalProof.textContent = formatBytes(report.totals?.proofBytes);
   if (proveEl.totalMs) proveEl.totalMs.textContent = formatMs(report.totals?.proveMs);
@@ -189,18 +197,21 @@ async function doProbeBridge() {
   showToast(`prove-bridge up · ${helloExists} · ${proof}`, false);
 }
 
-async function doBridgeProveHello() {
-  showToast('Bridge proving hello increment (may take ~1–5s)…', false);
+async function doBridgeProveHello(circuit = 'increment') {
+  const label = circuit === 'recordNote' ? 'recordNote (witness, disclose hash)' : 'increment';
+  showToast(`Bridge proving hello ${label} (may take ~1–5s)…`, false);
   if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: proving…';
-  const r = await requestBridgeProveHello(DEFAULT_BRIDGE_URL);
+  const r = await requestBridgeProveHello(DEFAULT_BRIDGE_URL, { circuit });
   if (!r.ok) {
     if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: prove failed';
     showToast(r.error || 'Bridge prove failed (soft-fail)', true);
     return;
   }
-  if (proveEl.bridgePill) proveEl.bridgePill.textContent = 'bridge: up · proved';
-  renderProvePanel(r.report, { sourceLabel: 'bridge POST /prove?contract=hello' });
-  showToast('hello increment proved via bridge — LOCAL ≠ on-chain', false);
+  if (proveEl.bridgePill) proveEl.bridgePill.textContent = `bridge: up · ${circuit}`;
+  renderProvePanel(r.report, {
+    sourceLabel: `bridge POST /prove?contract=hello&circuit=${circuit}`,
+  });
+  showToast(`hello ${circuit} proved via bridge — LOCAL ≠ on-chain`, false);
 }
 
 function importProveFile(file) {
@@ -229,7 +240,10 @@ document.getElementById('btn-bridge-last')?.addEventListener('click', () => {
   loadLastProveBridge().catch((e) => showToast(String(e?.message || e), true));
 });
 document.getElementById('btn-bridge-prove')?.addEventListener('click', () => {
-  doBridgeProveHello().catch((e) => showToast(String(e?.message || e), true));
+  doBridgeProveHello('increment').catch((e) => showToast(String(e?.message || e), true));
+});
+document.getElementById('btn-bridge-prove-note')?.addEventListener('click', () => {
+  doBridgeProveHello('recordNote').catch((e) => showToast(String(e?.message || e), true));
 });
 document.getElementById('btn-import-prove')?.addEventListener('click', () => {
   document.getElementById('prove-import-file')?.click();

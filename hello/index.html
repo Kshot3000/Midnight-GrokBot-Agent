@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta
     name="description"
-    content="Hello Studio — local ZK prove metrics for hello.compact increment. last-prove.json / prove-bridge :6399 by @kshot9000. LOCAL ≠ on-chain."
+    content="Hello Studio — local ZK prove metrics for hello.compact increment and recordNote. last-prove.json / prove-bridge :6399 by @kshot9000. LOCAL ≠ on-chain."
   />
   <meta name="theme-color" content="#05070f" />
   <title>Hello Studio — LOCAL prove · Midnight GrokBot Lab</title>
@@ -51,10 +51,11 @@
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Midnight Compact · hello.compact</p>
       <h1>Hello Studio — local ZK prove metrics</h1>
       <p class="lede">
-        Mirror of Agent Escrow’s local-prove panel for the hello
-        <code>increment</code> circuit. Load <code>last-prove.json</code> from
-        <code>npm run prove:hello-local</code> or prove-bridge <code>:6399</code>
-        (<code>POST /prove?contract=hello</code>).
+        Local-prove panel for hello <code>increment</code> and
+        <code>recordNote</code> (witness + disclose hash). Load
+        <code>last-prove.json</code> from <code>npm run prove:hello-local</code>
+        or prove-bridge <code>:6399</code>
+        (<code>POST /prove?contract=hello&circuit=increment|recordNote</code>).
         Built by <a href="https://x.com/kshot9000" rel="noopener noreferrer">@kshot9000</a> / Kshot3000.
         <strong>LOCAL prove ≠ on-chain.</strong>
       </p>
@@ -75,8 +76,8 @@
       <div class="section-head">
         <h2 id="local-prove-heading">Local ZK prove metrics <span class="badge badge-live">REAL vs :6300</span></h2>
         <p class="muted">
-          Optional bridge to real <code>prove:hello-local</code> output — preimage size, proof bytes, prove ms, greetings 0→1.
-          <strong>LOCAL prove ≠ on-chain.</strong>
+          Optional bridge to real <code>prove:hello-local</code> output — preimage size, proof bytes, prove ms, greetings 0→1, noteCount for recordNote.
+          <strong>LOCAL prove ≠ on-chain.</strong> recordNote keys exist only after <code>compact:hello</code>.
         </p>
       </div>
       <div class="prove-status-row" role="status" aria-live="polite">
@@ -89,7 +90,8 @@
         <button type="button" class="btn primary small" id="btn-load-last-prove" title="Fetch ./last-prove.json written by CLI">Load last local prove</button>
         <button type="button" class="btn ghost small" id="btn-probe-bridge" title="GET http://127.0.0.1:6399/health">Probe prove-bridge :6399</button>
         <button type="button" class="btn ghost small" id="btn-bridge-last" title="GET :6399/last-prove?contract=hello">Load from bridge</button>
-        <button type="button" class="btn ghost small" id="btn-bridge-prove" title="POST :6399/prove?contract=hello (needs proof-server)">Bridge prove hello</button>
+        <button type="button" class="btn ghost small" id="btn-bridge-prove" title="POST :6399/prove?contract=hello&circuit=increment (needs proof-server)">Bridge prove increment</button>
+        <button type="button" class="btn ghost small" id="btn-bridge-prove-note" title="POST :6399/prove?contract=hello&circuit=recordNote — localNote witness, disclose hash. Stale artifacts fail closed.">Bridge prove recordNote</button>
         <button type="button" class="btn ghost small" id="btn-import-prove" title="Import a last-prove.json file">Import prove JSON</button>
         <input type="file" id="prove-import-file" accept="application/json,.json" hidden />
         <span class="muted small" id="proveBridgePill">bridge: unknown</span>
@@ -98,6 +100,7 @@
         <div class="status-row">
           <span>Circuit: <code id="provePath">—</code></span>
           <span>Greetings: <code id="proveGreetings">—</code></span>
+          <span>Notes: <code id="proveNoteCount">—</code></span>
           <span>Proof: <code id="proveTotalProof">—</code></span>
           <span>Prove: <code id="proveTotalMs">—</code></span>
           <span>Written: <code id="proveWrittenAt">—</code></span>
@@ -112,7 +115,7 @@
         </table>
       </div>
       <pre class="log prove-raw" id="proveRaw" hidden></pre>
-      <p class="muted small">CLI: <code>npm run prove:hello-local</code> → writes <code>apps/hello-studio/last-prove.json</code> + <code>/tmp/midnight-hello-last-prove.json</code>. Bridge: <code>npm run prove-bridge</code> → <code>POST /prove?contract=hello</code>. Metrics helpers: shared <code>@kshot/prove-metrics</code> (synced).</p>
+      <p class="muted small">CLI: <code>npm run prove:hello-local</code> or <code>--circuit=recordNote</code> → writes <code>apps/hello-studio/last-prove.json</code>. Bridge: <code>POST /prove?contract=hello&circuit=increment|recordNote</code>. Note stays private; only the disclosed hash is ledger state. LOCAL-TRUE.</p>
     </section>
 
     <section id="contract" class="panel" aria-labelledby="contract-heading">

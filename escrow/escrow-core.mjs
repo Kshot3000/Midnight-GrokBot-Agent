@@ -11,6 +11,16 @@ export const DONATE_ADDR =
 export const EXPORT_KIND = 'midnight-lab.agent-escrow';
 export const L = 1_000_000;
 export const MAIN_PATH = ['created', 'funded', 'in_progress', 'settled'];
+export const ESCROW_STATES = ['created', 'funded', 'in_progress', 'settled', 'disputed', 'refunded'];
+export const MILESTONE_STATUSES = ['pending', 'proof_submitted', 'released', 'rejected'];
+
+/** Money fields: finite and non-negative, else 0. JSON `1e999` parses to
+ *  Infinity and negative amounts used to pass normalize untouched, making
+ *  balance() return Infinity or an inflated figure. */
+export function finiteNonNeg(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
 
 export const ROLE_ACTS = {
   client: ['fund', 'start', 'settle', 'dispute', 'resume', 'refund', 'reset', 'approve1', 'reject2'],
@@ -21,13 +31,13 @@ export const ROLE_ACTS = {
 export const WHY_DISABLED = {
   fund: 'Available only while state is created.',
   start: 'Fund the escrow first (state must be funded).',
-  proof1: 'Needs in_progress and milestone m1 still pending.',
+  proof1: 'Needs in_progress and m1 pending or rejected (resubmit after reject).',
   approve1: 'Needs m1 in proof_submitted (agent must submit proof first).',
-  proof2: 'Needs in_progress and milestone m2 still pending.',
+  proof2: 'Needs in_progress and m2 pending or rejected (resubmit after reject).',
   reject2: 'Needs m2 in proof_submitted (demo path: reject after proof).',
   settle: 'Needs every milestone released or rejected while in_progress.',
   dispute: 'Available from funded or in_progress only.',
-  resume: 'Available only while disputed.',
+  resume: 'Available only while disputed, and only if the pre-dispute state was funded or in_progress.',
   refund: 'Available only while disputed.',
   reset: 'Always available — clears local demo state.',
 };
@@ -38,10 +48,10 @@ export const SUCCESS_MSG = {
   proof1: 'Agent submitted proof for m1.',
   approve1: 'Approver released m1.',
   proof2: 'Agent submitted proof for m2.',
-  reject2: 'Approver rejected m2 (demo path).',
+  reject2: 'Approver rejected m2 (demo path). Agent may resubmit.',
   settle: 'Escrow settled — remaining balance refunded locally.',
   dispute: 'Dispute opened.',
-  resume: 'Dispute resolved — resumed in_progress.',
+  resume: 'Dispute resolved — restored the pre-dispute state.',
   refund: 'Dispute refunded remaining balance.',
   reset: 'Local demo reset.',
 };
@@ -54,6 +64,7 @@ export const PROOF_NOTES = {
 export function freshEscrow() {
   return {
     state: 'created',
+    resumeTo: null,
     funded: 0,
     released: 0,
     refunded: 0,
@@ -76,7 +87,7 @@ export function emptyStudioState() {
 
 export function balance(escrow) {
   if (!escrow) return 0;
-  return (Number(escrow.funded) || 0) - (Number(escrow.released) || 0) - (Number(escrow.refunded) || 0);
+  return finiteNonNeg(escrow.funded) - finiteNonNeg(escrow.released) - finiteNonNeg(escrow.refunded);
 }
 
 export function findMilestone(escrow, id) {
@@ -86,6 +97,7 @@ export function findMilestone(escrow, id) {
 function cloneEscrow(escrow) {
   return {
     state: escrow.state,
+    resumeTo: escrow.resumeTo || null,
     funded: escrow.funded,
     released: escrow.released,
     refunded: escrow.refunded,
@@ -110,6 +122,15 @@ export function roleAllows(role, act) {
   return (ROLE_ACTS[role] || []).includes(act);
 }
 
+function proofSlotOpen(milestone) {
+  return milestone?.status === 'pending' || milestone?.status === 'rejected';
+}
+
+/** Compact resolveDisputeResume only restores FUNDED or IN_PROGRESS. */
+export function restorableDisputeState(escrow) {
+  return escrow?.resumeTo === 'funded' || escrow?.resumeTo === 'in_progress';
+}
+
 export function stateAllows(escrow, act) {
   const m1 = findMilestone(escrow, 'm1');
   const m2 = findMilestone(escrow, 'm2');
@@ -119,11 +140,11 @@ export function stateAllows(escrow, act) {
     case 'start':
       return escrow.state === 'funded';
     case 'proof1':
-      return escrow.state === 'in_progress' && m1?.status === 'pending';
+      return escrow.state === 'in_progress' && proofSlotOpen(m1);
     case 'approve1':
       return escrow.state === 'in_progress' && m1?.status === 'proof_submitted';
     case 'proof2':
-      return escrow.state === 'in_progress' && m2?.status === 'pending';
+      return escrow.state === 'in_progress' && proofSlotOpen(m2);
     case 'reject2':
       return escrow.state === 'in_progress' && m2?.status === 'proof_submitted';
     case 'settle':
@@ -134,6 +155,7 @@ export function stateAllows(escrow, act) {
     case 'dispute':
       return escrow.state === 'funded' || escrow.state === 'in_progress';
     case 'resume':
+      return escrow.state === 'disputed' && restorableDisputeState(escrow);
     case 'refund':
       return escrow.state === 'disputed';
     case 'reset':
@@ -155,6 +177,11 @@ export function nextAction(escrow, role) {
 /**
  * Apply a sync or pre-hashed action. For proof1/proof2, pass { proofHash, privateNote }.
  * Returns { ok, escrow, error }.
+ * proof1/proof2 match Compact submitProof: PENDING or REJECTED. A rejected
+ * slot reopens so settle still waits until the new proof is decided.
+ * dispute/resume match Compact resolveDisputeResume: resume restores FUNDED
+ * or IN_PROGRESS only. A missing resumeTo fails closed (does not skip start()).
+ * LOCAL-TRUE studio stand-in — not an on-chain call.
  */
 export function applyAction(escrow, act, payload = {}) {
   let s = cloneEscrow(escrow || freshEscrow());
@@ -180,12 +207,18 @@ export function applyAction(escrow, act, payload = {}) {
         const id = act === 'proof1' ? 'm1' : 'm2';
         if (s.state !== 'in_progress') throw new Error('need in_progress');
         const m = s.milestones.find((x) => x.id === id);
-        if (!m || m.status !== 'pending') throw new Error(`${id} not pending`);
+        if (!m || (m.status !== 'pending' && m.status !== 'rejected')) {
+          throw new Error(`${id} has no open proof slot`);
+        }
         if (!payload.proofHash) throw new Error('proofHash required');
+        const resubmit = m.status === 'rejected';
         m.privateNote = payload.privateNote || PROOF_NOTES[id] || null;
         m.proofHash = payload.proofHash;
         m.status = 'proof_submitted';
-        s = pushAudit(s, 'proof_submitted', 'agent', { milestone: id, proofHash: m.proofHash });
+        s = pushAudit(s, resubmit ? 'proof_resubmitted' : 'proof_submitted', 'agent', {
+          milestone: id,
+          proofHash: m.proofHash,
+        });
         break;
       }
       case 'approve1': {
@@ -217,14 +250,20 @@ export function applyAction(escrow, act, payload = {}) {
       }
       case 'dispute': {
         if (s.state !== 'funded' && s.state !== 'in_progress') throw new Error('cannot dispute now');
+        s.resumeTo = s.state;
         s.state = 'disputed';
-        s = pushAudit(s, 'disputed', 'client', {});
+        s = pushAudit(s, 'disputed', 'client', { from: s.resumeTo });
         break;
       }
       case 'resume': {
         if (s.state !== 'disputed') throw new Error('not disputed');
-        s.state = 'in_progress';
-        s = pushAudit(s, 'dispute_resolved_resume', 'client', {});
+        if (!restorableDisputeState(s)) {
+          throw new Error('dispute has no restorable state');
+        }
+        const back = s.resumeTo;
+        s.state = back;
+        s.resumeTo = null;
+        s = pushAudit(s, 'dispute_resolved_resume', 'client', { to: back });
         break;
       }
       case 'refund': {
@@ -232,6 +271,7 @@ export function applyAction(escrow, act, payload = {}) {
         const rem = balance(s);
         s.refunded += rem;
         s.state = 'refunded';
+        s.resumeTo = null;
         s = pushAudit(s, 'dispute_resolved_refund', 'client', { refund: rem });
         break;
       }
@@ -254,10 +294,21 @@ function normalizeMilestone(m) {
   return {
     id: String(m.id || ''),
     description: String(m.description || ''),
-    amount: Number(m.amount) || 0,
-    status: String(m.status || 'pending'),
+    amount: finiteNonNeg(m.amount),
+    status: MILESTONE_STATUSES.includes(m.status) ? m.status : 'pending',
     proofHash: m.proofHash ? String(m.proofHash) : null,
     privateNote: m.privateNote != null ? String(m.privateNote) : null,
+  };
+}
+
+function normalizeAuditEntry(e) {
+  if (!e || typeof e !== 'object') return null;
+  return {
+    seq: finiteNonNeg(e.seq),
+    type: String(e.type || ''),
+    actor: String(e.actor || ''),
+    state: String(e.state || ''),
+    data: e.data && typeof e.data === 'object' && !Array.isArray(e.data) ? e.data : {},
   };
 }
 
@@ -267,13 +318,17 @@ export function normalizeEscrow(raw) {
   const milestones = Array.isArray(raw.milestones)
     ? raw.milestones.map(normalizeMilestone).filter((m) => m && m.id)
     : base.milestones;
+  const resumeTo = raw.resumeTo === 'funded' || raw.resumeTo === 'in_progress' ? raw.resumeTo : null;
   return {
-    state: String(raw.state || 'created'),
-    funded: Number(raw.funded) || 0,
-    released: Number(raw.released) || 0,
-    refunded: Number(raw.refunded) || 0,
+    state: ESCROW_STATES.includes(raw.state) ? raw.state : 'created',
+    resumeTo,
+    funded: finiteNonNeg(raw.funded),
+    released: finiteNonNeg(raw.released),
+    refunded: finiteNonNeg(raw.refunded),
     milestones: milestones.length ? milestones.slice(0, 8) : base.milestones,
-    audit: Array.isArray(raw.audit) ? raw.audit.filter(Boolean).slice(0, 200) : [],
+    audit: Array.isArray(raw.audit)
+      ? raw.audit.map(normalizeAuditEntry).filter(Boolean).slice(0, 200)
+      : [],
   };
 }
 
