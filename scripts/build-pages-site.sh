@@ -34,6 +34,8 @@ copy_studio() {
 
 # Hub at Pages root
 cp apps/midnight-lab-site/index.html apps/midnight-lab-site/main.js apps/midnight-lab-site/styles.css "$SITE/"
+mkdir -p "$SITE/assets"
+cp apps/midnight-lab-site/assets/* "$SITE/assets/" 2>/dev/null || true
 
 copy_studio apps/agent-escrow-stub   escrow
 copy_studio apps/hello-studio       hello
