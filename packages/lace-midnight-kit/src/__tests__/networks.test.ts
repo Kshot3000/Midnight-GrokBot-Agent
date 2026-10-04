@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CliConnectorNetworkIds,
   MidnightNetworkIds,
   NETWORK_CATALOG,
   describeNetworkSwitch,
   findNetworkCatalogEntry,
+  networkIdForConnector,
 } from '../networks.js';
 
 describe('NETWORK_CATALOG', () => {
@@ -36,5 +38,25 @@ describe('describeNetworkSwitch', () => {
     expect(plan.changed).toBe(true);
     expect(plan.message.toLowerCase()).toContain('connect');
     expect(plan.message.toLowerCase()).toContain('transfer');
+  });
+});
+
+describe('networkIdForConnector', () => {
+  it('keeps Lace ids lowercase and mainnet standard', () => {
+    expect(networkIdForConnector('Preprod', 'lace')).toBe('preprod');
+    expect(networkIdForConnector('PREVIEW')).toBe(MidnightNetworkIds.Preview);
+    expect(networkIdForConnector('mainnet', 'cli')).toBe('mainnet');
+  });
+
+  it('uses CLI connector capitalization from the wallet integration guide', () => {
+    expect(networkIdForConnector('preprod', 'cli')).toBe(
+      CliConnectorNetworkIds.Preprod,
+    );
+    expect(networkIdForConnector('preview', 'cli')).toBe('Preview');
+    expect(networkIdForConnector('undeployed', 'cli')).toBe('Undeployed');
+  });
+
+  it('does not rewrite unknown wallet-defined ids', () => {
+    expect(networkIdForConnector(' custom-net ', 'cli')).toBe('custom-net');
   });
 });

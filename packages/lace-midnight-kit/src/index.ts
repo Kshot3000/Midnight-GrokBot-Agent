@@ -23,11 +23,14 @@ export { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 
 export {
   MidnightNetworkIds,
+  CliConnectorNetworkIds,
   DEFAULT_DEMO_NETWORK,
   NETWORK_CATALOG,
   findNetworkCatalogEntry,
+  networkIdForConnector,
   describeNetworkSwitch,
   type MidnightNetworkId,
+  type WalletConnectorKind,
   type NetworkCatalogEntry,
   type NetworkSwitchPlan,
 } from './networks.js';
@@ -204,4 +207,4 @@ export const LAB_BRANDING = {
 } as const;
 
 /** Kit semver for UI badges. */
-export const KIT_VERSION = '0.3.3';
+export const KIT_VERSION = '0.3.4';

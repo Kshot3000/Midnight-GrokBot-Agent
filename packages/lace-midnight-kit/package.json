@@ -1,6 +1,6 @@
 {
   "name": "@kshot/lace-midnight-kit",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Reusable Lace / Midnight DApp connector helpers — discover (friendly keys + v4 rdns), connect journey, injection watch, capability probe (incl. proving feature-detect), preferences, session health, demo mode. Types from @midnight-ntwrk/dapp-connector-api.",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,7 +23,6 @@
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:node": "npm run build && node --test test/*.test.js",
-    "test:all": "npm run test && npm run test:node",
     "test:watch": "vitest"
   },
   "keywords": [
