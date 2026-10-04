@@ -9,6 +9,7 @@ import {
   SCHEMA_VERSION,
   emptyStudioState,
   normalizeStudioState,
+  normalizeDraft,
   buildExportDocument,
   parseImportDocument,
 } from './market-core.mjs';
@@ -64,7 +65,9 @@ export function loadDraft(storage) {
   if (!ls) return null;
   try {
     const raw = ls.getItem(DRAFT_KEY);
-    return raw ? JSON.parse(raw) : null;
+    // Never hand the renderer a verbatim blob: a non-numeric reserve in a
+    // stored draft crashed renderDraftPreview and broke the whole board.
+    return raw ? normalizeDraft(JSON.parse(raw)) : null;
   } catch {
     return null;
   }

@@ -8,7 +8,7 @@ import {
   saveDraft,
   loadDraft,
 } from '../persist.mjs';
-import { STORAGE_KEY, SCHEMA_VERSION } from '../market-core.mjs';
+import { STORAGE_KEY, DRAFT_KEY, SCHEMA_VERSION } from '../market-core.mjs';
 
 function memoryStorage() {
   const map = new Map();
@@ -55,6 +55,18 @@ describe('persist', () => {
     saveDraft({ commitment: 'abc', salt: 's' }, store);
     expect(loadDraft(store).commitment).toBe('abc');
     saveDraft(null, store);
+    expect(loadDraft(store)).toBe(null);
+  });
+
+  it('loadDraft never returns a verbatim hostile draft', () => {
+    // Written straight into storage, bypassing saveDraft (crafted blob).
+    store.setItem(DRAFT_KEY, JSON.stringify({ commitment: 'abc', reserve: 'evil-string' }));
+    const draft = loadDraft(store);
+    expect(typeof draft.reserve).toBe('number');
+    expect(draft.reserve).toBe(0);
+    store.setItem(DRAFT_KEY, '{"commitment":"abc","reserve":1e999}');
+    expect(loadDraft(store).reserve).toBe(0);
+    store.setItem(DRAFT_KEY, JSON.stringify({ reserve: 5 }));
     expect(loadDraft(store)).toBe(null);
   });
 });

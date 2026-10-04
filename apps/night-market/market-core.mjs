@@ -43,6 +43,16 @@ export async function bidCommit(amount, listingId, salt, digestFn) {
   return sha256Hex(payload, digestFn);
 }
 
+/** Money fields: finite and non-negative, else 0. JSON `1e999` parses to
+ *  Infinity and negative amounts used to pass normalize untouched, so a
+ *  crafted import / localStorage blob could render "Infinity ADA", set a
+ *  −50 reserve that any bid "cleared", and fabricate zero bids from
+ *  non-numeric strings. Same guard as the escrow core's finiteNonNeg. */
+export function finiteNonNeg(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 export function marketStats(listings) {
   const list = listings || [];
   const bids = list.reduce((n, l) => n + (l.bids?.length || 0), 0);
@@ -51,10 +61,17 @@ export function marketStats(listings) {
   return { listings: list.length, bids, awarded, sealed, disclosed: list.length - sealed };
 }
 
-/** Simulated: bid.amount >= listing.reserve */
+/** Simulated: bid.amount >= listing.reserve, both positive finite amounts.
+ *  A 0 bid against a 0 (or negative / non-finite) reserve is not a proof —
+ *  the creation forms require positive amounts, and the predicate does too. */
 export function proveBidClearsReserve(listing, bid) {
   if (!listing || !bid) return { ok: false, error: 'missing listing or bid' };
-  if (Number(bid.amount) >= Number(listing.reserve)) return { ok: true };
+  const reserve = Number(listing.reserve);
+  const amount = Number(bid.amount);
+  if (!Number.isFinite(reserve) || !Number.isFinite(amount) || reserve <= 0 || amount <= 0) {
+    return { ok: false, error: 'bid and reserve must be positive amounts' };
+  }
+  if (amount >= reserve) return { ok: true };
   return { ok: false, error: 'bid below reserve' };
 }
 
@@ -72,7 +89,7 @@ function normalizeBid(b) {
   const disclosure = ['sealed', 'range', 'full'].includes(b.disclosure) ? b.disclosure : 'sealed';
   const out = {
     id: String(b.id || ''),
-    amount: Number(b.amount) || 0,
+    amount: finiteNonNeg(b.amount),
     handle: String(b.handle || '@anon'),
     salt: String(b.salt || ''),
     commitment: String(b.commitment || ''),
@@ -92,7 +109,7 @@ function normalizeListing(l) {
     title: String(l.title || ''),
     category: String(l.category || ''),
     seller: String(l.seller || '@anon'),
-    reserve: Number(l.reserve) || 0,
+    reserve: finiteNonNeg(l.reserve),
     details: String(l.details || ''),
     salt: String(l.salt || ''),
     commitment: String(l.commitment || ''),
@@ -105,6 +122,24 @@ function normalizeListing(l) {
   return out.id ? out : null;
 }
 
+/** Drafts used to pass normalize verbatim: a crafted draft whose reserve
+ *  was a string crashed renderDraftPreview (`reserve.toFixed` is not a
+ *  function) and broke the whole board render. Type every field; money
+ *  goes through finiteNonNeg so reserve is always a finite number. */
+export function normalizeDraft(d) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return null;
+  if (!d.commitment) return null;
+  return {
+    title: String(d.title || ''),
+    category: String(d.category || ''),
+    seller: String(d.seller || ''),
+    reserve: finiteNonNeg(d.reserve),
+    details: String(d.details || ''),
+    salt: String(d.salt || ''),
+    commitment: String(d.commitment),
+  };
+}
+
 export function normalizeStudioState(raw) {
   const base = emptyStudioState();
   if (!raw || typeof raw !== 'object') return base;
@@ -112,8 +147,7 @@ export function normalizeStudioState(raw) {
   const listings = Array.isArray(source.listings)
     ? source.listings.map(normalizeListing).filter(Boolean).slice(0, 60)
     : [];
-  let draft = source.draft && typeof source.draft === 'object' ? source.draft : null;
-  if (draft && !draft.commitment) draft = null;
+  const draft = normalizeDraft(source.draft);
   return {
     schemaVersion: SCHEMA_VERSION,
     listings,

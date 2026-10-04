@@ -31,6 +31,7 @@ Documented Pages path (when Actions enabled): `/market/`.
 - Does **not** run Compact, a proof server, Lace, or real ADA settlement.
 - Listing/bid commitments and clearance “proofs” are **teaching stand-ins**.
 - Export JSON may include reserves, bids, and salts — treat downloads as sensitive.
+- Imported / stored state is sanitized on load: non-finite or negative amounts clamp to 0 (and a clamped amount can never pass the prove/award check), and drafts are fully typed before rendering.
 
 ## Flow
 
