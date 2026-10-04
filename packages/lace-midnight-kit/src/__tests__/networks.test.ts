@@ -6,6 +6,7 @@ import {
   describeNetworkSwitch,
   findNetworkCatalogEntry,
   networkIdForConnector,
+  sameMidnightNetwork,
 } from '../networks.js';
 
 describe('NETWORK_CATALOG', () => {
@@ -58,5 +59,20 @@ describe('networkIdForConnector', () => {
 
   it('does not rewrite unknown wallet-defined ids', () => {
     expect(networkIdForConnector(' custom-net ', 'cli')).toBe('custom-net');
+  });
+});
+
+describe('sameMidnightNetwork', () => {
+  it('treats CLI aliases as the same network as Lace lowercase ids', () => {
+    expect(sameMidnightNetwork('preprod', CliConnectorNetworkIds.Preprod)).toBe(true);
+    expect(sameMidnightNetwork('preview', 'Preview')).toBe(true);
+    expect(sameMidnightNetwork('undeployed', 'Undeployed')).toBe(true);
+    expect(sameMidnightNetwork('mainnet', 'mainnet')).toBe(true);
+  });
+
+  it('still rejects a different network', () => {
+    expect(sameMidnightNetwork('preprod', 'preview')).toBe(false);
+    expect(sameMidnightNetwork('preprod', 'Undeployed')).toBe(false);
+    expect(sameMidnightNetwork('  ', 'preprod')).toBe(false);
   });
 });

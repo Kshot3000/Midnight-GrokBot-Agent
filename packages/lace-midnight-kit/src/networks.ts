@@ -119,6 +119,19 @@ export function networkIdForConnector(
   return trimmed;
 }
 
+/**
+ * Compare a requested connect() id with getConnectionStatus().networkId.
+ * Only mainnet is connector-standard. CLI reports PreProd / Preview /
+ * Undeployed; Lace examples use lowercase. Those aliases are the same network.
+ * Unknown ids compare case-insensitively. Does not call the wallet. LOCAL-TRUE.
+ * @see https://docs.midnight.network/sdks/community/wallets/community-wallets-integration
+ */
+export function sameMidnightNetwork(requested: string, reported: string): boolean {
+  const a = requested.trim().toLowerCase();
+  const b = reported.trim().toLowerCase();
+  return a.length > 0 && a === b;
+}
+
 export type NetworkSwitchPlan = {
   changed: boolean;
   fromId: string | null;

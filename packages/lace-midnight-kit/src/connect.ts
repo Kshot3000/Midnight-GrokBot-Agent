@@ -19,6 +19,7 @@ import {
 } from './errors.js';
 import {
   DEFAULT_DEMO_NETWORK,
+  sameMidnightNetwork,
   type MidnightNetworkId,
 } from './networks.js';
 
@@ -180,10 +181,12 @@ export async function connectWithProvider(
     );
   }
 
+  // Docs: reconcile the DApp to getConnectionStatus().networkId.
+  // CLI PreProd and Lace preprod are the same network, not a mismatch.
   if (
     assertNetworkMatch &&
     status.status === 'connected' &&
-    status.networkId !== networkId
+    !sameMidnightNetwork(networkId, status.networkId)
   ) {
     throw new LaceMidnightKitError(
       KitErrorCodes.NetworkMismatch,
@@ -224,4 +227,3 @@ export async function connectWithProvider(
 export function createDisconnectedSession(): null {
   return null;
 }
-

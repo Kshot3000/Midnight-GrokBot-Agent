@@ -28,6 +28,7 @@ export {
   NETWORK_CATALOG,
   findNetworkCatalogEntry,
   networkIdForConnector,
+  sameMidnightNetwork,
   describeNetworkSwitch,
   type MidnightNetworkId,
   type WalletConnectorKind,
