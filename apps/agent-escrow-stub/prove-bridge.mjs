@@ -12,7 +12,7 @@
  *   GET  /health
  *   GET  /last-prove?contract=escrow|hello
  *   POST /prove?path=initialize|happy|…|all          (escrow)
- *   POST /prove?contract=hello                      (hello increment)
+ *   POST /prove?contract=hello&circuit=increment|recordNote
  *   OPTIONS *
  *
  * Env:
@@ -152,12 +152,12 @@ async function runEscrowProve(pathName) {
   return slim;
 }
 
-async function runHelloProve() {
+async function runHelloProve(circuit) {
   const { proveHelloLocal } = await import(pathToFileURL(HELLO_PROVE_MODULE).href);
   const { writeLastProveJson } = await import(pathToFileURL(WRITER_MODULE).href);
-  const report = await proveHelloLocal({ timeout: PROVE_TIMEOUT_MS });
+  const report = await proveHelloLocal({ timeout: PROVE_TIMEOUT_MS, circuit });
   const { slim } = writeLastProveJson(report, {
-    source: 'prove-bridge:/prove?contract=hello',
+    source: `prove-bridge:/prove?contract=hello&circuit=${report.circuit}`,
     kind: 'hello',
     studioPath: HELLO_LAST_PROVE,
   });
@@ -169,6 +169,16 @@ function resolveContract(url) {
   if (c === 'hello' || c === 'hello-midnight') return 'hello';
   if (c === 'escrow' || c === 'agent-escrow') return 'escrow';
   return null;
+}
+
+function resolveHelloCircuitParam(url) {
+  const circuit = url.searchParams.get('circuit') || 'increment';
+  if (circuit !== 'increment' && circuit !== 'recordNote') {
+    const err = new Error('hello circuit must be increment or recordNote');
+    err.code = 'UNKNOWN_CIRCUIT';
+    throw err;
+  }
+  return circuit;
 }
 
 const server = http.createServer(async (req, res) => {
@@ -205,7 +215,7 @@ const server = http.createServer(async (req, res) => {
         'GET /health',
         'GET /last-prove?contract=escrow|hello',
         'POST /prove?path=initialize|happy|cancel|…|all',
-        'POST /prove?contract=hello',
+        'POST /prove?contract=hello&circuit=increment|recordNote',
       ],
       brand: '@kshot9000',
     });
@@ -243,7 +253,11 @@ const server = http.createServer(async (req, res) => {
     try {
       const slim =
         contract === 'hello'
-          ? await withTimeout(runHelloProve(), PROVE_TIMEOUT_MS, 'hello prove')
+          ? await withTimeout(
+              runHelloProve(resolveHelloCircuitParam(url)),
+              PROVE_TIMEOUT_MS,
+              'hello prove',
+            )
           : await withTimeout(runEscrowProve(pathName), PROVE_TIMEOUT_MS, `escrow prove path=${pathName}`);
       send(res, 200, { ok: true, report: slim });
     } catch (e) {
@@ -252,7 +266,9 @@ const server = http.createServer(async (req, res) => {
           ? 503
           : e?.code === 'PROVE_TIMEOUT'
             ? 504
-            : 500;
+            : e?.code === 'UNKNOWN_CIRCUIT' || e?.code === 'ARTIFACTS_STALE'
+              ? 400
+              : 500;
       send(res, code, {
         ok: false,
         error: String(e?.message || e),
@@ -273,7 +289,7 @@ const server = http.createServer(async (req, res) => {
       'GET /health',
       'GET /last-prove?contract=escrow|hello',
       'POST /prove?path=initialize|happy|…',
-      'POST /prove?contract=hello',
+      'POST /prove?contract=hello&circuit=increment|recordNote',
     ],
     hubDeepLinks: HUB_DEEP_LINKS,
   });
@@ -284,7 +300,7 @@ server.listen(PORT, HOST, () => {
   console.log(`  GET  /health`);
   console.log(`  GET  /last-prove?contract=escrow|hello`);
   console.log(`  POST /prove?path=initialize|happy|cancel|…`);
-  console.log(`  POST /prove?contract=hello`);
+  console.log(`  POST /prove?contract=hello&circuit=increment|recordNote`);
   console.log(`  timeout: ${PROVE_TIMEOUT_MS}ms · soft-fail on flake`);
   console.log(`  hub: ${HUB_DEEP_LINKS.helloStudio} · ${HUB_DEEP_LINKS.escrowStudio}`);
   console.log(`  claim: LOCAL ZK only — NOT a Preprod deploy`);
