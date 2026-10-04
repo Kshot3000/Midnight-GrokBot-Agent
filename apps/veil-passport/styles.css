@@ -1319,3 +1319,8 @@ body {
 .badge, .badge-live, .badge-flagship {
   letter-spacing: 0.04em;
 }
+
+/* Studio product banner */
+body { background-image: linear-gradient(180deg, rgba(7,6,18,0.2), #070612 220px), url("../assets/horizon.jpg"); background-size: auto, cover; background-position: center top; background-repeat: no-repeat; }
+.topbar, header.site-header { background: rgba(7,6,18,0.78) !important; }
+h1 { letter-spacing: -0.04em; }
