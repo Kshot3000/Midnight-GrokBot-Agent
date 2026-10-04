@@ -66,7 +66,10 @@ describe('happy path + reject branch', () => {
     expect(again.escrow.milestones[1].privateNote).toBe('retry');
     expect(again.escrow.audit.at(-1).type).toBe('proof_resubmitted');
     expect(stateAllows(again.escrow, 'settle')).toBe(false);
-    const blocked = applyAction(s, 'proof1', { proofHash: '0xddd' });
+    // Once resubmitted, m2 is proof_submitted again — no open proof slot.
+    // (This assertion previously ran proof1 against the pre-resubmit state,
+    // where m1 is legitimately pending, so it could never pass.)
+    const blocked = applyAction(again.escrow, 'proof2', { proofHash: '0xddd' });
     expect(blocked.ok).toBe(false);
     expect(blocked.error).toMatch(/no open proof slot/);
   });
