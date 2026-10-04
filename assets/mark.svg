@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Midnight proof constellation">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.95"/>
+      <stop offset="42%" stop-color="#7c5cff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#070612" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="45%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="640" fill="#070612"/>
+  <circle cx="320" cy="320" r="250" fill="url(#g)"/>
+  <circle cx="320" cy="320" r="214" fill="none" stroke="url(#ring)" stroke-width="10"/>
+  <circle cx="320" cy="320" r="168" fill="none" stroke="#c084fc" stroke-opacity="0.7" stroke-width="3"/>
+  <g fill="none" stroke="#67e8f9" stroke-width="2" stroke-opacity="0.85">
+    <path d="M320 168 L392 214 L430 304 L392 392 L320 438 L248 392 L210 304 L248 214 Z"/>
+    <path d="M320 168 L320 320 L392 392 M320 320 L248 392 M320 320 L430 304 M320 320 L210 304 M320 320 L248 214 M320 320 L392 214"/>
+  </g>
+  <g fill="#67e8f9">
+    <circle cx="320" cy="320" r="14"/>
+    <circle cx="320" cy="168" r="8"/>
+    <circle cx="392" cy="214" r="7"/>
+    <circle cx="430" cy="304" r="7"/>
+    <circle cx="392" cy="392" r="7"/>
+    <circle cx="320" cy="438" r="8"/>
+    <circle cx="248" cy="392" r="7"/>
+    <circle cx="210" cy="304" r="7"/>
+    <circle cx="248" cy="214" r="7"/>
+  </g>
+</svg>
