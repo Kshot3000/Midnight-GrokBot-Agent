@@ -6,6 +6,9 @@
  * public Preprod node and indexer. Upstream: midnightntwrk/servicedesk#225
  * (RPC 1010 block-limit) and #230 (Preprod indexer stall).
  * LOCAL-TRUE helper. Not a node fix.
+ * Credit: @kshot9000 https://x.com/kshot9000
+ * Donate ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK
  */
 
 export function decodeMidnightRpcError(err) {

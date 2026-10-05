@@ -26,3 +26,12 @@ This repo cannot patch `midnight-node` or the public indexer. It can keep the Co
 ## Cardano side
 
 Midnight is the privacy partner chain. Community work that helps both sides is a Compact contract that discloses only a commitment, plus a Preprod call record. Do not bridge ADA from these studios. tNIGHT and tDUST funding stays on the official faucet path: https://docs.midnight.network/guides/acquire-tokens
+
+## Credit
+
+Built by [@kshot9000](https://x.com/kshot9000). Cardano donation address:
+
+`addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v`
+
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
