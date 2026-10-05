@@ -21,7 +21,8 @@
     "prove:escrow-local": "node src/prove-escrow-local.mjs",
     "prove:escrow-all": "node src/prove-escrow-local.mjs --path=all",
     "check:escrow-artifacts": "node src/check-escrow-artifacts.mjs",
-    "preprod:call": "node src/call-preprod.mjs"
+    "preprod:call": "node src/call-preprod.mjs",
+    "preprod:head": "node src/sample-preprod-head.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
@@ -49,5 +50,6 @@
     "type": "git",
     "url": "https://github.com/Kshot3000/Midnight-GrokBot-Agent.git",
     "directory": "packages/preprod-hello-stub"
-  }
+  },
+  "credit": "Built by @kshot9000 https://x.com/kshot9000\nEmail: kshot9000@gmail.com\nCardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v\nTeams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation"
 }
