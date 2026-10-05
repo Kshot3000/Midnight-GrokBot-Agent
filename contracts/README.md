@@ -89,6 +89,10 @@ leaderboard and `contracts/agent-escrow`.
 
 Do not invent APIs or RPCs here. Use official Midnight.js, indexer, and DApp connector docs when wiring TypeScript clients.
 
+## Bitwise gap (midnight-docs #1387)
+
+`contracts/hello-midnight/no-bitwise.compact` folds a Boolean with `flag ? 1 : 0`. The published Compact grammar has no `&`, `|`, `^`, `<<`, `>>`, or `>>>`. See `docs/COMPACT-BITWISE-GAP.md`. Source check only; not a deploy.
+
 ## Shielded index without value (servicedesk #213)
 
 `contracts/hello-midnight/coin-index-gap.compact` records a `persistentCommit` receipt and does not call `writeCoin`. Official `writeCoin` fills a `QualifiedShieldedCoinInfo` cell, which includes `value`. See `docs/SHIELDED-INDEX-WITHOUT-VALUE.md`. Not a deploy and not an indexer fix.
