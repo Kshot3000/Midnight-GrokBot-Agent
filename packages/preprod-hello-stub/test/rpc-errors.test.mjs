@@ -68,7 +68,26 @@ describe('decodeMidnightRpcError', () => {
     expect(huge.ledgerCode).toBe(null);
     expect(huge.title).toMatch(/not a ledger u8/);
   });
+  it('does not invent a name for submission-layer code 10999', () => {
+    const decoded = decodeMidnightRpcError('Transaction submission error (code: 10999)');
+    expect(decoded.code).toBe(10999);
+    expect(decoded.ledgerCode).toBe(null);
+    expect(decoded.title).toMatch(/not a ledger u8/);
+    expect(decoded.title).not.toMatch(/Dust|Zswap|FeeCalculation/);
+    expect(decoded.upstream).toMatch(/midnight-docs\/issues\/1385/);
+    expect(decoded.docs).toBe('https://docs.midnight.network/nodes/error-codes');
+  });
+
+  it('names documented fee variants 155 and 231', () => {
+    expect(lookupLedgerCustomError(155).name).toBe('FeeCalculationError');
+    const outside = decodeMidnightRpcError('1010: Invalid Transaction: Custom error: 231');
+    expect(outside.ledgerCode).toBe(231);
+    expect(outside.title).toMatch(/OutsideTimeToDismiss/);
+    expect(outside.hint).toMatch(/servicedesk\/issues\/117/);
+  });
+
   it('keeps the lab credit block', () => {
+
     expect(builderCredit).toContain('Email: kshot9000@gmail.com');
     expect(builderCredit).toContain('Built by @kshot9000 https://x.com/kshot9000');
   });
