@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeMidnightRpcError, compareObservedHeads, warnSkippedIndexerEvents, builderCredit } from '../src/rpc-errors.mjs';
+import { decodeMidnightRpcError, lookupLedgerCustomError, builderCredit } from '../src/rpc-errors.mjs';
 
 /**
  * Built by @kshot9000 https://x.com/kshot9000
@@ -43,6 +43,31 @@ describe('decodeMidnightRpcError', () => {
     expect(decoded.upstream).toMatch(/230/);
   });
 
+
+  it('maps documented Custom error: 196 from a wrapped FiberFailure', () => {
+    const causeId = Symbol.for('effect/FiberFailure/Cause');
+    const rpc = { name: 'RpcError', message: '1010: Invalid Transaction: Custom error: 196' };
+    const inner = { name: 'SubmissionError', message: 'Transaction submission failed', cause: rpc };
+    const err = new Error('Transaction submission error');
+    err.name = '(FiberFailure) SubmissionError';
+    err.cause = undefined;
+    err[causeId] = inner;
+    const decoded = decodeMidnightRpcError(err);
+    expect(decoded.ledgerCode).toBe(196);
+    expect(decoded.title).toMatch(/DustDoubleSpend/);
+    expect(decoded.docs).toBe('https://docs.midnight.network/nodes/error-codes');
+    expect(decoded.upstream).toMatch(/225/);
+  });
+
+  it('names ledger 154 when Custom error is present and leaves unknown codes unnamed', () => {
+    expect(lookupLedgerCustomError(154).name).toBe('BlockLimitExceededError');
+    const unknown = decodeMidnightRpcError('1010: Invalid Transaction: Custom error: 142');
+    expect(unknown.ledgerCode).toBe(142);
+    expect(unknown.title).toMatch(/custom error 142/);
+    const huge = decodeMidnightRpcError('Custom error: 10101');
+    expect(huge.ledgerCode).toBe(null);
+    expect(huge.title).toMatch(/not a ledger u8/);
+  });
   it('keeps the lab credit block', () => {
     expect(builderCredit).toContain('Email: kshot9000@gmail.com');
     expect(builderCredit).toContain('Built by @kshot9000 https://x.com/kshot9000');

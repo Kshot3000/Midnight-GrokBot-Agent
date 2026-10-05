@@ -47,17 +47,66 @@ function collectErrorText(err, depth = 0, seen = new Set()) {
   return parts.filter(Boolean).join(' ');
 }
 
+
+/** Documented LedgerApiError u8 codes. Source: https://docs.midnight.network/nodes/error-codes */
+export const LEDGER_CUSTOM_ERRORS = {
+  106: { name: 'VerifierKeyNotFound', hint: 'Verifier key missing for the circuit operation. Deploy the verifier key before calling the circuit.' },
+  111: { name: 'TransactionTooLarge', hint: 'Transaction exceeds maximum allowed size. Reduce the payload or split the transaction.' },
+  115: { name: 'InvalidProof', hint: 'Zero-knowledge proof verification failed. Regenerate the proof with a compatible proof server (lab pin 8.1.0).' },
+  126: { name: 'Unbalanced', hint: 'Negative balance in a token type. The transaction does not balance.' },
+  154: { name: 'BlockLimitExceededError', hint: 'Transaction exceeds block limits. Reduce size or wait for a less full block. Related to a heavy deploy, not a proof-server crash.' },
+  166: { name: 'InvalidNetworkId', hint: 'Transaction network ID does not match the node. Check setNetworkId() against the target (Preprod vs undeployed).' },
+  174: { name: 'MalformedContractDeploy', hint: 'Contract deployment is structurally invalid. Check non-zero balance or charged state in the deploy.' },
+  179: { name: 'UnsupportedProofVersion', hint: 'Proof version not supported. Align the proof server and SDK (lab pins: proof-server 8.1.0, midnight-js 4.1.1).' },
+  196: { name: 'DustDoubleSpend', hint: 'Attempt to spend the same DUST twice. Resync DUST wallet state. Official docs use Custom error: 196 as the example.' },
+};
+
+export function lookupLedgerCustomError(code) {
+  const n = Number(code);
+  if (!Number.isInteger(n) || n < 0 || n > 255) return null;
+  return LEDGER_CUSTOM_ERRORS[n] || null;
+}
+
+function extractCustomErrorCode(text) {
+  const match = String(text).match(/Custom error:\s*(\d+)/i);
+  if (!match) return null;
+  return Number(match[1]);
+}
+
 export function decodeMidnightRpcError(err) {
   const raw = collectErrorText(err) || (typeof err === 'string' ? err : err?.message || String(err ?? ''));
   const text = raw.replace(/\s+/g, ' ').trim();
   const code = /1010/.test(text) ? 1010 : null;
 
+  const custom = extractCustomErrorCode(text);
+  if (custom != null) {
+    const known = lookupLedgerCustomError(custom);
+    const overRange = custom > 255;
+    return {
+      code: 1010,
+      ledgerCode: overRange ? null : custom,
+      title: known
+        ? `Ledger ${known.name} (Custom error: ${custom})`
+        : overRange
+          ? `Custom error: ${custom} is not a ledger u8`
+          : `Ledger custom error ${custom}`,
+      hint: known
+        ? known.hint
+        : overRange
+          ? 'Node ledger codes are u8 (0-255). A larger number did not come from the node error tables. Look for Custom error: N elsewhere in the chain.'
+          : 'RPC 1010 carried Custom error: N. Look up N in the official node error tables. This lab does not invent a name for codes it has not copied from that page.',
+      upstream: 'https://github.com/midnightntwrk/servicedesk/issues/225',
+      docs: 'https://docs.midnight.network/nodes/error-codes',
+      raw: text,
+    };
+  }
   if (code === 1010 || /exhaust the block limits/i.test(text)) {
     return {
       code: 1010,
       title: 'Transaction would exhaust the block limits',
-      hint: 'The node rejected the tx before it was a proof or balance failure. Shrink the call, drop extra contract maintenance, or retry when the block is less full. Official node text is RPC 1010.',
+      hint: 'The node rejected the tx before it was a proof or balance failure. Shrink the call, drop extra contract maintenance, or retry when the block is less full. Official node text is RPC 1010. A Substrate check can omit Custom error: N; ledger code 154 is the documented BlockLimitExceededError when the inner u8 is present.',
       upstream: 'https://github.com/midnightntwrk/servicedesk/issues/225',
+      docs: 'https://docs.midnight.network/nodes/error-codes',
       raw: text,
     };
   }
