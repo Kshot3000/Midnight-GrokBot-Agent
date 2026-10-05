@@ -1,0 +1,50 @@
+/*
+ * either-choice.compact — public-network Either convention.
+ *
+ * Official stdlib (do not invent constructors):
+ *   https://docs.midnight.network/compact/standard-library/exports
+ *   struct Either<A, B> { isLeft: Boolean; left: A; right: B; }
+ *   circuit left<A, B>(value: A): Either<A, B>;
+ *   circuit right<A, B>(value: B): Either<A, B>;
+ *   Iff isLeft is true, left is populated; otherwise right.
+ *   The other side should be default<> by convention.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Kapa could not answer Either usage, and builders asked whether an
+ * unbounded `>= 0.26` pragma is correct. Official examples and the
+ * public-network pin use a bounded language pragma, not ledger 9.
+ * Compact toolchain pin for this lab: ~0.31.1 / language ~0.23.
+ *
+ * This file does not call kernel.caller() (ledger 9 only) and does not
+ * claim a public deploy, indexer fix, or node fix. Source only.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger isLeft: Boolean;
+export ledger payload: Uint<64>;
+
+export circuit storeLeft(value: Uint<64>): [] {
+  assert(value != 0, "left payload must be non-default");
+  const choice = left<Uint<64>, Uint<64>>(value);
+  assert(choice.isLeft, "left() must set isLeft");
+  assert(choice.right == 0, "right must stay default<Uint<64>> when isLeft");
+  isLeft = disclose(choice.isLeft);
+  payload = disclose(choice.left);
+}
+
+export circuit storeRight(value: Uint<64>): [] {
+  assert(value != 0, "right payload must be non-default");
+  const choice = right<Uint<64>, Uint<64>>(value);
+  assert(!choice.isLeft, "right() must clear isLeft");
+  assert(choice.left == 0, "left must stay default<Uint<64>> when right");
+  isLeft = disclose(choice.isLeft);
+  payload = disclose(choice.right);
+}
