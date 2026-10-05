@@ -7,17 +7,20 @@
  *   https://docs.midnight.network/compact
  *   https://docs.midnight.network/compact/reference/compact-reference
  *   https://docs.midnight.network/compact/explicit_disclosure
+ *   https://docs.midnight.network/compact/reference/writing
  *
  * Compact contracts typically combine:
  *   1) public ledger state (on-chain, replicated)
  *   2) ZK circuits (prove valid transitions without revealing private inputs)
  *   3) local / off-chain witnesses (private data that never leaves the client)
  *
- * increment is the public Counter path. recordNote is the witness + disclose()
- * path from the explicit-disclosure guide: the note stays private; only a
- * domain-separated persistentHash is written to the ledger.
+ * increment is the public Counter path. recordNote / clearNote are the
+ * witness + disclose path from the explicit-disclosure and writing-a-contract
+ * guides: the note stays private; only a domain-separated persistentHash is
+ * written. A set commitment must be cleared (same local note) before the next
+ * recordNote, same shape as the lock example's set/clear.
  *
- * recordNote is source-only until the next `npm run compact:hello`.
+ * clearNote is source-only until the next `npm run compact:hello`.
  * LOCAL-TRUE. No on-chain deploy is claimed.
  *
  * Preferred live starters (example-counter is archived upstream):
@@ -36,9 +39,11 @@ import CompactStandardLibrary;
 export ledger greetings: Counter;
 
 // Commitment of the last private note. The note itself is never stored.
+// Empty (32 zero bytes) means the slot is clear and recordNote may run.
 export ledger lastNoteHash: Bytes<32>;
 
 // How many non-empty notes have been committed. Counter defaults to 0.
+// clearNote does not decrement this — it is a historical count, not a live occupancy.
 export ledger noteCount: Counter;
 
 /**
@@ -49,6 +54,18 @@ witness localNote(): Bytes<32>;
 
 constructor() {
   lastNoteHash = pad(32, "");
+}
+
+/**
+ * Domain-separated commitment of a private note. Same separator as recordNote
+ * so clearNote can prove knowledge of the note that produced lastNoteHash
+ * without writing the note itself.
+ */
+circuit noteCommitment(note: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "hello-midnight:note:"),
+    note
+  ]);
 }
 
 /**
@@ -66,17 +83,29 @@ export circuit increment(): [] {
  * recordNote — prove a non-empty local note and disclose only its hash.
  * Domain separator matches the agent-escrow roleCommitment pattern so the
  * commitment is not reusable as a bare hash of the note bytes.
- * Witness data must be wrapped in disclose() before a ledger write:
+ * The slot must be clear first (writing-a-contract set/clear). Witness data
+ * must be wrapped in disclose() before a ledger write:
  *   https://docs.midnight.network/compact/explicit_disclosure
  */
 export circuit recordNote(): [] {
+  assert(lastNoteHash == pad(32, ""), "clear the previous note before recording");
   const note = localNote();
   assert(note != pad(32, ""), "local note must be non-empty");
-  lastNoteHash = disclose(persistentHash<Vector<2, Bytes<32>>>([
-    pad(32, "hello-midnight:note:"),
-    note
-  ]));
+  lastNoteHash = disclose(noteCommitment(note));
   noteCount.increment(1);
+}
+
+/**
+ * clearNote — prove the same local note that produced lastNoteHash, then
+ * reset the public slot. Anyone can see the hash; only a witness that
+ * recomputes it can clear. noteCount is left unchanged.
+ * Source-only until the next `npm run compact:hello`. LOCAL-TRUE.
+ */
+export circuit clearNote(): [] {
+  assert(lastNoteHash != pad(32, ""), "no note to clear");
+  const note = localNote();
+  assert(noteCommitment(note) == lastNoteHash, "local note does not match committed hash");
+  lastNoteHash = pad(32, "");
 }
 
 /*
