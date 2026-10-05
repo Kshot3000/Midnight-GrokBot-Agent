@@ -10,12 +10,45 @@
  * Donate ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK
  * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
  * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
+const CREDIT = [
+  'Built by @kshot9000 https://x.com/kshot9000',
+  'Email: kshot9000@gmail.com',
+  'Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v',
+  'Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation',
+].join('\n');
+
+function collectErrorText(err, depth = 0, seen = new Set()) {
+  if (err == null || depth > 6) return '';
+  if (typeof err === 'string' || typeof err === 'number') return String(err);
+  if (typeof err !== 'object') return '';
+  if (seen.has(err)) return '';
+  seen.add(err);
+  const parts = [];
+  const keys = [
+    ...Object.getOwnPropertyNames(err),
+    ...Object.getOwnPropertySymbols(err).map((sym) => sym),
+  ];
+  for (const key of ['message', 'data', 'reason', 'name', '_tag', 'cause']) {
+    if (err[key] != null) parts.push(collectErrorText(err[key], depth + 1, seen));
+  }
+  for (const key of keys) {
+    if (['message', 'data', 'reason', 'name', '_tag', 'cause', 'stack'].includes(key)) continue;
+    const value = err[key];
+    if (value == null || typeof value === 'function') continue;
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'object') {
+      parts.push(collectErrorText(value, depth + 1, seen));
+    }
+  }
+  return parts.filter(Boolean).join(' ');
+}
+
 export function decodeMidnightRpcError(err) {
-  const raw = typeof err === 'string' ? err : err?.message || err?.cause?.message || String(err ?? '');
+  const raw = collectErrorText(err) || (typeof err === 'string' ? err : err?.message || String(err ?? ''));
   const text = raw.replace(/\s+/g, ' ').trim();
   const code = /1010/.test(text) ? 1010 : null;
 
@@ -46,8 +79,20 @@ export function decodeMidnightRpcError(err) {
       raw: text,
     };
   }
+  if (/Transaction submission error/i.test(text) && !/1010|exhaust the block limits/i.test(text)) {
+    return {
+      code: null,
+      title: 'Transaction submission error (node reason hidden)',
+      hint: 'midnight-js submitTx can reject with an Effect FiberFailure whose message is only "Transaction submission error" and whose .cause is undefined. The node reason (for example RPC 1010) sits on a symbol-keyed Effect cause. This decoder walks own properties and symbol values; if 1010 is still absent, log the Effect cause chain. Not a node fix.',
+      upstream: 'https://github.com/midnightntwrk/servicedesk/issues/225',
+      raw: text,
+    };
+  }
   return { code: null, title: 'Unhandled submit error', hint: text || 'No error text.', upstream: null, raw: text };
 }
+
+export const builderCredit = CREDIT;
+
 
 export function formatMidnightRpcError(err) {
   const decoded = decodeMidnightRpcError(err);
