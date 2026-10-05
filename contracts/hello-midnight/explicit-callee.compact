@@ -1,0 +1,57 @@
+/*
+ * explicit-callee.compact — public-network workaround for missing caller.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/202
+ * Callee contracts on the public networks cannot read kernel.caller, and
+ * CallContext does not carry the calling entry point.
+ *
+ * Official Compact 0.35.0 / language 0.27.0 adds kernel.caller() and
+ * PublicAddress, and says to read the caller only where the call is known
+ * to come from a contract. That release targets ledger 9, which is not
+ * deployed on the public networks. Docs say use `compact update 0.31`
+ * for contracts deployed today:
+ *   https://docs.midnight.network/relnotes/compact
+ *
+ * This file stays on language >= 0.23 (lab pin Compact ~0.31.1). It does
+ * not call kernel.caller(). It does not invent a cross-contract API.
+ * The caller passes an explicit commitment. disclose() is required before
+ * the ledger write (https://docs.midnight.network/compact/explicit_disclosure).
+ * The first registration asserts the slot is empty so a second call cannot
+ * overwrite it.
+ *
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed. Not a node
+ * or indexer fix.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger allowedCaller: Bytes<32>;
+
+witness callerSecret(): Bytes<32>;
+
+circuit callerCommitment(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "hello-midnight:callee"),
+    secret
+  ]);
+}
+
+export circuit registerCaller(): [] {
+  assert(allowedCaller == pad(32, ""), "caller already registered");
+  const secret = callerSecret();
+  assert(secret != pad(32, ""), "caller secret must be non-empty");
+  allowedCaller = disclose(callerCommitment(secret));
+}
+
+export circuit acceptFromCaller(presented: Bytes<32>): [] {
+  assert(allowedCaller != pad(32, ""), "register caller first");
+  assert(presented == allowedCaller, "presented caller does not match");
+  assert(callerCommitment(callerSecret()) == allowedCaller, "witness does not match registered caller");
+}
