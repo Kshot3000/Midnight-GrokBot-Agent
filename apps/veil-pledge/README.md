@@ -31,6 +31,7 @@ Documented Pages path (when Actions enabled): `/pledge/`.
 - Does **not** run Compact, a proof server, Lace transfers, or real ADA tips from this UI.
 - Commitments and threshold “proofs” are **teaching stand-ins** — verify official Compact / Zswap crypto before shipping.
 - Export JSON may include amounts, notes, and salts — treat downloads as sensitive.
+- Imported / persisted amounts are sanitized on load: non-finite (`1e999` → Infinity), negative, or non-numeric amounts and range minimums are clamped to 0 / dropped, drafts are fully typed, and a threshold proof requires a positive finite amount on both sides — a crafted snapshot cannot fake money, prove a threshold trivially, or crash the board.
 
 ## Flow
 

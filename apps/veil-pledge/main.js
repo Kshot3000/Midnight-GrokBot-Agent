@@ -8,6 +8,7 @@ import {
   short,
   escapeHtml,
   commitHash,
+  proveThreshold as proveThresholdCore,
 } from "./pledge-core.mjs";
 import {
   loadStudioState,
@@ -472,8 +473,10 @@ import {
       return;
     }
 
-    // Simulated circuit: witness amount vs public threshold claim
-    const ok = p.amount >= threshold;
+    // Simulated circuit: witness amount vs public threshold claim.
+    // Single-source the core predicate — it requires a positive finite
+    // amount on both sides, so a hostile amount can never prove.
+    const ok = proveThresholdCore(p, threshold).ok;
     pushThreshLog(
       `Prove amount ≥ ${threshold} against ${short(p.commitment)} … ${ok ? "ACCEPT" : "REJECT"}`
     );

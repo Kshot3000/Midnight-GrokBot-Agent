@@ -57,4 +57,15 @@ describe('persist', () => {
     saveDraft(null, store);
     expect(loadDraft(store)).toBe(null);
   });
+
+  it('loadDraft normalizes a hostile stored draft instead of returning it verbatim', () => {
+    store.setItem('mn-veil-pledge-draft-v1', JSON.stringify({ commitment: 'c', amount: '50', salt: 123 }));
+    const draft = loadDraft(store);
+    expect(draft.amount).toBe(50);
+    expect(typeof draft.amount).toBe('number');
+    expect(draft.salt).toBe('123');
+    // A draft without a commitment is not a draft
+    store.setItem('mn-veil-pledge-draft-v1', JSON.stringify({ amount: 5 }));
+    expect(loadDraft(store)).toBe(null);
+  });
 });
