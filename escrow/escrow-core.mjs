@@ -11,7 +11,7 @@ export const DONATE_ADDR =
 export const EXPORT_KIND = 'midnight-lab.agent-escrow';
 export const L = 1_000_000;
 export const MAIN_PATH = ['created', 'funded', 'in_progress', 'settled'];
-export const ESCROW_STATES = ['created', 'funded', 'in_progress', 'settled', 'disputed', 'refunded'];
+export const ESCROW_STATES = ['created', 'funded', 'in_progress', 'settled', 'disputed', 'refunded', 'cancelled'];
 export const MILESTONE_STATUSES = ['pending', 'proof_submitted', 'released', 'rejected'];
 
 /** Money fields: finite and non-negative, else 0. JSON `1e999` parses to
@@ -23,7 +23,7 @@ export function finiteNonNeg(value) {
 }
 
 export const ROLE_ACTS = {
-  client: ['fund', 'start', 'settle', 'dispute', 'resume', 'refund', 'reset', 'approve1', 'reject2'],
+  client: ['fund', 'start', 'settle', 'dispute', 'resume', 'refund', 'cancel', 'reset', 'approve1', 'reject2'],
   agent: ['proof1', 'proof2', 'reset'],
   approver: ['approve1', 'reject2', 'reset'],
 };
@@ -39,6 +39,7 @@ export const WHY_DISABLED = {
   dispute: 'Available from funded or in_progress only.',
   resume: 'Available only while disputed, and only if the pre-dispute state was funded or in_progress.',
   refund: 'Available only while disputed.',
+  cancel: 'Available only before work starts (created or funded).',
   reset: 'Always available — clears local demo state.',
 };
 
@@ -53,6 +54,7 @@ export const SUCCESS_MSG = {
   dispute: 'Dispute opened.',
   resume: 'Dispute resolved — restored the pre-dispute state.',
   refund: 'Dispute refunded remaining balance.',
+  cancel: 'Escrow cancelled — remaining balance refunded locally.',
   reset: 'Local demo reset.',
 };
 
@@ -173,6 +175,8 @@ export function stateAllows(escrow, act) {
       return escrow.state === 'disputed' && restorableDisputeState(escrow);
     case 'refund':
       return escrow.state === 'disputed';
+    case 'cancel':
+      return escrow.state === 'created' || escrow.state === 'funded';
     case 'reset':
       return true;
     default:
@@ -197,6 +201,7 @@ export function nextAction(escrow, role) {
  * dispute/resume match Compact resolveDisputeResume: resume restores FUNDED
  * or IN_PROGRESS only. A missing resumeTo fails closed (does not skip start()).
  * Non-zero milestone.deadline uses the same strict-before rule as blockTimeLt.
+ * cancel matches Compact cancel(): only CREATED or FUNDED, then refund remainder.
  * LOCAL-TRUE studio stand-in — not an on-chain call.
  */
 export function applyAction(escrow, act, payload = {}) {
@@ -291,6 +296,18 @@ export function applyAction(escrow, act, payload = {}) {
         s.state = 'refunded';
         s.resumeTo = null;
         s = pushAudit(s, 'dispute_resolved_refund', 'client', { refund: rem });
+        break;
+      }
+      case 'cancel': {
+        // Compact cancel(): CREATED or FUNDED only. Refund remaining, then CANCELLED.
+        if (s.state !== 'created' && s.state !== 'funded') {
+          throw new Error('can only cancel before work starts');
+        }
+        const rem = balance(s);
+        s.refunded += rem;
+        s.state = 'cancelled';
+        s.resumeTo = null;
+        s = pushAudit(s, 'cancelled', 'client', { refund: rem });
         break;
       }
       case 'reset': {

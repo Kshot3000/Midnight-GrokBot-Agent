@@ -33,24 +33,38 @@ export async function sha256Hex(text, digestFn) {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+/** Money fields: finite and non-negative, else 0. JSON `1e999` parses to
+ *  Infinity and negative amounts used to pass normalize untouched, so a
+ *  crafted import / localStorage blob could render "Infinity ADA", poison
+ *  the vault sum, and prove any threshold trivially. Same guard as the
+ *  escrow / night-market cores' finiteNonNeg. */
+export function finiteNonNeg(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 export async function commitHash(amount, note, salt, digestFn) {
-  const payload = `${DOMAIN_COMMIT}|${Number(amount).toFixed(4)}|${note}|${salt}`;
+  const payload = `${DOMAIN_COMMIT}|${finiteNonNeg(amount).toFixed(4)}|${note}|${salt}`;
   return sha256Hex(payload, digestFn);
 }
 
 export function pledgeStats(pledges) {
   const list = pledges || [];
   const sealed = list.filter((p) => p.disclosure === 'sealed').length;
-  const sum = list.reduce((a, p) => a + (Number(p.amount) || 0), 0);
+  const sum = list.reduce((a, p) => a + finiteNonNeg(p.amount), 0);
   return { total: list.length, sealed, disclosed: list.length - sealed, sum };
 }
 
-/** Simulated threshold circuit: amount >= threshold (teaching only). */
+/** Simulated threshold circuit: amount >= threshold (teaching only).
+ *  Both sides must be positive finite amounts — an Infinity (or otherwise
+ *  non-finite) pledge amount is not a proof. */
 export function proveThreshold(pledge, threshold) {
   const thr = Number(threshold);
   if (!pledge) return { ok: false, error: 'no pledge' };
   if (!Number.isFinite(thr) || thr <= 0) return { ok: false, error: 'bad threshold' };
-  if (Number(pledge.amount) >= thr) return { ok: true, rangeMin: thr };
+  const amount = Number(pledge.amount);
+  if (!Number.isFinite(amount) || amount <= 0) return { ok: false, error: 'bad amount' };
+  if (amount >= thr) return { ok: true, rangeMin: thr };
   return { ok: false, error: 'below threshold' };
 }
 
@@ -71,13 +85,32 @@ function normalizePledge(p) {
     handle: String(p.handle || '@anon'),
     commitment: String(p.commitment || ''),
     salt: String(p.salt || ''),
-    amount: Number(p.amount) || 0,
+    amount: finiteNonNeg(p.amount),
     note: String(p.note || ''),
     createdAt: String(p.createdAt || ''),
     disclosure,
   };
-  if (disclosure === 'range' && p.rangeMin != null) out.rangeMin = Number(p.rangeMin);
+  if (disclosure === 'range') {
+    const rangeMin = finiteNonNeg(p.rangeMin);
+    if (rangeMin > 0) out.rangeMin = rangeMin;
+  }
   return out.id ? out : null;
+}
+
+/** Drafts used to pass normalize verbatim: a crafted draft whose amount
+ *  was a string crashed renderDraftPreview (`amount.toFixed` is not a
+ *  function) and broke the whole board render. Type every field; money
+ *  goes through finiteNonNeg so amount is always a finite number. */
+export function normalizeDraft(d) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return null;
+  if (!d.commitment) return null;
+  return {
+    amount: finiteNonNeg(d.amount),
+    note: String(d.note || ''),
+    handle: String(d.handle || '@anon'),
+    salt: String(d.salt || ''),
+    commitment: String(d.commitment),
+  };
 }
 
 export function normalizeStudioState(raw) {
@@ -87,8 +120,7 @@ export function normalizeStudioState(raw) {
   const pledges = Array.isArray(source.pledges)
     ? source.pledges.map(normalizePledge).filter(Boolean).slice(0, 100)
     : [];
-  let draft = source.draft && typeof source.draft === 'object' ? source.draft : null;
-  if (draft && !draft.commitment) draft = null;
+  const draft = normalizeDraft(source.draft);
   return {
     schemaVersion: SCHEMA_VERSION,
     pledges,
