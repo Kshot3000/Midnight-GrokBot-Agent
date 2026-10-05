@@ -1,0 +1,51 @@
+/*
+ * coin-index-gap.compact — record a shielded receipt without writeCoin.
+ *
+ * Official types:
+ *   https://docs.midnight.network/compact/standard-library/exports
+ *   QualifiedShieldedCoinInfo includes nonce, color, value, and mtIndex.
+ *   https://docs.midnight.network/compact/data-types/ledger-adt
+ *   Cell.writeCoin(coin, recipient) writes ShieldedCoinInfo and the runtime
+ *   fills mtIndex. The cell type must be QualifiedShieldedCoinInfo, so value
+ *   is part of the public ledger cell.
+ *
+ * receiveShielded(coin: ShieldedCoinInfo): [] does not return mtIndex.
+ * persistentCommit protects its input when rand is random, so a commitment
+ * may be disclosed into a Bytes<32> cell without writing the coin value.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/213
+ * This file does not add a Compact API. It does not deploy. It does not
+ * claim the public indexer or node was fixed.
+ *
+ * Language pin: Compact ~0.31.1 / language 0.23.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger coinCommit: Bytes<32>;
+export ledger noteCount: Counter;
+
+witness localNonce(): Bytes<32>;
+witness localColor(): Bytes<32>;
+witness localValue(): Uint<128>;
+witness localRand(): Bytes<32>;
+
+export circuit noteReceipt(): [] {
+  const opening = persistentCommit<Vector<3, Bytes<32>>>(
+    [
+      localNonce(),
+      localColor(),
+      persistentHash<Uint<128>>(localValue())
+    ],
+    localRand()
+  );
+  coinCommit = disclose(opening);
+  noteCount.increment(1);
+}
