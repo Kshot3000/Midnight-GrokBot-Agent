@@ -56,8 +56,9 @@ export const LEDGER_CUSTOM_ERRORS = {
   111: { name: 'TransactionTooLarge', hint: 'Transaction exceeds maximum allowed size. Reduce the payload or split the transaction.' },
   115: { name: 'InvalidProof', hint: 'Zero-knowledge proof verification failed. Regenerate the proof with a compatible proof server (lab pin 8.1.0).' },
   126: { name: 'Unbalanced', hint: 'Negative balance in a token type. The transaction does not balance.' },
-  154: { name: 'BlockLimitExceededError', hint: 'Transaction exceeds block limits. Reduce size or wait for a less full block. Related to a heavy deploy, not a proof-server crash.' },
+  154: { name: 'BlockLimitExceededError', hint: 'Infrastructure LedgerApiError. Official how-to: the transaction would exceed block resource limits. Reduce intents or calls, or split batched work. Not the Substrate sentence "Transaction would exhaust the block limits". https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors' },
   155: { name: 'FeeCalculationError', hint: 'Fee calculation failed. Official how-to: refresh fee estimates and confirm runtime packages match the support matrix. https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors' },
+  232: { name: 'FeeCalculation.BlockLimitExceeded', hint: 'Malformed-transaction variant from the official how-to table. Distinct from infrastructure code 154 BlockLimitExceededError and from a 1010 that has no Custom error u8. https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors' },
   166: { name: 'InvalidNetworkId', hint: 'Transaction network ID does not match the node. Check setNetworkId() against the target (Preprod vs undeployed).' },
   174: { name: 'MalformedContractDeploy', hint: 'Contract deployment is structurally invalid. Check non-zero balance or charged state in the deploy.' },
   179: { name: 'UnsupportedProofVersion', hint: 'Proof version not supported. Align the proof server and SDK (lab pins: proof-server 8.1.0, midnight-js 4.1.1).' },
@@ -124,12 +125,19 @@ export function decodeMidnightRpcError(err) {
     };
   }
   if (code === 1010 || /exhaust the block limits/i.test(text)) {
+    const noInnerU8 = !/Custom error:\s*\d+/i.test(text);
     return {
       code: 1010,
-      title: 'Transaction would exhaust the block limits',
-      hint: 'The node rejected the tx before it was a proof or balance failure. Shrink the call, drop extra contract maintenance, or retry when the block is less full. Official node text is RPC 1010. A Substrate check can omit Custom error: N; ledger code 154 is the documented BlockLimitExceededError when the inner u8 is present.',
+      ledgerCode: null,
+      noInnerU8,
+      title: noInnerU8
+        ? 'Transaction would exhaust the block limits (1010, no Custom error u8)'
+        : 'Transaction would exhaust the block limits',
+      hint: noInnerU8
+        ? 'Node text is "Transaction would exhaust the block limits" and there is no Custom error: N. Official how-to: 1010 without an inner u8 is Substrate validation, not a LedgerApiError. Do not map this sentence to 154 BlockLimitExceededError or 232 FeeCalculation.BlockLimitExceeded. Shrink the call or retry when the block is less full. This decoder does not fix the public node. https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors'
+        : 'RPC 1010 carried both the exhaust-the-block-limits sentence and an inner u8. Prefer the Custom error path (154 or 232) when that u8 is present.',
       upstream: 'https://github.com/midnightntwrk/servicedesk/issues/225',
-      docs: 'https://docs.midnight.network/nodes/error-codes',
+      docs: 'https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors',
       raw: text,
     };
   }
