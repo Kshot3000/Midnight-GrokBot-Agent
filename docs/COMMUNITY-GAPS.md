@@ -19,6 +19,7 @@ Checked 2026-10-04 against open `midnightntwrk/servicedesk` issues. No invented 
 | [servicedesk#230](https://github.com/midnightntwrk/servicedesk/issues/230) | 1AM Preprod indexer stalled about 27k blocks behind the public node | Indexer team |
 | [servicedesk#225](https://github.com/midnightntwrk/servicedesk/issues/225) | Node RPC 1010 block-limit rejection surfaces as a generic submission error | Wallet SDK / node error mapping |
 | [servicedesk#223](https://github.com/midnightntwrk/servicedesk/issues/223) | Public Preprod RPC head can go backwards between calls | Node / RPC |
+| [servicedesk#216](https://github.com/midnightntwrk/servicedesk/issues/216) | Official Preprod indexer skipped event ids 989781–989802 | Indexer team |
 | [servicedesk#226](https://github.com/midnightntwrk/servicedesk/issues/226) | No subset deploy or multi-insert verifier-key maintenance in midnight-js | midnight-js |
 
 This repo cannot patch `midnight-node` or the public indexer. It can keep the Compact starters honest and decode those failures so Cardano and Midnight builders do not blame their circuit.

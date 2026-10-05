@@ -1,3 +1,8 @@
+/**
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
 #!/usr/bin/env node
 /**
  * Preprod hello call — HONEST path.
@@ -39,6 +44,7 @@ import {
   printExitLegend,
   ok,
 } from './cli-format.mjs';
+import { formatMidnightRpcError } from './rpc-errors.mjs';
 import {
   buildPreprodWalletFromEnv,
   waitUntilConnected,
@@ -348,6 +354,8 @@ async function main() {
   } catch (e) {
     console.error('\nCALL PATH ERROR (honest — NOT claiming success):');
     console.error(String(e?.stack || e));
+    console.error(formatMidnightRpcError(e));
+
     let cause = e?.cause;
     let depth = 0;
     while (cause && depth < 6) {

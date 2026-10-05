@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeMidnightRpcError } from '../src/rpc-errors.mjs';
+import { decodeMidnightRpcError, compareObservedHeads, warnSkippedIndexerEvents } from '../src/rpc-errors.mjs';
 
 describe('decodeMidnightRpcError', () => {
   it('names RPC 1010 instead of a generic submission error', () => {

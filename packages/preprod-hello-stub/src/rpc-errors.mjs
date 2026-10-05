@@ -9,6 +9,9 @@
  * Credit: @kshot9000 https://x.com/kshot9000
  * Donate ADA: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
 export function decodeMidnightRpcError(err) {
@@ -53,4 +56,36 @@ export function formatMidnightRpcError(err) {
   lines.push(decoded.hint);
   if (decoded.upstream) lines.push(decoded.upstream);
   return lines.join('\n');
+}
+
+export function compareObservedHeads(first, second) {
+  const a = Number(first);
+  const b = Number(second);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    return { ok: false, backwards: false, title: 'Head probe incomplete', hint: 'Need two numeric heights before judging the Preprod RPC head.' };
+  }
+  if (b < a) {
+    return {
+      ok: false,
+      backwards: true,
+      title: 'Preprod RPC head moved backwards',
+      hint: `Head went ${a} -> ${b}. Re-query before treating a submit as a contract revert. Upstream: https://github.com/midnightntwrk/servicedesk/issues/223`,
+    };
+  }
+  return { ok: true, backwards: false, title: 'Head did not move backwards', hint: `${a} -> ${b}` };
+}
+
+export function warnSkippedIndexerEvents(ids) {
+  const nums = (ids || []).map(Number).filter(Number.isFinite).sort((x, y) => x - y);
+  const gaps = [];
+  for (let i = 1; i < nums.length; i += 1) {
+    if (nums[i] - nums[i - 1] > 1) gaps.push([nums[i - 1], nums[i]]);
+  }
+  return {
+    ok: gaps.length === 0,
+    gaps,
+    hint: gaps.length
+      ? 'Indexer event ids skipped. Do not assume contiguous ledger events. Upstream: https://github.com/midnightntwrk/servicedesk/issues/216'
+      : 'No skipped event ids in this sample.',
+  };
 }
