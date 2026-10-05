@@ -1,0 +1,45 @@
+/*
+ * disclose-boundary.compact — disclose() is not a publish.
+ *
+ * Official reads (not invented APIs):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   "Wrapping a value in disclose() does not publish it. disclose() clears
+ *    the compiler's private-data check so the value may cross a public
+ *    boundary; the value becomes visible only when it crosses one, through
+ *    a ledger write, a return from an exported circuit, or a
+ *    contract-to-contract call."
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * Upstream: midnightntwrk/midnight-docs#1245
+ * The cross-chain guide says a disclose() call publishes. That contradicts
+ * the security page the same guide links. This file does not edit that guide.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger published: Bytes<32>;
+export ledger writes: Counter;
+
+// Ledger write is the public boundary. disclose only clears the check.
+export circuit publishNote(note: Bytes<32>): [] {
+  published = disclose(note);
+  writes.increment(1);
+}
+
+// disclose into a local does not write the ledger, return the note, or call
+// another contract. The note stays off the public boundary.
+export circuit holdPrivate(note: Bytes<32>): [] {
+  const cleared = disclose(note);
+  assert(cleared != published, "local disclose is not a ledger write");
+}

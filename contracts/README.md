@@ -97,6 +97,10 @@ Do not invent APIs or RPCs here. Use official Midnight.js, indexer, and DApp con
 
 `contracts/hello-midnight/coin-index-gap.compact` records a `persistentCommit` receipt and does not call `writeCoin`. Official `writeCoin` fills a `QualifiedShieldedCoinInfo` cell, which includes `value`. See `docs/SHIELDED-INDEX-WITHOUT-VALUE.md`. Not a deploy and not an indexer fix.
 
+## disclose() is not the publish (midnight-docs #1245)
+
+`contracts/hello-midnight/disclose-boundary.compact` writes `disclose(note)` into a ledger cell in `publishNote` and only binds a local in `holdPrivate`. Official security page: `disclose()` clears the private-data check; the ledger write, exported return, or contract call is what makes the value visible. See `docs/DISCLOSE-DOES-NOT-PUBLISH.md`. Source check only; not a deploy.
+
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
