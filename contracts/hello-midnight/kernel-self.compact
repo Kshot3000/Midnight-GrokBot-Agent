@@ -1,0 +1,46 @@
+/*
+ * kernel-self.compact — ContractAddress bytes are a field, not a Kernel method.
+ *
+ * Official reads (not invented APIs):
+ *   kernel.self(): ContractAddress
+ *     https://docs.midnight.network/compact/data-types/ledger-adt
+ *   struct ContractAddress { bytes: Bytes<32>; }
+ *     https://docs.midnight.network/compact/standard-library/exports
+ *   kernel.self() example:
+ *     https://docs.midnight.network/compact/reference/compact-reference
+ *   MerkleTree.insert(item) inserts one leaf:
+ *     https://docs.midnight.network/compact/data-types/ledger-adt
+ *   emit in a constructor is a static error:
+ *     https://docs.midnight.network/compact/reference/compact-reference
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Kapa could not answer whether kernel.self().bytes exists. It does, as a
+ * field read on the ContractAddress returned by kernel.self(). kernel.bytes
+ * is not a documented Kernel operation. MerkleTree.insert takes one leaf.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only until the next compact compile. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger selfBytes: Bytes<32>;
+export ledger inserts: Counter;
+export ledger items: MerkleTree<10, Field>;
+
+export circuit rememberSelf(): [] {
+  selfBytes = disclose(kernel.self().bytes);
+}
+
+export circuit insertOne(item: Field): [] {
+  items.insert(disclose(item));
+  inserts.increment(1);
+}
