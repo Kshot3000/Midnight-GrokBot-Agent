@@ -1,0 +1,35 @@
+/*
+ * matrix-language-pin.compact — keep the compiler on the midnight-js 4.1.1 pin.
+ *
+ * Official language pragma:
+ *   https://docs.midnight.network/troubleshoot/compiler-errors
+ *   example: pragma language_version >= 0.23;
+ * Official version-mismatch sentence (when the runtime check fires):
+ *   "version mismatch: compiled code expects X.Y.Z, runtime is A.B.C"
+ *   https://docs.midnight.network/troubleshoot/compiler-errors
+ * Support matrix pairing:
+ *   https://docs.midnight.network/relnotes/support-matrix
+ *   Compact toolchain 0.31.1, compact-runtime 0.16.0, Midnight.js 4.1.1
+ *
+ * Upstream: midnightntwrk/servicedesk#236
+ * A contract with only `pragma language_version >= 0.20` can be compiled by
+ * compiler 0.34.0 / 0.35.0, which emits checkRuntimeVersion('0.19.0') or
+ * '0.20.0'. midnight-js 4.1.1 then fails deploy construction without the
+ * official version-mismatch sentence. This file keeps the 0.23 floor used
+ * by compiler 0.31.1. It does not invent a Compact API and is not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger rounds: Counter;
+
+export circuit tick(): [] {
+  rounds.increment(1);
+}
