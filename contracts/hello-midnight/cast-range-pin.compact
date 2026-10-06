@@ -1,0 +1,35 @@
+/*
+ * cast-range-pin.compact — explicit bound before a Uint cast.
+ *
+ * Official note: compiler 0.31.0 could drop a range-check constraint from
+ * generated ZK circuits for certain casts; 0.31.1 fixes that.
+ *   https://docs.midnight.network/tokens/unshielded-token
+ * Public-network pin remains Compact toolchain 0.31.1 / language ~0.23:
+ *   https://docs.midnight.network/relnotes/support-matrix
+ *   https://docs.midnight.network/getting-started/installation
+ *
+ * midnight-docs#1245 records an EffectStream guide that tells readers to run
+ * `compact update 0.31.0`, which both sets the machine default and pins the
+ * compiler the token tutorial warns about. This file does not invent a
+ * compiler flag. It keeps the cast and adds an assert the circuit can check
+ * even if a generated constraint is missing. Not compiled here. Not a deploy.
+ * Not a public indexer or node fix.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1245
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Uint<8>;
+
+export circuit storeByte(value: Uint<64>): [] {
+  assert(value <= 255, "value does not fit Uint<8>");
+  stored = disclose(value as Uint<8>);
+}
