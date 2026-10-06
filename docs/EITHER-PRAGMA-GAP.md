@@ -22,6 +22,9 @@ struct Either<A, B> {
 
 Constructors are the standard-library circuits `left<A, B>(value)` and `right<A, B>(value)`. If `isLeft` is true, `left` is populated and `right` should be `default<>`. The other way around when `isLeft` is false. There is no `Either.Left` constructor in the published exports page.
 
+
+Field-name split (same upstream issue): the public docs page still spells the tag `isLeft`. [LFDT-Minokawa/compact#833](https://github.com/LFDT-Minokawa/compact/issues/833) says compiler 0.35.0 reads `is_left`. This 0.31.1 sample does not switch. See `docs/EITHER-FIELD-SPLIT.md`.
+
 ## Lab source
 
 `contracts/hello-midnight/either-choice.compact` pins `pragma language_version >= 0.22 && <= 0.23`, builds both sides with `left` / `right`, asserts the inactive `Uint<64>` stays `0` (the default), then `disclose`s only the populated field into the ledger. It does not call `kernel.caller()` (ledger 9 only).

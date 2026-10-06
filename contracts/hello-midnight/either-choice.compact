@@ -14,6 +14,9 @@
  * unbounded `>= 0.26` pragma is correct. Official examples and the
  * public-network pin use a bounded language pragma, not ledger 9.
  * Compact toolchain pin for this lab: ~0.31.1 / language ~0.23.
+ * Field name on this pin is isLeft, matching docs.midnight.network.
+ * compact#833 (compiler 0.35.0, not this pin) reads is_left instead.
+ * Do not copy that spelling into this file. See docs/EITHER-FIELD-SPLIT.md.
  *
  * This file does not call kernel.caller() (ledger 9 only) and does not
  * claim a public deploy, indexer fix, or node fix. Source only.
