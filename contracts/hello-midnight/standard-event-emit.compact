@@ -1,0 +1,56 @@
+/*
+ * standard-event-emit.compact — emit only a standard event type, never from
+ * the constructor, and decode it with deserialize.
+ *
+ * Official reads (not invented APIs):
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ *   "Events are emitted via the form emit(e) where e is an expression whose
+ *    type is a standard event type."
+ *   "The type of every emit form is []."
+ *   "An attempt to emit the value of an expression that does not have a
+ *    standard event type is a static error."
+ *   "An attempt to emit an event, directly or indirectly, via the contract
+ *    constructor is a static error."
+ *   Official circuit:
+ *     emit(ShieldedSpend { nullifier: disclose(n) });
+ *     return deserialize<ShieldedSpend, 32>(x);
+ *   https://docs.midnight.network/compact/standard-library/exports
+ *   Events are struct types emitted with emit. ShieldedSpend is
+ *   { nullifier: Bytes<32> } and its serialized size is 32.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Kapa could not answer "how do I declare an event type and use the emit
+ * statement". A user-declared struct is not a standard event type.
+ * This file does not edit midnight-docs. It does not fix the public indexer
+ * or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger spends: Counter;
+
+constructor() {
+  spends.increment(0);
+}
+
+// Standard event only. disclose clears the private-data check so the
+// nullifier may enter the public event encoding. emit returns [].
+export circuit spend(n: Bytes<32>): [] {
+  emit(ShieldedSpend { nullifier: disclose(n) });
+  spends.increment(1);
+}
+
+// Events are serialized by emit. Callers decode with the documented size.
+export circuit deserializeShieldedSpend(x: Bytes<32>): ShieldedSpend {
+  return deserialize<ShieldedSpend, 32>(x);
+}
