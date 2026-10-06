@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PREPROD, BRAND } from './preprod-config.mjs';
+import { checkFaucetRequestPath } from './faucet-path-guard.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '../../..');
@@ -26,6 +27,10 @@ function loadDefaultAddress() {
 
 async function drip(baseUrl, address, captchaToken) {
   const url = `${baseUrl.replace(/\/$/, '')}${PREPROD.faucetDripsPath}`;
+  const pathCheck = checkFaucetRequestPath(url);
+  if (!pathCheck.ok) {
+    return { url, ok: false, skipped: true, failures: pathCheck.failures, upstream: pathCheck.upstream };
+  }
   const headers = { 'Content-Type': 'application/json' };
   if (captchaToken) headers['X-Captcha-Token'] = captchaToken;
   const body = {
