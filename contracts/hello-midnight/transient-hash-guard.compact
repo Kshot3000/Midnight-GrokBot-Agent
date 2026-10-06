@@ -1,0 +1,54 @@
+/*
+ * transient-hash-guard.compact — do not derive ledger state from transientHash.
+ *
+ * Official stdlib (CompactStandardLibrary exports):
+ *   https://docs.midnight.network/compact/standard-library/exports
+ * transientHash is a circuit-efficient compression to Field. It is not
+ * guaranteed to persist between upgrades. Docs say it should not be used to
+ * derive state data; persistentHash should. transientCommit is the form that
+ * can hide a witness without disclose, if rand is random. This sample does
+ * not use transientCommit.
+ *
+ * deserialize<T, #n> reconstructs an event type from its canonical size.
+ * Docs say it can only be instantiated for an event type. ShieldedSpend is
+ * a standard event with serialized size 32. Boolean is not an event type, so
+ * deserialize<Boolean, 1> is not a documented instantiation. disclose does
+ * not change the Compact type of a valid deserialize call.
+ *
+ * emit is only documented for a standard event type, and not from a
+ * constructor. This file does not emit.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * (Kapa could not answer transientHash stability or the Boolean deserialize
+ * snippet). This lab file is not a midnight-docs edit.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ * Not deployed. Not a public indexer or node fix.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger note: Bytes<32>;
+
+witness nonce(): Bytes<32>;
+
+export circuit recordNote(): [] {
+  const n = nonce();
+  assert(n != pad(32, ""), "nonce must be non-empty");
+  const checkA = transientHash<Bytes<32>>(n);
+  const checkB = transientHash<Bytes<32>>(n);
+  assert(checkA == checkB, "transient consistency only");
+  note = disclose(persistentHash<Bytes<32>>(n));
+}
+
+export circuit readSpend(raw: Bytes<32>): [] {
+  const spent = deserialize<ShieldedSpend, 32>(raw);
+  assert(spent.nullifier != pad(32, ""), "empty nullifier");
+}
