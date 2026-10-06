@@ -1,0 +1,35 @@
+/*
+ * circuit-count.compact — no published maximum circuit count.
+ *
+ * Official Compact reference (https://docs.midnight.network/compact/reference/compact-reference):
+ *   a contract may define several circuits, and at most one constructor.
+ *   A circuit that touches the public ledger requires a proof and a proving key.
+ * The reference does not state a maximum number of circuits. This file does not invent one.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Kapa could not answer the maximum circuits per contract. This sample has two
+ * exported circuits so a count is visible, not because two is a protocol cap.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger hits: Counter;
+
+export circuit ping(): [] {
+  hits.increment(1);
+}
+
+export circuit pingAgain(): [] {
+  hits.increment(1);
+}
