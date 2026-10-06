@@ -1,0 +1,43 @@
+/*
+ * merkle-insert.compact — one leaf per MerkleTree.insert / insertHash.
+ *
+ * Official reads (not invented APIs):
+ *   MerkleTree depth is 2 <= nat <= 32.
+ *   insert(item: value_type): [] inserts one leaf at the first free index.
+ *   insertHash(hash: Bytes<32>): [] inserts one leaf that is already a hash.
+ *   isFull(): Boolean reports that further direct inserts cannot proceed.
+ *     https://docs.midnight.network/compact/reference/ledger-adt
+ *   Private-data example uses items.insert(disclose(item)) for one Field:
+ *     https://docs.midnight.network/concepts/how-midnight-works/keeping-data-private
+ *
+ * Upstream: midnightntwrk/midnight-docs#63
+ * Related Kapa gap (how many leaves one insert updates): midnight-docs#1387
+ *
+ * insert hashes the leaf. insertHash stores a Bytes<32> the caller already
+ * hashed. Neither call takes a second leaf. This file does not compile, does
+ * not deploy, and does not fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only until the next compact compile.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger items: MerkleTree<10, Field>;
+
+export circuit insertLeaf(item: Field): [] {
+  assert(!items.isFull(), "tree is full");
+  items.insert(disclose(item));
+}
+
+export circuit insertPrehashed(hash: Bytes<32>): [] {
+  assert(!items.isFull(), "tree is full");
+  items.insertHash(disclose(hash));
+}
