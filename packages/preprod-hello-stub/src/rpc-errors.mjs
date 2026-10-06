@@ -102,6 +102,22 @@ export function decodeMidnightRpcError(err) {
       raw: text,
     };
   }
+  if (/OutsideTimeToDismiss|maximum time to dismiss|time to dismiss/i.test(text) && !/Custom error:\s*\d+/i.test(text)) {
+    const took = text.match(/would take ([0-9.]+)ms/i);
+    const cap = text.match(/at most ([0-9.]+)ms/i);
+    const size = text.match(/size of ([0-9,]+) bytes/i);
+    const measured = took && cap ? ` Observed ${took[1]}ms vs ${cap[1]}ms cap` : '';
+    const sized = size ? ` at ${size[1].replace(/,/g, '')} bytes` : '';
+    return {
+      code: /1010/.test(text) ? 1010 : null,
+      ledgerCode: 231,
+      title: 'FeeCalculation.OutsideTimeToDismiss (dismiss-time budget)',
+      hint: `Official how-to maps malformed variant 231 to FeeCalculation.OutsideTimeToDismiss: the transaction exceeds the maximum allowed time-to-dismiss for its byte size.${measured}${sized}. servicedesk#117: a single receiveUnshielded/sendUnshielded call was rejected this way while a larger pure-state call was accepted, so byte size alone is not the check. This decoder does not change fees or fix the public node. https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors https://docs.midnight.network/api-reference/error-reference/ledger-errors`,
+      upstream: 'https://github.com/midnightntwrk/servicedesk/issues/117',
+      docs: 'https://docs.midnight.network/api-reference/error-reference/ledger-errors',
+      raw: text,
+    };
+  }
   const custom = extractCustomErrorCode(text);
   if (custom != null) {
     const known = lookupLedgerCustomError(custom);

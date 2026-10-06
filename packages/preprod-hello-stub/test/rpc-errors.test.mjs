@@ -78,7 +78,16 @@ describe('decodeMidnightRpcError', () => {
     expect(decoded.docs).toBe('https://docs.midnight.network/nodes/error-codes');
   });
 
-  it('names documented fee variants 155 and 231', () => {
+  it('names OutsideTimeToDismiss when the node log has no Custom error line', () => {
+    const log = 'Transaction malformed: exceeded the maximum time to dismiss for transaction size; this transaction would take 15.706ms to dismiss, but given its size of 7090 bytes, it may take at most 15.000ms Malformed(FeeCalculation(OutsideTimeToDismiss))';
+    const decoded = decodeMidnightRpcError({ message: 'Transaction submission error', cause: undefined, [Symbol.for('effect/Runtime/FiberFailure/Cause')]: log });
+    expect(decoded.ledgerCode).toBe(231);
+    expect(decoded.title).toMatch(/OutsideTimeToDismiss/);
+    expect(decoded.upstream).toMatch(/servicedesk\/issues\/117/);
+    expect(decoded.hint).toMatch(/15\.706ms/);
+  });
+
+  it('names documented fee variants 155 and 231, () => {
     expect(lookupLedgerCustomError(155).name).toBe('FeeCalculationError');
     const outside = decodeMidnightRpcError('1010: Invalid Transaction: Custom error: 231');
     expect(outside.ledgerCode).toBe(231);
