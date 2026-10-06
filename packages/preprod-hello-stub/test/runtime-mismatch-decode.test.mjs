@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkRuntimePin, decodeRuntimeMismatch, MATRIX_PINS } from '../src/runtime-mismatch-decode.mjs';
+import { checkRuntimePin, decodeRuntimeMismatch, findDuplicateOnchainCopies, MATRIX_PINS } from '../src/runtime-mismatch-decode.mjs';
 
 /**
  * Built by @kshot9000 https://x.com/kshot9000
@@ -31,5 +31,21 @@ describe('servicedesk#236 deploy runtime mismatch', () => {
     const bad = checkRuntimePin("checkRuntimeVersion('0.19.0')\n\"@midnight-ntwrk/compact-runtime\": \"0.19.0\"");
     expect(bad.ok).toBe(false);
     expect(bad.failures.length).toBeGreaterThan(0);
+  });
+
+  it('names two physical onchain-runtime-v3 paths from an npm list', () => {
+    const same = findDuplicateOnchainCopies([
+      '/app/node_modules/@midnight-ntwrk/onchain-runtime-v3',
+      '/app/node_modules/@midnight-ntwrk/onchain-runtime-v3',
+    ]);
+    expect(same.ok).toBe(true);
+    const nested = findDuplicateOnchainCopies([
+      '/app/node_modules/@midnight-ntwrk/onchain-runtime-v3',
+      '/app/contracts/node_modules/@midnight-ntwrk/onchain-runtime-v3',
+    ]);
+    expect(nested.ok).toBe(false);
+    expect(nested.message).toContain('install one copy');
+    expect(nested.message).toContain(MATRIX_PINS.onchainRuntime);
+    expect(nested.copies).toHaveLength(2);
   });
 });

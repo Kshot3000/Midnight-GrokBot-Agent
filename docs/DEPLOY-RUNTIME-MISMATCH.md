@@ -9,7 +9,7 @@ Observed messages:
 1. `ContractConfigurationError: Failed to configure constructor context with coin public key`, caused by `TypeError: Cannot read properties of undefined (reading 'coinPublicKey')`. Upstream reproduced this with compiler 0.34.0 / 0.35.0 (`checkRuntimeVersion('0.19.0')` or `0.20.0`). The support matrix for midnight-js 4.1.1 lists Compact compiler 0.31.1 and compact-runtime 0.16.0.
 2. `Error: expected instance of ContractMaintenanceAuthority` when the contract package has its own copy of `@midnight-ntwrk/onchain-runtime-v3`, even at the same version. The matrix on-chain runtime is 3.0.0. Install one copy.
 
-`packages/preprod-hello-stub/src/runtime-mismatch-decode.mjs` maps those strings and a generated `checkRuntimeVersion('…')` pin onto the matrix. It does not call midnight-js deploy, does not submit a transaction, and does not claim a fix of the public indexer or node.
+`packages/preprod-hello-stub/src/runtime-mismatch-decode.mjs` maps those strings and a generated `checkRuntimeVersion('…')` pin onto the matrix. `findDuplicateOnchainCopies` names the second reproduction when a builder already has two resolved `@midnight-ntwrk/onchain-runtime-v3` paths (the official check is `npm list @midnight-ntwrk/onchain-runtime-v3`). It does not call midnight-js deploy, does not submit a transaction, and does not claim a fix of the public indexer or node.
 
 Official:
 

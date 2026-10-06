@@ -127,3 +127,36 @@ export function checkRuntimePin(source) {
     credit: CREDIT,
   };
 }
+
+/**
+ * Name the second reproduction in servicedesk#236: two physical copies of
+ * @midnight-ntwrk/onchain-runtime-v3, even at the same version. Callers pass
+ * paths they already collected (for example `npm list @midnight-ntwrk/onchain-runtime-v3`).
+ * This does not walk node_modules, does not call midnight-js, and does not invent an API.
+ * @param {readonly string[]} resolvedPaths
+ */
+export function findDuplicateOnchainCopies(resolvedPaths) {
+  const copies = [...new Set((resolvedPaths || []).map((item) => String(item).replace(/\\/g, '/').trim()).filter(Boolean))];
+  if (copies.length <= 1) {
+    return {
+      ok: true,
+      copies,
+      message: copies.length === 0
+        ? 'no @midnight-ntwrk/onchain-runtime-v3 paths supplied'
+        : `one copy of @midnight-ntwrk/onchain-runtime-v3 at ${copies[0]}`,
+      pins: MATRIX_PINS,
+      upstream: UPSTREAM_RUNTIME_MISMATCH,
+      official: OFFICIAL_VERSION_FIX,
+      credit: CREDIT,
+    };
+  }
+  return {
+    ok: false,
+    copies,
+    message: `the contract and midnight-js load different copies of @midnight-ntwrk/onchain-runtime-v3 (${copies.join(', ')}); install one copy at ${MATRIX_PINS.onchainRuntime}`,
+    pins: MATRIX_PINS,
+    upstream: UPSTREAM_RUNTIME_MISMATCH,
+    official: OFFICIAL_VERSION_FIX,
+    credit: CREDIT,
+  };
+}
