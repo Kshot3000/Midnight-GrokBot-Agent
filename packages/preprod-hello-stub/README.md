@@ -167,6 +167,10 @@ or use prove-bridge `:6399` (`POST /prove?contract=hello`).
 
 **LOCAL ZK only — NOT on-chain.**
 
+## Preprod wallet sync stall
+
+`src/wallet-sync-stall.mjs` classifies symptoms recorded on midnight-docs#1381 (connected is not synced, `waitForSyncedState` hang, non-linear dust commitment insert). It does not invent a sync duration and does not fix the public indexer or node. See [`docs/PREPROD-WALLET-SYNC-STALL.md`](../../docs/PREPROD-WALLET-SYNC-STALL.md).
+
 ## Ledger notes gap (no pin bump)
 
 Official ledger index still lists 8.1.2 as LATEST. midnight-docs#1453 tracks the missing 8.1.3 notes page. Lab proof-server stays 8.1.0. See [`docs/LEDGER-813-NOTES-GAP.md`](../../docs/LEDGER-813-NOTES-GAP.md). This does not fix the public indexer or node.
