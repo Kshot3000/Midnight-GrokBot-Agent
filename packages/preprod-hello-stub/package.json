@@ -25,6 +25,7 @@
     "preprod:head": "node src/sample-preprod-head.mjs",
     "prove:path": "node src/prove-path.mjs",
     "check:hello-deps": "node src/hello-world-deps.mjs",
+    "check:segment-polarity": "node src/segment-polarity.mjs",
     "check:circuit-context": "node --test test/circuit-context-sample.test.mjs"
   },
   "dependencies": {
