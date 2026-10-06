@@ -1,0 +1,43 @@
+/*
+ * deserialize-type.compact — return type of deserialize is T.
+ *
+ * Official Compact standard library:
+ *   circuit deserialize<T, #n>(x: Bytes<n>): T;
+ *   "deserialize can only be instantiated for an event type and its
+ *    canonical serialized size."
+ *   https://docs.midnight.network/compact/standard-library/exports
+ * Official event example returns ShieldedSpend from
+ *   deserialize<ShieldedSpend, 32>:
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ * disclose() does not change a type. It clears the private-data check:
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * The Kapa review asked for the type of
+ *   disclose(deserialize<Boolean, 1>(flag)).
+ * This file does not invent a Boolean encoding size. The stdlib note
+ * limits deserialize to an event type. ShieldedSpend is the event type
+ * in the official example. disclose does not retype that result.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger seenNullifier: Bytes<32>;
+
+// decoded has type ShieldedSpend, the first type argument. disclose does
+// not change that type; the ledger write is the public boundary.
+export circuit noteSpend(encoded: Bytes<32>): [] {
+  const decoded: ShieldedSpend = deserialize<ShieldedSpend, 32>(encoded);
+  seenNullifier = disclose(decoded.nullifier);
+}
