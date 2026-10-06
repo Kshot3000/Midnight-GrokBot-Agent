@@ -23,7 +23,8 @@
     "check:escrow-artifacts": "node src/check-escrow-artifacts.mjs",
     "preprod:call": "node src/call-preprod.mjs",
     "preprod:head": "node src/sample-preprod-head.mjs",
-    "prove:path": "node src/prove-path.mjs"
+    "prove:path": "node src/prove-path.mjs",
+    "check:hello-deps": "node src/hello-world-deps.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
