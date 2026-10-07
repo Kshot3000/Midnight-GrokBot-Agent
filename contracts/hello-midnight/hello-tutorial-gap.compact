@@ -1,0 +1,34 @@
+/*
+ * hello-tutorial-gap.compact
+ *
+ * Lab copy of the published getting-started Hello World contract.
+ * Source: https://docs.midnight.network/getting-started/hello-world
+ * Upstream gap: https://github.com/midnightntwrk/midnight-docs/issues/1396
+ *
+ * The published sample is only this pragma, one public Opaque<"string">
+ * ledger field, and storeMessage. Circuit arguments are private. disclose()
+ * is required before the public write. The tutorial deploys with
+ * `yarn test:local` on the Docker devnet and does not show a witness,
+ * a ledger read-back, or the Preprod path (`yarn proof:up` /
+ * `yarn test:preprod` lives on /guides/deploy-mn-app, not on this page).
+ *
+ * Do not add a getter circuit here. Public ledger reads are off-chain.
+ * Do not invent a witness API; witnesses are declared in the election and
+ * bulletin-board examples, not in this tutorial.
+ *
+ * Pins: Compact ~0.31.1 / language 0.23, midnight-js 4.1.1,
+ * DApp Connector 4.0.1, proof-server 8.1.0.
+ * This file does not deploy and does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+pragma language_version 0.23;
+
+export ledger message: Opaque<"string">;
+
+export circuit storeMessage(newMessage: Opaque<"string">): [] {
+  message = disclose(newMessage);
+}
