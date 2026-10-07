@@ -4,9 +4,11 @@ Upstream: [midnightntwrk/servicedesk#223](https://github.com/midnightntwrk/servi
 
 On 2 Oct 2026, consecutive `chain_getHeader` calls to the public Preprod RPC returned HTTP 200 with a block number that stepped backwards (largest reported step back: 15). The same client against preview did not. Official endpoint list: https://docs.midnight.network/guides/networks-and-environments (`https://rpc.preprod.midnight.network`).
 
-This lab does not fix the public node or indexer. `packages/preprod-hello-stub/src/head-consistency.mjs` only compares header numbers a caller already has. `npm run preprod:head` posts the documented JSON-RPC method `chain_getHeader` a few times and exits 2 if the sampled head decreases. A decrease means the client saw inconsistent backends; it is not a local chain reorg diagnosis.
+The same report also shows `system_syncState` returning `currentBlock == highestBlock` at a height below a `highestBlock` already seen seconds earlier (12:19:22 UTC: both fields at 2804284 after 2804291). That response looks synced. It is not a local reorg diagnosis, and this lab does not fix the public node or indexer.
 
-Related open reports read this run: [#225](https://github.com/midnightntwrk/servicedesk/issues/225) (RPC 1010 hidden by a generic submission error; already decoded in this stub), [#226](https://github.com/midnightntwrk/servicedesk/issues/226) (subset deploy), [#230](https://github.com/midnightntwrk/servicedesk/issues/230) (1AM indexer tip lag — not the public Midnight indexer).
+`packages/preprod-hello-stub/src/head-consistency.mjs` compares header numbers a caller already has. `packages/preprod-hello-stub/src/sync-state-lag.mjs` compares `system_syncState` samples the same way and flags a false-synced lower head. `npm run preprod:head` posts the documented JSON-RPC method `chain_getHeader` a few times and exits 2 if the sampled head decreases. A decrease means the client saw inconsistent backends.
+
+Related open reports read this run: [#225](https://github.com/midnightntwrk/servicedesk/issues/225) (RPC 1010 hidden by a generic submission error; already decoded in this stub), [#226](https://github.com/midnightntwrk/servicedesk/issues/226) (subset deploy), [#230](https://github.com/midnightntwrk/servicedesk/issues/230) (1AM indexer tip lag — not the public Midnight indexer), [#236](https://github.com/midnightntwrk/servicedesk/issues/236) (deploy errors that do not name a runtime mismatch).
 
 Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Local proof server, from https://docs.midnight.network/getting-started/installation :
 
