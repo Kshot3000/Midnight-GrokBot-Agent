@@ -1,0 +1,32 @@
+/*
+ * pragma-form.compact — language pragma that matches the lab pin.
+ *
+ * Official grammar (version-atom is nat, nat.nat, or nat.nat.nat):
+ *   https://docs.midnight.network/compact/reference/compact-grammar
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ * Official pages still show three different strings:
+ *   pragma language_version 0.16;          writing a contract
+ *   pragma language_version >= 0.23;       troubleshoot compiler errors
+ *   pragma language_version 0.23.0;        security and best practices
+ * Bulletin board uses the pair form this file uses:
+ *   https://docs.midnight.network/examples/dapps/bboard
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ *           LFDT-Minokawa/compact#833 (pragma form)
+ * This file does not invent a Compact API and is not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger rounds: Counter;
+
+export circuit tick(): [] {
+  rounds.increment(1);
+}
