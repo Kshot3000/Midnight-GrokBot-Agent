@@ -15,7 +15,9 @@ This lab does not re-query the public indexer and does not fix it or the node. `
 - a saved cursor resumed on a different host is `non-portable-resume`
 - a resume index inside 989781–989802 is the same non-portable class
 
-The helper never adds the missing count onto a saved index. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+The helper never adds the missing count onto a saved index.
+`decodeDustTreeInsert` maps the official networks-page string `values inserted non-linearly into dust generation tree` (also `zswap commitment tree` and `dust commitment tree`) onto that same instruction. servicedesk#216 recorded the wallet form `expected to insert index 399177, but received 399179` after a preseed cut against the official indexer resumed on another indexer. The helper reads the error text the caller already has. It does not query either indexer.
+ Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

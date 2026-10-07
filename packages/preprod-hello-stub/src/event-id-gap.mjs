@@ -153,4 +153,48 @@ export function classifyEventIdSequence(input = {}) {
   };
 }
 
+
+/**
+ * Name the dust-tree insert error the official networks guide already lists
+ * for a non-portable indexer cursor. Does not query an indexer.
+ * Official row: "values inserted non-linearly into dust generation tree".
+ * Upstream numbers: servicedesk#216 (official Preprod skip 989781-989802).
+ * @param {unknown} error
+ */
+export function decodeDustTreeInsert(error) {
+  const blob = error == null
+    ? ''
+    : typeof error === 'string'
+      ? error
+      : [error.message, error.cause && error.cause.message].filter(Boolean).join(' ');
+  const match = blob.match(/values inserted non-linearly into (dust generation tree|zswap commitment tree|dust commitment tree); expected to insert index (\d+), but received (\d+)/);
+  if (!match) {
+    return {
+      ok: true,
+      classification: 'not-dust-tree-insert',
+      title: 'Error is not the documented non-linear tree insert',
+      hint: 'This helper only names the string on the official networks page. It does not call an indexer or node.',
+      upstream: UPSTREAM,
+      docs: DOCS,
+      credit: CREDIT,
+    };
+  }
+  const tree = match[1];
+  const expected = Number(match[2]);
+  const received = Number(match[3]);
+  return {
+    ok: false,
+    classification: 'non-portable-dust-cursor',
+    tree,
+    expected,
+    received,
+    title: 'Saved sync cursor is not portable onto this indexer',
+    hint: `Official networks guide: "${tree}" expected index ${expected} but received ${received} when saved sync state resumes on another indexer. servicedesk#216 reports official Preprod event ids 989781-989802 missing at block 1130996, so later ids differ by 22 from another indexer of the same chain. Discard that state and sync from genesis. Do not shift cursors by hand. Not a public indexer or node fix.`,
+    upstream: UPSTREAM,
+    docs: DOCS,
+    reportedSkip: REPORTED_PREPROD_EVENT_SKIP,
+    credit: CREDIT,
+  };
+}
+
 export const eventIdGapCredit = CREDIT;
