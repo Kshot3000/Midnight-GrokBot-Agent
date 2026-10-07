@@ -1,5 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { classifyIndexerTipLag, indexerTipLagCredit } from '../src/indexer-tip-lag.mjs';
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {
+  HEIGHT_QUERY,
+  REPORTED,
+  classifyIndexerTipLag,
+  heightFromIndexerBody,
+} from '../src/indexer-tip-lag.mjs';
 
 /**
  * Built by @kshot9000 https://x.com/kshot9000
@@ -8,42 +14,37 @@ import { classifyIndexerTipLag, indexerTipLagCredit } from '../src/indexer-tip-l
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
-describe('classifyIndexerTipLag', () => {
-  it('explains a missing output when the public indexer already has the tx', () => {
-    const result = classifyIndexerTipLag({
-      publicTip: 2825871,
-      walletIndexerTip: 2797947,
-      publicIndexerTip: 2821114,
-      txBlock: 2821114,
-    });
-    expect(result.ok).toBe(false);
-    expect(result.classification).toBe('wallet-indexer-behind-public-confirmation');
-    expect(result.walletLagBlocks).toBe(27924);
-    expect(result.hint).toMatch(/servicedesk#230/);
-    expect(result.hint).toMatch(/not a failed prove/);
-    expect(result.upstream).toBe('https://github.com/midnightntwrk/servicedesk/issues/230');
-    expect(result.publicIndexer).toBe('https://indexer.preprod.midnight.network/api/v4/graphql');
-  });
+test('documented block.height body parses', () => {
+  assert.equal(HEIGHT_QUERY, '{ block { height } }');
+  assert.equal(heightFromIndexerBody({ data: { block: { height: 2825871 } } }), 2825871);
+  assert.equal(heightFromIndexerBody({ data: { block: { height: '2797947' } } }), 2797947);
+  assert.equal(heightFromIndexerBody({ errors: [{ message: 'no' }] }), null);
+});
 
-  it('does not call a stall when the wallet tip already covers the tx block', () => {
-    const result = classifyIndexerTipLag({
-      publicTip: 100,
-      walletIndexerTip: 100,
-      publicIndexerTip: 100,
-      txBlock: 90,
-    });
-    expect(result.ok).toBe(true);
-    expect(result.classification).toBe('aligned');
+test('servicedesk#230 heights classify as a third-party stall', () => {
+  const result = classifyIndexerTipLag({
+    publicTip: REPORTED.publicTip,
+    thirdPartyTip: REPORTED.thirdPartyTip,
+    txBlock: REPORTED.txBlock,
+    stalledHours: REPORTED.stalledHours,
+    thirdPartyHost: REPORTED.thirdPartyHost,
   });
+  assert.equal(result.classification, 'third-party-indexer-behind-public-tip');
+  assert.equal(result.lagBlocks, 27924);
+  assert.equal(result.txAboveThirdParty, true);
+  assert.equal(result.matchesReport, true);
+  assert.match(result.upstream, /servicedesk\/issues\/230/);
+  assert.match(result.claim, /not an indexer or node fix/);
+  assert.match(result.credit, /kshot9000@gmail.com/);
+});
 
-  it('refuses incomplete heights instead of inventing a query', () => {
-    const result = classifyIndexerTipLag({ publicTip: 10 });
-    expect(result.classification).toBe('incomplete');
-    expect(result.hint).toMatch(/does not call the indexer/);
-  });
+test('a tip at or above the public tip is not the stall', () => {
+  const result = classifyIndexerTipLag({ publicTip: 100, thirdPartyTip: 100, txBlock: 90 });
+  assert.equal(result.classification, 'third-party-tip-not-behind');
+});
 
-  it('keeps the lab credit block', () => {
-    expect(indexerTipLagCredit).toContain('Email: kshot9000@gmail.com');
-    expect(indexerTipLagCredit).toContain('Built by @kshot9000 https://x.com/kshot9000');
-  });
+test('missing heights stay incomplete', () => {
+  const result = classifyIndexerTipLag({});
+  assert.equal(result.classification, 'incomplete');
+  assert.match(result.hint, /block \{ height \}/);
 });

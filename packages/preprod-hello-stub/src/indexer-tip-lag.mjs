@@ -1,11 +1,12 @@
 /**
- * Classify a missing Preprod shielded output as wallet-indexer tip lag
- * versus a public confirmation. Uses heights the caller already observed.
- * Does not query an indexer and does not fix the public indexer or node.
+ * Classify a third-party Preprod indexer tip against a public tip.
+ * Uses only the documented GraphQL shape `{ block { height } }`.
+ * Does not call an indexer and does not claim the public indexer or node is fixed.
  *
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/230
- * Public Preprod indexer (docs): https://indexer.preprod.midnight.network/api/v4/graphql
- * https://docs.midnight.network/guides/networks-and-environments
+ * Official query: https://docs.midnight.network/guides/networks-and-environments
+ * Public Preprod indexer named there:
+ * https://indexer.preprod.midnight.network/api/v4/graphql
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -13,9 +14,21 @@
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
-const UPSTREAM = 'https://github.com/midnightntwrk/servicedesk/issues/230';
-const DOCS = 'https://docs.midnight.network/guides/networks-and-environments';
-const PUBLIC_PREPROD_INDEXER = 'https://indexer.preprod.midnight.network/api/v4/graphql';
+export const UPSTREAM = 'https://github.com/midnightntwrk/servicedesk/issues/230';
+export const DOCS = 'https://docs.midnight.network/guides/networks-and-environments';
+export const PUBLIC_INDEXER = 'https://indexer.preprod.midnight.network/api/v4/graphql';
+export const HEIGHT_QUERY = '{ block { height } }';
+
+/** Heights named in servicedesk#230. Not a live measurement. */
+export const REPORTED = Object.freeze({
+  publicTip: 2825871,
+  thirdPartyTip: 2797947,
+  lagBlocks: 27924,
+  stalledHours: 4,
+  tx: 'e0f1b47301c0456d429b4059e4272396732cd140e02ff163692c3366d3874605',
+  txBlock: 2821114,
+  thirdPartyHost: 'api-preprod.1am.xyz',
+});
 
 const CREDIT = [
   'Built by @kshot9000 https://x.com/kshot9000',
@@ -24,65 +37,92 @@ const CREDIT = [
   'Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation',
 ].join('\n');
 
-function height(value) {
-  if (value == null || value === '') return null;
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < 0) return null;
-  return n;
+export function heightFromIndexerBody(body) {
+  const height = body?.data?.block?.height;
+  if (typeof height === 'number' && Number.isInteger(height) && height >= 0) return height;
+  if (typeof height === 'string' && /^[0-9]+$/.test(height)) return Number(height);
+  return null;
 }
 
+/**
+ * @param {{ publicTip?: number, thirdPartyTip?: number, txBlock?: number, stalledHours?: number, thirdPartyHost?: string }} [input]
+ */
 export function classifyIndexerTipLag(input = {}) {
-  const publicTip = height(input.publicTip);
-  const walletIndexerTip = height(input.walletIndexerTip ?? input.indexerTip);
-  const publicIndexerTip = height(input.publicIndexerTip);
-  const txBlock = height(input.txBlock);
+  const publicTip = input.publicTip;
+  const thirdPartyTip = input.thirdPartyTip;
+  const txBlock = input.txBlock ?? null;
+  const stalledHours = input.stalledHours ?? null;
+  const thirdPartyHost = input.thirdPartyHost ?? REPORTED.thirdPartyHost;
 
-  if (publicTip == null || walletIndexerTip == null) {
+  if (!Number.isInteger(publicTip) || !Number.isInteger(thirdPartyTip)) {
     return {
       ok: false,
       classification: 'incomplete',
-      title: 'Indexer tip probe incomplete',
-      hint: 'Need numeric publicTip and walletIndexerTip before judging lag. This helper does not call the indexer.',
+      title: 'Indexer tip sample incomplete',
+      hint: `Need integer heights from the documented query ${HEIGHT_QUERY}. This helper does not query an indexer.`,
       upstream: UPSTREAM,
       docs: DOCS,
-      publicIndexer: PUBLIC_PREPROD_INDEXER,
+      query: HEIGHT_QUERY,
+      credit: CREDIT,
     };
   }
 
-  const walletLag = publicTip - walletIndexerTip;
-  const txAheadOfWallet = txBlock != null && txBlock > walletIndexerTip;
-  const publicHasTx = publicIndexerTip != null && txBlock != null && publicIndexerTip >= txBlock;
-  const walletBehindPublicIndexer = publicIndexerTip != null && walletIndexerTip + 1 < publicIndexerTip;
+  const lagBlocks = publicTip - thirdPartyTip;
+  const txAboveThirdParty = Number.isInteger(txBlock) && txBlock > thirdPartyTip;
+  const matchesReport =
+    publicTip === REPORTED.publicTip &&
+    thirdPartyTip === REPORTED.thirdPartyTip &&
+    lagBlocks === REPORTED.lagBlocks;
 
-  let classification = 'aligned';
-  let title = 'Wallet indexer tip is not behind this sample';
-  let hint = 'Wallet indexer tip is at or above the public tip in this sample. A missing output is not explained by tip lag.';
+  if (lagBlocks > 0 && (txAboveThirdParty || (stalledHours != null && stalledHours >= REPORTED.stalledHours))) {
+    return {
+      ok: true,
+      classification: 'third-party-indexer-behind-public-tip',
+      publicTip,
+      thirdPartyTip,
+      lagBlocks,
+      txBlock,
+      txAboveThirdParty,
+      stalledHours,
+      thirdPartyHost,
+      matchesReport,
+      title: 'Third-party Preprod indexer tip is behind the public tip',
+      hint: 'A wallet pointed at the lagging host cannot see a shielded output whose block is above that tip. The official public indexer URL is unchanged. This classification does not restart 1AM and does not fix the public indexer or node.',
+      publicIndexer: PUBLIC_INDEXER,
+      upstream: UPSTREAM,
+      docs: DOCS,
+      query: HEIGHT_QUERY,
+      claim: 'tip-lag classification only — not an indexer or node fix',
+      credit: CREDIT,
+    };
+  }
 
-  if (txAheadOfWallet && publicHasTx) {
-    classification = 'wallet-indexer-behind-public-confirmation';
-    title = 'Wallet indexer tip is behind a publicly confirmed transaction';
-    hint = `Transaction block ${txBlock} is above wallet indexer tip ${walletIndexerTip} and at or below public indexer tip ${publicIndexerTip}. The public Preprod indexer can already see it. This is wallet-indexer lag (servicedesk#230 reported api-preprod.1am.xyz), not a failed prove and not a fix of the public indexer.`;
-  } else if (txAheadOfWallet) {
-    classification = 'tx-above-wallet-indexer-tip';
-    title = 'Transaction block is above the wallet indexer tip';
-    hint = `Transaction block ${txBlock} is ${txBlock - walletIndexerTip} blocks above wallet indexer tip ${walletIndexerTip}. Do not treat a missing shielded output as a contract failure until this indexer catches up. This lab does not fix that indexer.`;
-  } else if (walletLag > 0 || walletBehindPublicIndexer) {
-    classification = 'wallet-indexer-behind-public-tip';
-    title = 'Wallet indexer tip is behind the public chain tip';
-    hint = `Wallet indexer tip ${walletIndexerTip} is ${walletLag} blocks behind public tip ${publicTip}. Compare with the documented public indexer ${PUBLIC_PREPROD_INDEXER} before blaming the contract. Not a public indexer or node fix.`;
+  if (lagBlocks <= 0 && !txAboveThirdParty) {
+    return {
+      ok: true,
+      classification: 'third-party-tip-not-behind',
+      publicTip,
+      thirdPartyTip,
+      lagBlocks,
+      title: 'Third-party tip is not behind the public tip in this sample',
+      hint: 'A single sample is not a health check. This helper does not query an indexer.',
+      upstream: UPSTREAM,
+      docs: DOCS,
+      credit: CREDIT,
+    };
   }
 
   return {
-    ok: classification === 'aligned',
-    classification,
-    walletLagBlocks: walletLag,
-    txAheadOfWallet,
-    publicHasTx,
-    title,
-    hint,
+    ok: false,
+    classification: 'unexpected',
+    publicTip,
+    thirdPartyTip,
+    lagBlocks,
+    title: 'Indexer tip sample does not match a behind-public-tip stall',
+    hint: 'Pass heights already observed. Do not invent a new GraphQL field.',
     upstream: UPSTREAM,
     docs: DOCS,
-    publicIndexer: PUBLIC_PREPROD_INDEXER,
+    credit: CREDIT,
   };
 }
 
