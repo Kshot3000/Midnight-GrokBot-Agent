@@ -30,7 +30,8 @@
     "check:language-pin": "node --test test/matrix-language-pin.test.mjs",
     "check:circuit-count": "node --test test/circuit-count-invariant.test.mjs",
     "check:dust-balance-stall": "node --test test/dust-balance-stall.test.mjs",
-    "check:safe-sub": "node --test test/safe-sub-invariant.test.mjs"
+    "check:safe-sub": "node --test test/safe-sub-invariant.test.mjs",
+    "check:assert-fail": "node --test test/assert-fail-decode.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
