@@ -28,7 +28,8 @@
     "check:segment-polarity": "node src/segment-polarity.mjs",
     "check:circuit-context": "node --test test/circuit-context-sample.test.mjs",
     "check:language-pin": "node --test test/matrix-language-pin.test.mjs",
-    "check:circuit-count": "node --test test/circuit-count-invariant.test.mjs"
+    "check:circuit-count": "node --test test/circuit-count-invariant.test.mjs",
+    "check:dust-balance-stall": "node --test test/dust-balance-stall.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
