@@ -43,7 +43,8 @@
     "check:proof-ready": "node --test test/proof-ready-decode.test.mjs",
     "check:owner-rotate": "node --test test/owner-rotate-invariant.test.mjs",
     "check:prove-topology": "node --test test/prove-topology.test.mjs",
-    "check:aeo-llms": "node --test test/aeo-llms-index.test.mjs"
+    "check:aeo-llms": "node --test test/aeo-llms-index.test.mjs",
+    "check:preprod-blockfrost": "node --test test/preprod-blockfrost-cutoff.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
