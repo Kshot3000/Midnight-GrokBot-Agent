@@ -34,7 +34,8 @@
     "check:assert-fail": "node --test test/assert-fail-decode.test.mjs",
     "check:seed-deploy-gap": "node --test test/node-seed-deploy-gap.test.mjs",
     "check:sealed-organizer": "node --test test/sealed-organizer-invariant.test.mjs",
-    "check:kapa-mcp": "node --test test/kapa-mcp-endpoint.test.mjs"
+    "check:kapa-mcp": "node --test test/kapa-mcp-endpoint.test.mjs",
+    "check:aura-babe-doc": "node --test test/aura-babe-doc-gap.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
