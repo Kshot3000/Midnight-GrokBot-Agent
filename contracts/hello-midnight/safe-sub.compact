@@ -1,0 +1,46 @@
+/*
+ * safe-sub.compact — assert before Uint subtraction.
+ *
+ * Official behavior (not an invented API):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   section "Compact arithmetic behavior" and "Validating inputs before computing"
+ *
+ * Compact does not wrap. `balance - amount` aborts at runtime with
+ * "result of subtraction would be negative" when amount > balance.
+ * The official safe path discloses the amount, asserts amt <= balance
+ * with "insufficient balance", then subtracts.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Compact reference pages are synced from LFDT-Minokawa/compact and still
+ * leave this arithmetic failure mode easy to miss. This lab file is not a
+ * fix to those pages and does not claim a public deploy.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Official sample uses
+ * `pragma language_version 0.23.0`. Not compiled here. Not deployed.
+ * Does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger balance: Uint<64>;
+
+constructor() {
+  balance = 5;
+}
+
+export circuit unsafeSub(amount: Uint<64>): [] {
+  balance = balance - disclose(amount);
+}
+
+export circuit safeSub(amount: Uint<64>): [] {
+  const amt = disclose(amount);
+  assert(amt <= balance, "insufficient balance");
+  balance = balance - amt;
+}
