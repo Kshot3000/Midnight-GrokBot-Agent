@@ -1,0 +1,12 @@
+pragma language_version >= 0.23.0;
+
+// Lab note only. Do not deploy this file as an auth contract.
+// Official: https://docs.midnight.network/guides/security-best-practices
+// Upstream: https://github.com/midnightntwrk/midnight-docs/issues/902
+// ownPublicKey() is a witness. Do not assert it against owner.
+// The safe claim path is contracts/hello-midnight/caller-auth.compact.
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation

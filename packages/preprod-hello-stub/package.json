@@ -44,7 +44,8 @@
     "check:owner-rotate": "node --test test/owner-rotate-invariant.test.mjs",
     "check:prove-topology": "node --test test/prove-topology.test.mjs",
     "check:aeo-llms": "node --test test/aeo-llms-index.test.mjs",
-    "check:preprod-blockfrost": "node --test test/preprod-blockfrost-cutoff.test.mjs"
+    "check:preprod-blockfrost": "node --test test/preprod-blockfrost-cutoff.test.mjs",
+    "check:own-pubkey": "node --test test/own-pubkey-auth-scan.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
