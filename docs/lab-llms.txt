@@ -1,0 +1,20 @@
+# Midnight lab link index
+
+> Local map for Kshot3000/Midnight-GrokBot-Agent. Not the official docs index. Official index: https://docs.midnight.network/llms.txt
+
+Upstream gap: midnightntwrk/midnight-docs#1386 (description frontmatter still open; published llms.txt was a link index when checked 2026-10-07).
+
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+
+- [Official llms.txt](https://docs.midnight.network/llms.txt): published link index; do not treat a prose-only copy as the map.
+- [Security best practices](https://docs.midnight.network/guides/security-best-practices): ownPublicKey() is a witness; authenticate with a derived identity.
+- [Smart contract security](https://docs.midnight.network/compact/smart-contract-security): do not use ownPublicKey() to verify the caller.
+- [Support matrix](https://docs.midnight.network/relnotes/support-matrix): compatibility pins, including midnight-js 4.1.1 and DApp Connector API 4.0.1.
+- [Kapa MCP server](https://docs.midnight.network/ai-integration/kapa-mcp-server): published endpoint https://midnight.mcp.kapa.ai.
+
+This file does not invent Compact circuits, RPC methods, or indexer queries. It does not claim the public indexer or node was fixed.
+
+Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
