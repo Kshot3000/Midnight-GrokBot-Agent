@@ -48,7 +48,8 @@
     "check:preprod-blockfrost": "node --test test/preprod-blockfrost-cutoff.test.mjs",
     "check:own-pubkey": "node --test test/own-pubkey-auth-scan.test.mjs",
     "check:pragma-form": "node --test test/pragma-form.test.mjs",
-    "check:indexer-usability": "node --test test/indexer-usability-gap.test.mjs"
+    "check:indexer-usability": "node --test test/indexer-usability-gap.test.mjs",
+    "check:node-seed-wallet": "node --test test/node-seed-wallet-gap.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
