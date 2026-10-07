@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   classifyEventIdSequence,
+  decodeDustTreeInsert,
   eventIdGapCredit,
   REPORTED_PREPROD_EVENT_SKIP,
 } from '../src/event-id-gap.mjs';
@@ -48,6 +49,27 @@ describe('classifyEventIdSequence', () => {
     const result = classifyEventIdSequence({ eventIds: [4, 5, 6] });
     expect(result.ok).toBe(true);
     expect(result.classification).toBe('contiguous');
+  });
+
+
+  it('names the official non-linear dust insert as a non-portable cursor', () => {
+    const result = decodeDustTreeInsert(
+      'Wallet.Other: Error while applying sync update\n[cause]: Error: values inserted non-linearly into dust generation tree; expected to insert index 399177, but received 399179.',
+    );
+    expect(result.ok).toBe(false);
+    expect(result.classification).toBe('non-portable-dust-cursor');
+    expect(result.expected).toBe(399177);
+    expect(result.received).toBe(399179);
+    expect(result.hint).toMatch(/sync from genesis/);
+    expect(result.hint).toMatch(/servicedesk#216/);
+    expect(result.hint).toMatch(/Not a public indexer or node fix/);
+    expect(result.docs).toBe('https://docs.midnight.network/guides/networks-and-environments');
+  });
+
+  it('does not classify an unrelated prove error as a cursor mismatch', () => {
+    const result = decodeDustTreeInsert('proof server unreachable on port 6300');
+    expect(result.ok).toBe(true);
+    expect(result.classification).toBe('not-dust-tree-insert');
   });
 
   it('keeps the lab credit block', () => {
