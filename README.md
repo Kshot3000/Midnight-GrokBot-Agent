@@ -343,6 +343,8 @@ Pin Compact compiler **~0.31.1** (create-mn-app / example-bboard matrix). **Comp
 
 See [`docs/UPSTREAM-SWEEP-2026-09-25.md`](./docs/UPSTREAM-SWEEP-2026-09-25.md) for PRs/issues landed from this lab.
 
+Wallet SDK reference gap (midnight-docs#831, page now published, generated index still open): [`docs/WALLET-SDK-REFERENCE-GAP.md`](./docs/WALLET-SDK-REFERENCE-GAP.md).
+
 ## Recommended next apps
 
 1. ~~Compile escrow / hello with Compact ~0.31.1~~ **done**.
