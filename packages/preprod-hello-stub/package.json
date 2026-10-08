@@ -50,6 +50,7 @@
     "check:pragma-form": "node --test test/pragma-form.test.mjs",
     "check:indexer-usability": "node --test test/indexer-usability-gap.test.mjs",
     "check:node-seed-wallet": "node --test test/node-seed-wallet-gap.test.mjs"
+    "check:calltx-finalization": "node --test test/calltx-finalization-decode.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

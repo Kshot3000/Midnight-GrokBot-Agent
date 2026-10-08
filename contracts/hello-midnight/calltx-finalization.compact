@@ -1,0 +1,28 @@
+/*
+ * calltx-finalization.compact — compiling counterpart to the test-and-debug sample.
+ *
+ * The live page https://docs.midnight.network/compact/test-and-debug
+ * still shows a Compact sample that does not compile: a top-level const,
+ * an empty Bytes constructor, and a ledger write that needs disclose().
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1487
+ *
+ * This file uses the language pin and a counter increment. It is not
+ * deployed and does not claim a public node or indexer fix.
+ * Official writing guide: https://docs.midnight.network/compact/reference/writing
+ * Official disclose rule: https://docs.midnight.network/compact/reference/compact-reference
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger posts: Counter;
+
+export circuit post(): [] {
+  posts.increment(1);
+}
