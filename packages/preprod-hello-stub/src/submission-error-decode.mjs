@@ -25,7 +25,7 @@ export const UPSTREAM_UNSIGNED = 'https://github.com/midnightntwrk/midnight-docs
 
 /**
  * Variants named on the official decode-1010 page. Codes can change between node releases.
- * 168 FeeCalculation is the retired code the same page calls out.
+ * 168 FeeCalculation is listed on the official 1.0.x node error codes page. Do not mark it retired for preprod.
  */
 export const NAMED_LEDGER_VARIANTS = Object.freeze({
   108: 'ReplayCounterMismatch',
@@ -134,9 +134,10 @@ export function decodeSubmissionError(error) {
       classification: 'named-ledger-variant',
       code,
       variant: named,
-      retired: code === 168,
+      nodeLine: '1.0.x',
+      retired: false,
       hint: code === 168
-        ? 'Official decode-1010 says 168 FeeCalculation was retired and replaced by 155 FeeCalculationError. Confirm the node release before acting on the number.'
+        ? 'Official node error codes lists 168 FeeCalculation for node version 1.0.x. It is not retired on that page. 155 FeeCalculationError is a different 1.0.x row. midnight-docs#1509: confirm the network is still on 1.0.x before treating 168 as a 2.x rename. This decoder does not fix the public node.'
         : `Official decode-1010 names ${code} ${named}. Look up N on the node error codes page for the node your network is running. Variant numbers can change between releases.`,
     };
   }
