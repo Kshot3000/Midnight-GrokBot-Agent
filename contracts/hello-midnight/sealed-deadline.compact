@@ -1,0 +1,40 @@
+/*
+ * sealed-deadline.compact — cutoff is sealed; claim uses blockTimeLt.
+ *
+ * Official pattern (not an invented API):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   "Enforcing a deadline". A sealed ledger field is set once, during
+ *   construction. blockTimeLt(time) is true when the current block time
+ *   is before time. There is no raw block-time accessor. Block time is
+ *   accurate to the scale of blocks, not seconds, and is not a randomness
+ *   source. The sample assert message is "expired".
+ *
+ * Upstream tracking: midnightntwrk/midnight-docs#1387
+ * Compact reference pages are copied from LFDT-Minokawa/compact. This file
+ * does not edit those pages and does not fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export sealed ledger deadline: Uint<64>;
+export ledger claimed: Boolean;
+
+constructor(deadlineTime: Uint<64>) {
+  deadline = disclose(deadlineTime);
+  claimed = false;
+}
+
+export circuit claim(): [] {
+  assert(blockTimeLt(deadline), "expired");
+  claimed = true;
+}
