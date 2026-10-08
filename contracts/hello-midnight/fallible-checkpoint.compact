@@ -1,0 +1,39 @@
+/*
+ * fallible-checkpoint.compact — first statement of a fallible section.
+ *
+ * Official reads (not invented APIs):
+ *   kernel.checkpoint(): []
+ *     https://docs.midnight.network/compact/reference/ledger-adt
+ *     "Marks all execution up to this point as being a single atomic unit,
+ *      allowing partial transaction failures to be split across it."
+ *   Custom error 118 FallibleWithoutCheckpoint
+ *     https://docs.midnight.network/nodes/error-codes
+ *     "Fallible transcript missing initial checkpoint.
+ *      Add kernel.checkpoint() at the start of fallible sections."
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Kapa asked which Kernel operations exist (self, balance, blockTime, checkpoint).
+ * checkpoint is a documented Kernel operation. It is not kernel.self().bytes.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger marks: Counter;
+
+// fallible section: checkpoint before any later kernel read.
+export circuit markFallible(): [] {
+  kernel.checkpoint();
+  assert(kernel.blockTimeGreaterThan(0), "block time not yet positive");
+  marks.increment(1);
+}

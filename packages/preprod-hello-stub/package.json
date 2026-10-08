@@ -64,7 +64,8 @@
     "check:submit-print": "node --test test/submit-print-path.test.mjs",
     "check:safe-downcast": "node --test test/safe-downcast-invariant.test.mjs",
     "check:submit-verify": "node --test test/submit-verify-path.test.mjs",
-    "check:constructor-once": "node src/constructor-once.mjs"
+    "check:constructor-once": "node src/constructor-once.mjs",
+    "check:fallible-checkpoint": "node --test test/fallible-checkpoint.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
