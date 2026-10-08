@@ -1,0 +1,39 @@
+/*
+ * untaken-compare.compact — hoist relational compares out of conditionals.
+ *
+ * Official Compact toolchain 0.31.0 notes: during proof construction both
+ * branches of a conditional are part of the relation. Relational comparisons
+ * (<, <=, >, >=) with inputs that might be unknown are on the temporary
+ * workaround list and can enlarge the circuit. The notes say to move those
+ * operations outside conditionally executed Compact code when size matters.
+ *   https://docs.midnight.network/relnotes/compact/toolchain-0.31.0
+ * Public-network pin remains Compact toolchain 0.31.1 / language ~0.23:
+ *   https://docs.midnight.network/relnotes/support-matrix
+ * Assert is the documented invariant form:
+ *   https://docs.midnight.network/compact/test-and-debug
+ * This file does not invent a compiler flag. The compare stays outside the
+ * if. Not compiled here. Not a deploy. Not a public indexer or node fix.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1387
+ * (Compact language reference is synced from the compiler repo and does not
+ * document the temporary untaken-branch proof workaround.)
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Uint<64>;
+
+export circuit storeIfUnderCap(value: Uint<64>, cap: Uint<64>, take: Boolean): [] {
+  const under = value < cap;
+  assert(under, "value is not under cap");
+  if (take) {
+    stored = disclose(value);
+  }
+}
