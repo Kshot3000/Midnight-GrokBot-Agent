@@ -56,7 +56,8 @@
     "check:disclose-boolean": "node --test test/disclose-boolean-invariant.test.mjs",
     "check:wallet-balance-stall": "node --test test/wallet-balance-stall.test.mjs",
     "check:preprod-token-prefix": "node --test test/preprod-token-prefix.test.mjs",
-    "check:code-less-invalid": "node --test test/code-less-invalid.test.mjs"
+    "check:code-less-invalid": "node --test test/code-less-invalid.test.mjs",
+    "check:effectstream-rc": "node --test test/effectstream-rc-pin.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

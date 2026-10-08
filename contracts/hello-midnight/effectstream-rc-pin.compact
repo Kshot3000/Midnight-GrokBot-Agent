@@ -1,0 +1,34 @@
+/*
+ * effectstream-rc-pin.compact — stay on the public-network Compact pin.
+ *
+ * Official support matrix (Preview, Preprod, Mainnet) lists Compact toolchain
+ * 0.31.1 and Compact language about 0.23. Toolchains 0.34.0 and 0.35.0 target
+ * ledger 9 and do not work with that matrix.
+ *   https://docs.midnight.network/relnotes/support-matrix
+ *
+ * The published EffectStream cross-chain guide (read 2026-10-08) tells readers
+ * to unzip compactc_v0.33.0-rc.2 and shows `pragma language_version >= 0.17`.
+ * midnight-docs#1245 already recorded that the verified public pin is
+ * compactc 0.31.1 at language 0.23.0. This file does not compile with an rc
+ * toolchain and does not invent a Compact API. Not a deploy. Not a public
+ * indexer or node fix.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1245
+ * Guide: https://docs.midnight.network/guides/build-cross-chain-dapp-with-effectstream
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Uint<8>;
+
+export circuit storePinned(value: Uint<64>): [] {
+  assert(value <= 255, "value does not fit Uint<8>");
+  stored = disclose(value as Uint<8>);
+}
