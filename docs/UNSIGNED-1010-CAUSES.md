@@ -8,6 +8,8 @@ The 1010 without a number that builders hit is `Transaction would exhaust the bl
 
 The same how-to sample still calls `api.tx.someCall().signAndSend(account)`. Midnight DApps do not submit that way. Log `String(err)` from the wallet submit path. `JSON.stringify(err)` still drops the code, as the official page already says.
 
+`packages/preprod-hello-stub/src/submission-error-decode.mjs` used to repeat the signed-extrinsic hint for a bare 1010, and `String({ code, message, data })` became `[object Object]`. It now walks `code`, `message`, and `data`, and classifies a no-u8 1010 with `classifyUnsigned1010`. A raw body whose `data` is `Transaction would exhaust the block limits` is `block-limit-no-u8`. A bare `1010: Invalid Transaction` is `unsigned-1010-no-inner-u8`. Neither path applies bad signature, stale era, or wrong nonce. This still does not submit a transaction.
+
 This note does not change the public docs page, the public node, or the public indexer.
 
 ```js

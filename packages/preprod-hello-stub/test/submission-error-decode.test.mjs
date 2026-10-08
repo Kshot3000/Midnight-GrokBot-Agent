@@ -2,6 +2,7 @@
  * Local checks for the submission-error decoder.
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/225
  * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1385
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1509
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -38,7 +39,22 @@ test('does not invent a name for unlisted submission code 10999', () => {
   assert.match(decoded.hint, /midnight-docs#1385/);
 });
 
-test('flags 1010 with no inner u8 as a Substrate check', () => {
+test('does not treat a bare 1010 as a signed-extrinsic failure', () => {
   const decoded = decodeSubmissionError('1010: Invalid Transaction');
-  assert.equal(decoded.classification, '1010-without-inner-u8');
+  assert.equal(decoded.classification, 'unsigned-1010-no-inner-u8');
+  assert.equal(decoded.appliesSignedExtrinsicCauses, false);
+  assert.match(decoded.hint, /midnight-docs#1509/);
+  assert.match(decoded.hint, /not a bad signature/);
+});
+
+test('reads a raw JSON-RPC 1010 body instead of [object Object]', () => {
+  const decoded = decodeSubmissionError({
+    code: 1010,
+    message: 'Invalid Transaction',
+    data: 'Transaction would exhaust the block limits',
+  });
+  assert.equal(decoded.classification, 'block-limit-no-u8');
+  assert.equal(decoded.code, null);
+  assert.equal(decoded.appliesSignedExtrinsicCauses, false);
+  assert.match(decoded.hint, /send_mn_transaction/);
 });

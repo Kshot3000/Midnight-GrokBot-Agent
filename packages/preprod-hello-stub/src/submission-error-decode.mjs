@@ -6,6 +6,7 @@
  * Official: https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors
  * Upstream wrapper: https://github.com/midnightntwrk/servicedesk/issues/225
  * Upstream missing code: https://github.com/midnightntwrk/midnight-docs/issues/1385
+ * Upstream unsigned 1010: https://github.com/midnightntwrk/midnight-docs/issues/1509
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -14,11 +15,13 @@
  */
 
 import { pathToFileURL } from 'node:url';
+import { classifyUnsigned1010 } from './unsigned-1010-causes.mjs';
 
 export const UPSTREAM_WRAPPER = 'https://github.com/midnightntwrk/servicedesk/issues/225';
 export const UPSTREAM_CODES = 'https://github.com/midnightntwrk/midnight-docs/issues/1385';
 export const OFFICIAL_CODES = 'https://docs.midnight.network/nodes/error-codes';
 export const OFFICIAL_DECODE = 'https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors';
+export const UPSTREAM_UNSIGNED = 'https://github.com/midnightntwrk/midnight-docs/issues/1509';
 
 /**
  * Variants named on the official decode-1010 page. Codes can change between node releases.
@@ -50,7 +53,28 @@ const CREDIT = [
 function textOf(error) {
   if (error == null) return '';
   if (typeof error === 'string') return error;
-  if (typeof error === 'object') return String(error);
+  if (typeof error === 'object') {
+    const parts = [];
+    const seen = new Set();
+    const walk = (value, depth) => {
+      if (value == null || depth > 4 || seen.has(value)) return;
+      if (typeof value === 'string' || typeof value === 'number') {
+        parts.push(String(value));
+        return;
+      }
+      if (typeof value !== 'object') return;
+      seen.add(value);
+      if (Array.isArray(value)) {
+        for (const item of value) walk(item, depth + 1);
+        return;
+      }
+      for (const key of ['code', 'message', 'data', 'cause', 'name']) {
+        if (key in value) walk(value[key], depth + 1);
+      }
+    };
+    walk(error, 0);
+    if (parts.length) return parts.join(' ');
+  }
   return String(error);
 }
 
@@ -76,6 +100,7 @@ export function decodeSubmissionError(error) {
     codesIssue: UPSTREAM_CODES,
     official: OFFICIAL_CODES,
     decodeGuide: OFFICIAL_DECODE,
+    unsignedIssue: UPSTREAM_UNSIGNED,
     claim: 'local classification of an already-observed error string — not a node fix',
     credit: CREDIT,
   };
@@ -117,13 +142,18 @@ export function decodeSubmissionError(error) {
   }
 
   if (has1010 && code == null) {
+    const unsigned = classifyUnsigned1010(text);
+    const blockLimit = unsigned.kind === 'block-limit-no-u8';
     return {
       ...base,
       ok: true,
-      classification: '1010-without-inner-u8',
+      classification: blockLimit ? 'block-limit-no-u8' : 'unsigned-1010-no-inner-u8',
       code: null,
       variant: null,
-      hint: 'Official decode-1010: 1010 without Custom error: N is a Substrate check (bad signature, stale era, or wrong nonce), not a LedgerApiError.',
+      appliesSignedExtrinsicCauses: false,
+      hint: blockLimit
+        ? unsigned.hint
+        : 'midnight-docs#1509: a 1010 with no Custom error: N is not a bad signature, stale era, or wrong nonce. Those checks are on signed extrinsics. Midnight transactions go in as the unsigned send_mn_transaction call. The no-u8 sentence builders hit is "Transaction would exhaust the block limits" (servicedesk#225). This sample has neither that sentence nor an inner u8. Do not rebuild for a nonce. This decoder does not fix the public node.',
     };
   }
 
@@ -158,9 +188,12 @@ if (isMain) {
   );
   const named = decodeSubmissionError('1010: Invalid Transaction: Custom error: 154');
   const missing = decodeSubmissionError('submission layer code 10999');
+  const bare = decodeSubmissionError({ code: 1010, message: 'Invalid Transaction', data: 'Transaction would exhaust the block limits' });
   const ok = hidden.classification === 'block-limit-text-hidden'
     && named.variant === 'BlockLimitExceededError'
-    && missing.classification === 'unlisted-submission-code';
+    && missing.classification === 'unlisted-submission-code'
+    && bare.classification === 'block-limit-no-u8'
+    && bare.appliesSignedExtrinsicCauses === false;
   if (!ok) {
     console.error(JSON.stringify({ hidden, named, missing }, null, 2));
     process.exit(1);
