@@ -1,0 +1,49 @@
+/*
+ * bounded-loop.compact — only the two Compact for forms the reference allows.
+ *
+ * Official grammar (not an invented API):
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ *   "for (const x of expr) stmt" over Vector, tuple, or Bytes
+ *   "for (const i of start .. end) stmt" where start and end are literal
+ *   unsigned integers or generic natural-number parameters, and end >= start
+ * Recursion is disallowed. Loops must be bounded by a constant or by the
+ * size of an object of constant size, because circuits must be finite.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387 (circuit-limit questions; the
+ * Compact reference is owned by mn-codeowners-compact). This file does not
+ * edit those pages and does not fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger steps: Uint<16>;
+
+constructor() {
+  steps = 0;
+}
+
+// Range form: both ends are unsigned integer literals, end >= start.
+export circuit countRange(): [] {
+  for (const i of 0..4) {
+    assert(i < 4, "range end is exclusive of the static bound");
+    steps = (steps + 1) as Uint<16>;
+  }
+}
+
+// Size form: the iterated value is a Vector whose length is fixed at compile time.
+export circuit countVector(flags: Vector<3, Boolean>): [] {
+  for (const flag of flags) {
+    if (disclose(flag)) {
+      steps = (steps + 1) as Uint<16>;
+    }
+  }
+}
