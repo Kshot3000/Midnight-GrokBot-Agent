@@ -1,0 +1,31 @@
+/*
+ * constructor-once.compact — Compact allows at most one constructor.
+ *
+ * Official reference (language pin ~0.23, reviewed in docs for 0.27.0 text):
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ * "the definition of at most one constructor, which is a function called when
+ * a contract is created and can be used to initialize public and private state."
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Kapa could not answer how to declare an event type and use emit. Official
+ * stdlib: https://docs.midnight.network/compact/standard-library/exports
+ * Events are struct types emitted with emit. This sample does not emit.
+ * It only initializes a public counter in the single constructor.
+ *
+ * Not compiled in this lab. Not deployed. Not a public indexer or node fix.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger starts: Uint<64>;
+
+constructor() {
+  starts = 1;
+}
