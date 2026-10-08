@@ -1,0 +1,37 @@
+/*
+ * disclose-boolean.compact — publish a comparison, not the witness value.
+ *
+ * Official behavior (not an invented API):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   section "Restricting a circuit to a group"
+ *
+ * "When you only need to prove a property, disclose the boolean result, not the value: disclose(age >= 18)."
+ *
+ * disclose() does not publish by itself. An exported-circuit return and a
+ * ledger write are public positions, so this circuit discloses only the
+ * comparison. It does not write age.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Kapa could not answer Compact reference questions, including disclosure
+ * typing. This lab source copies the security-guide sentence. It does not
+ * edit midnight-docs and is not a public deploy.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger adult: Boolean;
+
+export circuit markAdult(age: Uint<8>): Boolean {
+  const ok = disclose(age >= 18);
+  adult = ok;
+  return ok;
+}

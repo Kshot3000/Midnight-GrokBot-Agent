@@ -52,7 +52,8 @@
     "check:indexer-usability": "node --test test/indexer-usability-gap.test.mjs",
     "check:node-seed-wallet": "node --test test/node-seed-wallet-gap.test.mjs",
     "check:calltx-finalization": "node --test test/calltx-finalization-decode.test.mjs",
-    "check:transfer-bounds": "node --test test/transfer-bounds-invariant.test.mjs"
+    "check:transfer-bounds": "node --test test/transfer-bounds-invariant.test.mjs",
+    "check:disclose-boolean": "node --test test/disclose-boolean-invariant.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
