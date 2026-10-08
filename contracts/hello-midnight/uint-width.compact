@@ -1,0 +1,40 @@
+/*
+ * uint-width.compact — keep Uint<n> inside the documented byte bound.
+ *
+ * Official note (not an invented API):
+ *   https://docs.midnight.network/relnotes/compact/compact-0-20-28-0
+ *   "The maximum representable unsigned integer value has changed to be smaller"
+ *   n in Uint<n> is at most 248 (8 * 31 field bytes). Wider unsigned
+ *   values could fail in the proof server without a clear error.
+ *
+ * This circuit only uses Uint<64>, which is inside that bound.
+ * It does not compile here and does not claim a public deploy.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Compact reference pages are synced from LFDT-Minokawa/compact and
+ * still do not state this width. This file does not edit those pages.
+ * Does not fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger ticks: Uint<64>;
+
+constructor() {
+  ticks = 0;
+}
+
+export circuit bump(step: Uint<64>): [] {
+  const n = disclose(step);
+  assert(n <= 64, "step above lab bound");
+  ticks = (ticks + n) as Uint<64>;
+}
