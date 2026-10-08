@@ -1,0 +1,45 @@
+/*
+ * safe-add.compact — assert bounds, then narrow a widened sum.
+ *
+ * Official behavior (not an invented API):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   section "Compact arithmetic behavior"
+ *
+ * Addition of two Uint values widens past the operand width, so the
+ * sum cannot be stored back in a same-width ledger field. The documented
+ * fix is to assert bounds, then narrow with a cast:
+ *   (a + b) as Uint<64>
+ * The page also allows storing the sum in a wider field. This lab file
+ * uses only the documented cast form.
+ *
+ * The numeric bound below is a lab stand-in. The official table does not
+ * publish an addition sample or a domain message. It is not a protocol
+ * limit and it does not claim a public deploy.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Compact reference pages are synced from LFDT-Minokawa/compact. This
+ * file does not edit those pages. Does not fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger balance: Uint<64>;
+
+constructor() {
+  balance = 5;
+}
+
+export circuit safeAdd(amount: Uint<64>): [] {
+  const amt = disclose(amount);
+  assert(amt <= 100, "amount too large");
+  balance = (balance + amt) as Uint<64>;
+}
