@@ -1,0 +1,56 @@
+/*
+ * unshielded-balance.compact — cover a sendUnshielded with unshieldedBalanceGte.
+ *
+ * Official standard library (not an invented API):
+ *   https://docs.midnight.network/compact/standard-library/exports
+ *   sendUnshielded(color: Bytes<32>, amount: Uint<128>, recipient: Either<ContractAddress, UserAddress>): []
+ *   receiveUnshielded(color: Bytes<32>, amount: Uint<128>): []
+ *   nativeToken(): Bytes<32>
+ *   unshieldedBalanceGte(color: Bytes<32>, amount: Uint<128>): Boolean
+ *   unshieldedBalance(color: Bytes<32>): Uint<128>
+ *
+ * The same page says unshieldedBalance is fixed at the start of execution and
+ * that using it fails application unless the balance is exactly the same as
+ * at construction. Prefer unshieldedBalanceGte / Gt / Lte / Lt.
+ *
+ * Tutorial that does this before sendUnshielded:
+ *   https://docs.midnight.network/tutorials/private-party/smart-contract
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/117
+ * A single receiveUnshielded call was rejected as
+ * 1010 Custom error 231 = Malformed(FeeCalculation(OutsideTimeToDismiss))
+ * while a larger pure-state call was accepted. This source does not change
+ * that fee model and does not fix the public node or indexer.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here. Not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger coveredSend: Boolean;
+
+constructor() {
+  coveredSend = false;
+}
+
+export circuit sendIfCovered(amount: Uint<128>, user: UserAddress): [] {
+  const color = nativeToken();
+  assert(unshieldedBalanceGte(color, disclose(amount)), "contract NIGHT balance below send");
+  sendUnshielded(
+    color,
+    disclose(amount),
+    right<ContractAddress, UserAddress>(disclose(user))
+  );
+  coveredSend = disclose(true);
+}
+
+export circuit receiveNight(amount: Uint<128>): [] {
+  receiveUnshielded(nativeToken(), disclose(amount));
+}
