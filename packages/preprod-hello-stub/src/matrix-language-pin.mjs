@@ -36,6 +36,59 @@ const OFFICIAL_MISMATCH =
   /version mismatch:\s*compiled code expects\s+([0-9]+\.[0-9]+\.[0-9]+),\s*runtime is\s+([0-9]+\.[0-9]+\.[0-9]+)/i;
 
 /**
+ * Rows from the official support-matrix "Known incompatible combinations" table.
+ * https://docs.midnight.network/relnotes/support-matrix
+ * Does not invent a Compact API.
+ */
+export const MATRIX_IMPORT_ROWS = Object.freeze([
+  Object.freeze({
+    expected: '0.19.0',
+    runtime: '0.16.0',
+    toolchain: '0.34.0',
+    note: 'Compact toolchain 0.34.0 with Compact runtime 0.16.0. Import throws Version mismatch: compiled code expects 0.19.0, runtime is 0.16.0. Toolchain 0.34.0 targets ledger 9; Preview, Preprod, and Mainnet run ledger 8.',
+  }),
+  Object.freeze({
+    expected: '0.20.0',
+    runtime: '0.16.0',
+    toolchain: '0.35.0',
+    note: 'Compact toolchain 0.35.0 with Compact runtime 0.16.0. Import throws Version mismatch: compiled code expects 0.20.0, runtime is 0.16.0. Toolchain 0.35.0 targets ledger 9.',
+  }),
+  Object.freeze({
+    expected: '0.16.0',
+    runtime: '0.19.0',
+    toolchain: '0.31.1',
+    note: 'Compact toolchain 0.31.1 with Compact runtime 0.19.0. Import throws Version mismatch: compiled code expects 0.16.0, runtime is 0.19.0.',
+  }),
+  Object.freeze({
+    expected: '0.16.0',
+    runtime: '0.20.0',
+    toolchain: '0.31.1',
+    note: 'Compact toolchain 0.31.1 with Compact runtime 0.20.0. Import throws Version mismatch: compiled code expects 0.16.0, runtime is 0.20.0.',
+  }),
+]);
+
+/**
+ * Name the support-matrix row for an import-time expects/runtime pair.
+ * @param {string} expected
+ * @param {string} runtime
+ */
+export function mapMatrixImportPair(expected, runtime) {
+  const row = MATRIX_IMPORT_ROWS.find((item) => item.expected === expected && item.runtime === runtime) || null;
+  return {
+    ok: row == null,
+    expected,
+    runtime,
+    row,
+    message: row
+      ? row.note
+      : `no support-matrix row for compiled code expects ${expected}, runtime is ${runtime}. Matrix runtime for midnight-js ${MATRIX_PINS.midnightJs} is ${MATRIX_PINS.compactRuntime} (compiler ${MATRIX_PINS.compactCompiler}).`,
+    upstream: UPSTREAM_LANGUAGE_PIN,
+    official: OFFICIAL_SUPPORT_MATRIX,
+    credit: CREDIT,
+  };
+}
+
+/**
  * A `>= 0.20` floor alone is what servicedesk#236 compiled with 0.34.0 / 0.35.0.
  * @param {string} source
  */
@@ -80,16 +133,20 @@ export function decodeOfficialVersionMismatch(error) {
     const expected = match[1];
     const runtime = match[2];
     const aligned = expected === MATRIX_PINS.compactRuntime && runtime === MATRIX_PINS.compactRuntime;
+    const mapped = mapMatrixImportPair(expected, runtime);
     return {
       ok: aligned,
       kind: 'official-version-mismatch',
       expected,
       runtime,
+      toolchain: mapped.row ? mapped.row.toolchain : null,
       message: aligned
         ? `official version-mismatch sentence names runtime ${runtime}, which matches the support matrix`
-        : `version mismatch: compiled code expects ${expected}, runtime is ${runtime}. midnight-js ${MATRIX_PINS.midnightJs} matrix runtime is ${MATRIX_PINS.compactRuntime} (compiler ${MATRIX_PINS.compactCompiler}). Recompile or align @midnight-ntwrk/compact-runtime.`,
+        : mapped.row
+          ? mapped.message
+          : `version mismatch: compiled code expects ${expected}, runtime is ${runtime}. midnight-js ${MATRIX_PINS.midnightJs} matrix runtime is ${MATRIX_PINS.compactRuntime} (compiler ${MATRIX_PINS.compactCompiler}). Recompile or align @midnight-ntwrk/compact-runtime.`,
       upstream: UPSTREAM_LANGUAGE_PIN,
-      official: OFFICIAL_COMPILER_ERRORS,
+      official: OFFICIAL_SUPPORT_MATRIX,
       credit: CREDIT,
     };
   }

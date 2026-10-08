@@ -9,7 +9,7 @@
  */
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { checkLanguagePin, decodeOfficialVersionMismatch } from '../src/matrix-language-pin.mjs';
+import { checkLanguagePin, decodeOfficialVersionMismatch, mapMatrixImportPair } from '../src/matrix-language-pin.mjs';
 
 describe('matrix language pin (servicedesk#236)', () => {
   it('rejects the 0.20 floor used by the 0.34.0 reproduction', () => {
@@ -41,5 +41,23 @@ describe('matrix language pin (servicedesk#236)', () => {
     );
     assert.equal(decoded.kind, 'opaque-deploy-construction');
     assert.match(decoded.message, /version mismatch/);
+  });
+
+  it('maps the four official import pairs from the support matrix', () => {
+    const a = mapMatrixImportPair('0.19.0', '0.16.0');
+    assert.equal(a.ok, false);
+    assert.equal(a.row.toolchain, '0.34.0');
+    const b = mapMatrixImportPair('0.20.0', '0.16.0');
+    assert.equal(b.row.toolchain, '0.35.0');
+    const c = mapMatrixImportPair('0.16.0', '0.19.0');
+    assert.equal(c.row.toolchain, '0.31.1');
+    const d = mapMatrixImportPair('0.16.0', '0.20.0');
+    assert.match(d.message, /runtime is 0\.20\.0/);
+    const decoded = decodeOfficialVersionMismatch(
+      new Error('Version mismatch: compiled code expects 0.16.0, runtime is 0.20.0'),
+    );
+    assert.equal(decoded.toolchain, '0.31.1');
+    assert.match(decoded.message, /0\.31\.1/);
+    assert.match(decoded.credit, /kshot9000@gmail.com/);
   });
 });
