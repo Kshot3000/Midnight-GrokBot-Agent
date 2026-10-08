@@ -1,0 +1,42 @@
+/*
+ * transfer-bounds.compact — bounds checks without the non-compiling sample.
+ *
+ * Official reads (not invented APIs):
+ *   https://docs.midnight.network/compact/test-and-debug
+ *   The "Comprehensive validation example" uses a top-level const, Bytes<32>{},
+ *   and a ledger write of a circuit parameter with no disclose().
+ *   https://docs.midnight.network/getting-started/hello-world
+ *   Circuit parameters are private. A ledger write needs disclose().
+ *   https://docs.midnight.network/compact/smart-contract-security
+ *   assert validates bounds and state before the transition.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1487
+ * That issue says this Compact sample does not compile on the matrix pin
+ * (top-level const, Bytes<32>{}, missing disclose). This file does not edit
+ * midnight-docs and does not claim the public page is fixed.
+ *
+ * Language pin: Compact ~0.31.1 / language >= 0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger balance: Uint<64>;
+export ledger recipient: Bytes<32>;
+
+// Bounds live inside the circuit. No top-level const. No Bytes<32>{}.
+export circuit transfer(nextRecipient: Bytes<32>, amount: Uint<64>): [] {
+  assert(amount >= 1, "Amount too small");
+  assert(amount <= 1000000, "Amount exceeds maximum");
+  assert(balance >= amount, "Insufficient funds");
+  recipient = disclose(nextRecipient);
+  balance = disclose(balance - amount);
+}
