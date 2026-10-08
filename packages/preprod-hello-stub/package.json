@@ -69,7 +69,8 @@
     "check:fallible-checkpoint": "node --test test/fallible-checkpoint.test.mjs",
     "check:uint-width": "node --test test/uint-width-invariant.test.mjs",
     "check:connector-reason": "node --test test/connector-reason-decode.test.mjs",
-    "check:bounded-loop": "node --test test/bounded-loop-invariant.test.mjs"
+    "check:bounded-loop": "node --test test/bounded-loop-invariant.test.mjs",
+    "check:for-generic-bound": "node --test test/for-generic-bound.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

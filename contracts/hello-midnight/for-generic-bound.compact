@@ -1,0 +1,45 @@
+/*
+ * for-generic-bound.compact — range for whose end is a generic natural-number
+ * parameter, and no return inside the loop.
+ *
+ * Official reference (not an invented API):
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ *   Generic natural-number parameters are declared with a # prefix (#N).
+ *   for (const i of start..end): start and end must be unsigned integer
+ *   literals or references to generic natural-number parameters, and end >= start.
+ *   return statements cannot be used to return from within for statements.
+ * Toolchain note: https://docs.midnight.network/relnotes/compact/toolchain-0.31.0
+ *   "for loop iteration bounds can now be generic parameters"
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387 (Compact reference gaps; the
+ * reference is owned by mn-codeowners-compact). This file does not edit those
+ * pages and does not fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger steps: Uint<16>;
+
+constructor() {
+  steps = 0;
+}
+
+// #N is a generic natural-number parameter. The range end is that parameter,
+// which the 0.31 toolchain allows. The body does not return from the for.
+export circuit countGeneric<#N>(flags: Vector<N, Boolean>): [] {
+  for (const i of 0..N) {
+    assert(i < N, "generic range end is exclusive");
+    if (disclose(flags[i])) {
+      steps = (steps + 1) as Uint<16>;
+    }
+  }
+}
