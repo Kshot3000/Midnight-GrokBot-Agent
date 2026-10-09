@@ -73,7 +73,8 @@
     "check:bounded-loop": "node --test test/bounded-loop-invariant.test.mjs",
     "check:for-generic-bound": "node --test test/for-generic-bound.test.mjs",
     "check:untaken-compare": "node --test test/untaken-compare-invariant.test.mjs",
-    "check:bytes-uint-cast": "node --test test/bytes-uint-cast-invariant.test.mjs"
+    "check:bytes-uint-cast": "node --test test/bytes-uint-cast-invariant.test.mjs",
+    "check:matrix-json-fields": "node --test test/matrix-json-field-gap.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
