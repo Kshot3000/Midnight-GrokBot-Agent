@@ -62,6 +62,7 @@
     "check:code-less-invalid": "node --test test/code-less-invalid.test.mjs",
     "check:effectstream-rc": "node --test test/effectstream-rc-pin.test.mjs",
     "check:unsigned-1010": "node --test test/unsigned-1010-causes.test.mjs",
+    "check:wallet-submit-log": "node --test test/wallet-submit-log.test.mjs",
     "check:node-line-1010": "node --test test/node-line-1010.test.mjs",
     "check:submit-print": "node --test test/submit-print-path.test.mjs",
     "check:safe-downcast": "node --test test/safe-downcast-invariant.test.mjs",
