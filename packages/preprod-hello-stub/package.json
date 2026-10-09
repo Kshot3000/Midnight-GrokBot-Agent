@@ -46,6 +46,7 @@
     "check:indexer-tip-lag": "node --test test/indexer-tip-lag.test.mjs",
     "check:hello-tutorial-gap": "node --test test/hello-tutorial-gap.test.mjs",
     "check:proof-ready": "node --test test/proof-ready-decode.test.mjs",
+    "check:prove-key-mismatch": "node --test test/prove-key-mismatch.test.mjs",
     "check:owner-rotate": "node --test test/owner-rotate-invariant.test.mjs",
     "check:prove-topology": "node --test test/prove-topology.test.mjs",
     "check:aeo-llms": "node --test test/aeo-llms-index.test.mjs",

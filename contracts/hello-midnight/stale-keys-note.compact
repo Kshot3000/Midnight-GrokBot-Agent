@@ -1,0 +1,33 @@
+/*
+ * stale-keys-note.compact — lab note, not a production contract.
+ *
+ * Official prove path: https://docs.midnight.network/guides/local-proving
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1377
+ *
+ * The local-proving page says a keys/circuit mismatch is reported by the
+ * prover as "check that your keys match", then tells the builder to recompile.
+ * That string is not a Compact assert message. This circuit only asserts a
+ * public counter bound so a failed assert stays distinct from that phrase.
+ *
+ * Not compiled in this change. Does not deploy. Does not claim a public
+ * indexer, node, or proof-server fix.
+ *
+ * Compact ~0.31.1 / language ~0.23. If the compiler rejects `>=`, pin
+ * `pragma language_version 0.23;`.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger round: Counter;
+
+export circuit bump(): [] {
+  assert(round < 100n, "counter must stay below the bound");
+  round.increment(1);
+}
