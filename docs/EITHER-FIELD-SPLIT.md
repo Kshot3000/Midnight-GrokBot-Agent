@@ -6,39 +6,37 @@ Follow-up filed by the docs owners: [LFDT-Minokawa/compact#833](https://github.c
 
 This lab does not edit midnight-docs or the Compact repo. It does not fix the public indexer or node.
 
-## What each published surface says
+## What the published page says now
 
-The public Midnight docs page still describes `Either` as:
+Read 2026-10-09 of https://docs.midnight.network/compact/standard-library/exports
+
+The synced standard-library page now describes `Either` as:
 
 ```
 struct Either<A, B> {
-  isLeft: Boolean;
+  is_left: Boolean;
   left: A;
   right: B;
 }
 ```
 
-Source: https://docs.midnight.network/compact/standard-library/exports
+`Maybe` on that same page uses `is_some`, not `isSome`. Constructors stay `left<A, B>` and `right<A, B>`. The inactive side should be `default<>`.
 
-Constructors on that page are `left<A, B>` and `right<A, B>`. This lab's public-network sample (`contracts/hello-midnight/either-choice.compact`) stays on that spelling because the lab pin is Compact ~0.31.1 / language ~0.23, the set in https://docs.midnight.network/relnotes/support-matrix.
+That is the spelling midnight-docs#1387 said the Compact repo already corrected (`is_left` in LFDT-Minokawa/compact#796) while the Midnight site still showed `isLeft`. The site copy has moved. An earlier lab note that said this URL still showed `isLeft` is stale.
 
-Compact issue #833 says the opposite for compiler 0.35.0 (language 0.27, ledger 9, not the public-network pin). The example they checked is:
+## What the public-network pin still uses
 
-```
-export pure circuit leftOrZero(e: Either<Uint<32>, Bytes<32>>): Uint<32> {
-  return e.is_left ? e.left : 0;
-}
-```
+The support matrix still pins Compact toolchain `0.31.1` and language `0.23`: https://docs.midnight.network/relnotes/support-matrix
 
-midnight-docs#1387 notes that the synced site still shows `isLeft`, which that newer compiler rejects, and that LFDT-Minokawa/compact#796 renamed the field to `is_left` in the Compact repo docs. Those Compact repo docs have not replaced the page on docs.midnight.network.
+`contracts/hello-midnight/either-choice.compact` keeps `choice.isLeft` for that pin. Copying `is_left` from the synced page into a 0.31.1 file is the mismatch #1387 described, only the page and the pin have swapped roles. A compiler 0.35.0 experiment (language 0.27, not this pin) is the one that reads `e.is_left`.
 
 ## What to do
 
-- Public preprod / preview / mainnet contracts on Compact 0.31.1: read `choice.isLeft`. Do not copy `is_left` from the 0.35 example.
-- A compiler 0.35 experiment: read `e.is_left`. Do not copy `isLeft` from the public docs page.
-- Do not mix the two in one file. This lab checker only classifies source. It does not run `compact compile`.
+- Public preprod / preview / mainnet contracts on Compact 0.31.1: read `choice.isLeft`. Do not copy `is_left` from the current standard-library page.
+- A compiler 0.35 experiment: read `e.is_left`. Do not copy `isLeft` from an older snapshot of the page.
+- Do not mix the two in one file. This lab checker only classifies source and a pasted page excerpt. It does not run `compact compile`.
 
-`packages/preprod-hello-stub/src/either-choice-invariant.mjs` exports `classifyEitherField`.
+`packages/preprod-hello-stub/src/either-page-drift.mjs` exports `classifyEitherPageDrift`.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

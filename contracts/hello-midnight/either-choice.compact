@@ -1,22 +1,26 @@
 /*
  * either-choice.compact — public-network Either convention.
  *
- * Official stdlib (do not invent constructors):
+ * Official constructors (do not invent them):
  *   https://docs.midnight.network/compact/standard-library/exports
- *   struct Either<A, B> { isLeft: Boolean; left: A; right: B; }
  *   circuit left<A, B>(value: A): Either<A, B>;
  *   circuit right<A, B>(value: B): Either<A, B>;
- *   Iff isLeft is true, left is populated; otherwise right.
- *   The other side should be default<> by convention.
+ *   The inactive side should be default<> by convention.
+ * Page read 2026-10-09 shows struct field is_left (and Maybe.is_some).
+ * That spelling is the Compact-repo sync midnight-docs#1387 asked for.
+ * This file stays on isLeft because the support-matrix pin is Compact
+ * ~0.31.1 / language ~0.23, which this lab already compiled against
+ * with isLeft. Do not copy is_left from the synced page into a 0.31.1 file.
  *
  * Upstream: midnightntwrk/midnight-docs#1387
  * Kapa could not answer Either usage, and builders asked whether an
  * unbounded `>= 0.26` pragma is correct. Official examples and the
  * public-network pin use a bounded language pragma, not ledger 9.
  * Compact toolchain pin for this lab: ~0.31.1 / language ~0.23.
- * Field name on this pin is isLeft, matching docs.midnight.network.
- * compact#833 (compiler 0.35.0, not this pin) reads is_left instead.
- * Do not copy that spelling into this file. See docs/EITHER-FIELD-SPLIT.md.
+ * Field name on this pin is isLeft.
+ * The synced docs page (read 2026-10-09) and compact#833 (compiler 0.35.0)
+ * both show is_left. Do not copy that spelling into this file.
+ * See docs/EITHER-FIELD-SPLIT.md.
  *
  * This file does not call kernel.caller() (ledger 9 only) and does not
  * claim a public deploy, indexer fix, or node fix. Source only.
