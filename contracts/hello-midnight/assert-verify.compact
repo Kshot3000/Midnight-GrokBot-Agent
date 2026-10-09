@@ -1,0 +1,44 @@
+/*
+ * assert-verify.compact — a verify circuit returns Boolean; it does not
+ * reject a bad signature unless the caller asserts the result.
+ *
+ * Official (Compact standard library, not an invented API):
+ *   https://docs.midnight.network/compact/standard-library/exports
+ *   ed25519Verify, secp256r1EcdsaVerify, secp256k1EcdsaVerify, jubjubSchnorrVerify:
+ *   "Returns true if the signature is valid; false otherwise."
+ *   "To actually enforce that a signature is valid in a Compact circuit, use an
+ *   assert that the result is true."
+ * The verify circuits only assert that the verification key is not the identity
+ * point. Ed25519ctx and Ed25519ph do not verify under ed25519Verify.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Remaining Compact reference gaps were handed to LFDT-Minokawa/compact#833.
+ * This lab file does not edit those repos and is not a public deploy.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export circuit acceptEd25519(
+  msg: Bytes<32>,
+  sig: Ed25519Signature,
+  pk: Curve25519Point
+): [] {
+  assert(ed25519Verify(msg, sig, pk), "ed25519 signature rejected");
+}
+
+export circuit acceptSecp256r1(
+  msgHash: Bytes<32>,
+  sig: Secp256r1EcdsaSignature,
+  pk: Secp256r1Point
+): [] {
+  assert(secp256r1EcdsaVerify(msgHash, sig, pk), "secp256r1 signature rejected");
+}

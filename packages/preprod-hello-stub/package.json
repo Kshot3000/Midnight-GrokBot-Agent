@@ -89,7 +89,8 @@
     "check:confidential-space": "node --test test/confidential-space-argv.test.mjs",
     "check:matrix-npm-image": "node --test test/matrix-npm-image-gap.test.mjs",
     "check:runtime-context-arity": "node --test test/runtime-context-arity.test.mjs",
-    "check:proof-server-skew": "node --test test/proof-server-matrix-skew.test.mjs"
+    "check:proof-server-skew": "node --test test/proof-server-matrix-skew.test.mjs",
+    "check:assert-verify": "node --test test/assert-verify-invariant.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
