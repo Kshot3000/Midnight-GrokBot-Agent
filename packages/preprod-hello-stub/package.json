@@ -74,7 +74,7 @@
     "check:for-generic-bound": "node --test test/for-generic-bound.test.mjs",
     "check:untaken-compare": "node --test test/untaken-compare-invariant.test.mjs",
     "check:bytes-uint-cast": "node --test test/bytes-uint-cast-invariant.test.mjs",
-    "check:matrix-json-fields": "node --test test/matrix-json-field-gap.test.mjs"
+    "check:matrix-json-fields": "node --test test/matrix-json-field-gap.test.mjs",
     "check:unshielded-dismiss": "node --test test/unshielded-dismiss.test.mjs"
   },
   "dependencies": {
