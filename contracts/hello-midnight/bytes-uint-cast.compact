@@ -1,0 +1,38 @@
+/*
+ * bytes-uint-cast.compact — keep byte-vector conversions out of conditionals.
+ *
+ * Official Compact toolchain 0.31.0 notes: proof construction considers both
+ * branches. Conversions of byte vectors to and from Field and Uint types are
+ * on the temporary workaround list and can enlarge the circuit. Move them
+ * outside conditionally executed Compact code when size matters.
+ *   https://docs.midnight.network/relnotes/compact/toolchain-0.31.0
+ * The same notes change convertBytesToUint maxval from number to bigint.
+ * Public-network pin: Compact ~0.31.1 / language ~0.23.
+ *   https://docs.midnight.network/relnotes/support-matrix
+ * Language reference: Bytes<n> casts to Field (checked). Bytes to Uint is not
+ * an allowed Compact cast (`e as T`). Do not write `raw as Uint<...>`.
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ * Not compiled here. Not a deploy. Not a public indexer or node fix.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1387
+ * (language reference still does not document the temporary untaken-branch
+ * workaround or the convertBytesToUint maxval bigint change.)
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Field;
+
+export circuit storeBytesAsField(raw: Bytes<8>, take: Boolean): [] {
+  const asField = raw as Field;
+  if (take) {
+    stored = disclose(asField);
+  }
+}
