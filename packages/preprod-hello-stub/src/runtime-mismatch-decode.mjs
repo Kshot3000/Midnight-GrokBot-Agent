@@ -71,7 +71,7 @@ export function decodeRuntimeMismatch(error) {
 
   if (/expected instance of ContractMaintenanceAuthority/.test(text)) {
     causes.push(
-      `expected instance of ContractMaintenanceAuthority: the contract package and midnight-js loaded different copies of @midnight-ntwrk/onchain-runtime-v3. Install one copy at ${MATRIX_PINS.onchainRuntime} (support matrix).`,
+      `expected instance of ContractMaintenanceAuthority: either a nested onchain-runtime-v3/v4 copy (install one copy at ${MATRIX_PINS.onchainRuntime}) or a ${MATRIX_PINS.compactRuntime} contract on the ledger-9 offline path with one copy. See authority-instance-split.mjs. Not a committee update.`,
     );
   }
 
