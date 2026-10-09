@@ -1,0 +1,40 @@
+/*
+ * no-toplevel-const.compact — const is a local binding, not a top-level declaration.
+ *
+ * Official Compact reference (const statements create local variable bindings
+ * inside a block or for-loop header; top-level identifiers are ledger, circuits,
+ * witnesses, constructors, imports, and pragmas):
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ *
+ * Explicit disclosure (a ledger write of a witness return needs disclose()):
+ *   https://docs.midnight.network/compact/explicit_disclosure
+ *
+ * Upstream: midnightntwrk/midnight-docs#1487
+ * The Test and debug page Compact sample does not compile on the matrix pin
+ * (Compact toolchain 0.31.1 / language ~0.23): const at the top level,
+ * Bytes<32>{}, and a ledger write that needs disclose(). This file keeps const
+ * inside the circuit, builds an empty Bytes<32> with pad(32, ""), and
+ * discloses the witness return before the ledger write. It does not invent
+ * APIs. Not a deploy, indexer fix, or node fix.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1,
+ * proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger note: Bytes<32>;
+
+witness localNote(): Bytes<32>;
+
+export circuit storeNote(): [] {
+  const raw = localNote();
+  note = disclose(raw);
+}

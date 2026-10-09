@@ -90,7 +90,8 @@
     "check:matrix-npm-image": "node --test test/matrix-npm-image-gap.test.mjs",
     "check:runtime-context-arity": "node --test test/runtime-context-arity.test.mjs",
     "check:proof-server-skew": "node --test test/proof-server-matrix-skew.test.mjs",
-    "check:assert-verify": "node --test test/assert-verify-invariant.test.mjs"
+    "check:assert-verify": "node --test test/assert-verify-invariant.test.mjs",
+    "check:no-toplevel-const": "node src/no-toplevel-const-invariant.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
