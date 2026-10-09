@@ -41,6 +41,7 @@
     "check:sealed-deadline": "node --test test/sealed-deadline-invariant.test.mjs",
     "check:kapa-mcp": "node --test test/kapa-mcp-endpoint.test.mjs",
     "check:aura-babe-doc": "node --test test/aura-babe-doc-gap.test.mjs",
+    "check:aura-babe-runbook": "node --test test/aura-babe-runbook-gate.test.mjs",
     "check:node-1400-notes": "node --test test/node-1400-notes-gap.test.mjs",
     "check:indexer-tip-lag": "node --test test/indexer-tip-lag.test.mjs",
     "check:hello-tutorial-gap": "node --test test/hello-tutorial-gap.test.mjs",
