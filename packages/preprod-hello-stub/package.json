@@ -77,6 +77,7 @@
     "check:matrix-json-fields": "node --test test/matrix-json-field-gap.test.mjs",
     "check:unshielded-dismiss": "node --test test/unshielded-dismiss.test.mjs",
     "check:intent-ttl-182": "node --test test/intent-ttl-182.test.mjs"
+    "check:proof-server-argv": "node --test test/proof-server-argv.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
