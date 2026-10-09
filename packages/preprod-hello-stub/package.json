@@ -87,6 +87,7 @@
     "check:cross-contract-pin": "node --test test/cross-contract-pin.test.mjs",
     "check:confidential-space": "node --test test/confidential-space-argv.test.mjs",
     "check:matrix-npm-image": "node --test test/matrix-npm-image-gap.test.mjs"
+    "check:runtime-context-arity": "node --test test/runtime-context-arity.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
