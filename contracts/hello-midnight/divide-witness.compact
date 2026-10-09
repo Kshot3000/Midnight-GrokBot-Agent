@@ -1,0 +1,40 @@
+/*
+ * divide-witness.compact — constrain an off-chain division witness.
+ *
+ * Official sample (not an invented API):
+ *   https://docs.midnight.network/examples/contracts/calculator
+ * The page declares divMod as a witness and checks it in divide:
+ *   assert(rem < num2 && quo * num2 + rem == num1, "incorrect division");
+ * A witness return is prover-chosen. The assert is what rejects a lying quotient.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * Compact reference pages are synced from LFDT-Minokawa/compact and still
+ * lack a contract snippet for this pattern. This file does not edit those
+ * pages. Does not fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger result: Uint<16>;
+
+constructor() {
+  result = 0;
+}
+
+witness divMod(num1: Uint<16>, num2: Uint<16>): [Uint<16>, Uint<16>];
+
+export circuit divide(num1: Uint<16>, num2: Uint<16>): Uint<16> {
+  const [quo, rem] = divMod(num1, num2);
+  assert(rem < num2 && quo * num2 + rem == num1, "incorrect division");
+  result = disclose(quo);
+  return quo;
+}
