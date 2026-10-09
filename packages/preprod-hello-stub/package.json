@@ -80,7 +80,8 @@
     "check:proof-server-argv": "node --test test/proof-server-argv.test.mjs",
     "check:divide-witness": "node --test test/divide-witness-invariant.test.mjs",
     "check:either-page-drift": "node src/either-page-drift.mjs && node --test test/either-page-drift.test.mjs",
-    "check:preprod-host-cutoff": "node --test test/preprod-host-cutoff-config.test.mjs"
+    "check:preprod-host-cutoff": "node --test test/preprod-host-cutoff-config.test.mjs",
+    "check:debug-sample": "node --test test/debug-sample-gap.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

@@ -1,0 +1,25 @@
+pragma language_version 0.23;
+
+// Corrected bounds sample. The public test-and-debug page writes a private
+// circuit argument into ledger state without disclose and omits the language
+// pragma. This file does not call the proof server.
+// Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1487
+// Official: https://docs.midnight.network/getting-started/hello-world
+// Official page under review: https://docs.midnight.network/compact/test-and-debug
+
+const MAX_AMOUNT: Uint<64> = 1000000;
+const MIN_AMOUNT: Uint<64> = 1;
+
+export ledger balance: Uint<64>;
+
+export circuit boundedTransfer(amount: Uint<64>): [] {
+  assert(amount >= MIN_AMOUNT, "Amount too small");
+  assert(amount <= MAX_AMOUNT, "Amount exceeds maximum");
+  assert(balance >= amount, "Insufficient funds");
+  balance = balance - disclose(amount);
+}
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
