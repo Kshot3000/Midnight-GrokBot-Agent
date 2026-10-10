@@ -71,17 +71,33 @@ export function selectProvePath(input = {}) {
   const failures = [];
 
   if (prefer === 'delegated') {
-    if (!hasDelegate) {
-      failures.push(
-        'wallet-delegated proving needs ConnectedAPI.getProvingProvider (DApp Connector 4.0.1). Lace does not expose it; fall back to the local proof server.',
-      );
+    if (hasDelegate) {
+      return {
+        ok: true,
+        failures,
+        fellBack: false,
+        topology: 'wallet-delegated',
+        method: 'getProvingProvider',
+        proofServerUrl: null,
+        deprecated: DEPRECATED_PROVER_FIELD,
+        connector: CONNECTOR_API,
+        proofServer: PROOF_SERVER_IMAGE,
+        upstream: UPSTREAM_PROVE_PATH,
+        official: OFFICIAL_PROVE_PATH,
+        credit: CREDIT,
+      };
     }
+    // Lace and most wallets do not expose getProvingProvider (DApp Connector 4.0.1).
+    // Fall back to the documented local proof server path.
     return {
-      ok: failures.length === 0,
-      failures,
-      topology: 'wallet-delegated',
-      method: 'getProvingProvider',
-      proofServerUrl: null,
+      ok: true,
+      failures: [],
+      fellBack: true,
+      note: 'wallet-delegated proving needs ConnectedAPI.getProvingProvider (DApp Connector 4.0.1). Lace does not expose it; fall back to the local proof server.',
+      topology: 'local-proof-server',
+      method: 'httpClientProofProvider',
+      proofServerUrl: LOCAL_PROOF_SERVER,
+      start: `docker run -p 6300:6300 ${PROOF_SERVER_IMAGE} midnight-proof-server -v`,
       deprecated: DEPRECATED_PROVER_FIELD,
       connector: CONNECTOR_API,
       proofServer: PROOF_SERVER_IMAGE,
@@ -101,7 +117,7 @@ export function selectProvePath(input = {}) {
       ok: failures.length === 0,
       failures,
       topology: 'hosted-proof-server',
-      method: 'httpClientProvingProvider',
+      method: 'httpClientProofProvider',
       proofServerUrl: configured,
       deprecated: DEPRECATED_PROVER_FIELD,
       connector: CONNECTOR_API,
@@ -121,7 +137,7 @@ export function selectProvePath(input = {}) {
     ok: failures.length === 0,
     failures,
     topology: 'local-proof-server',
-    method: 'httpClientProvingProvider',
+    method: 'httpClientProofProvider',
     proofServerUrl: configured,
     start: `docker run -p 6300:6300 ${PROOF_SERVER_IMAGE} midnight-proof-server -v`,
     deprecated: DEPRECATED_PROVER_FIELD,
@@ -137,13 +153,15 @@ const isMain =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMain) {
-  const lace = selectProvePath({ api: {} });
-  const oneAm = selectProvePath({ api: { getProvingProvider() {} } });
+  const lace = selectProvePath({ api: {}, prefer: 'delegated' });
+  const oneAm = selectProvePath({ api: { getProvingProvider() {} }, prefer: 'delegated' });
   const badHost = selectProvePath({
     prefer: 'hosted',
     proofServerUrl: 'https://indexer.example/api/v4/graphql',
   });
-  const ok = lace.ok && lace.topology === 'local-proof-server' && oneAm.ok && oneAm.topology === 'wallet-delegated' && !badHost.ok;
+  const ok = lace.ok && lace.fellBack === true && lace.topology === 'local-proof-server' && lace.method === 'httpClientProofProvider'
+    && oneAm.ok && oneAm.fellBack === false && oneAm.topology === 'wallet-delegated'
+    && !badHost.ok && badHost.method === 'httpClientProofProvider';
   if (!ok) {
     console.error(JSON.stringify({ lace, oneAm, badHost }, null, 2));
     process.exit(1);
