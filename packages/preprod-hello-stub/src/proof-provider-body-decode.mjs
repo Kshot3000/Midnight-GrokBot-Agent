@@ -57,6 +57,7 @@ function textOf(error) {
 
 /**
  * Classify a proof-provider failure that lost the response body or misreported a timeout.
+ * Shape matches the lab test for servicedesk#243.
  * @param {unknown} error
  */
 export function decodeProofProviderError(error) {
@@ -69,9 +70,12 @@ export function decodeProofProviderError(error) {
 
   if (isAbort && !failedResp) {
     return {
-      kind: 'timeout-or-abort',
+      kind: 'timeout',
       ok: true,
+      isTimeout: true,
       status: null,
+      code: null,
+      body: null,
       bodyDropped: false,
       hint: 'AbortError / "The user aborted a request" is how midnight-js 4.1.1 reports a proof-server timeout. The configured timeout fired; it is not a user cancel.',
       upstream: UPSTREAM_PROOF_PROVIDER_BODY,
@@ -82,15 +86,19 @@ export function decodeProofProviderError(error) {
 
   if (failedResp) {
     const url = failedResp[1];
-    const code = Number(failedResp[2]);
+    const code = failedResp[2];
+    const statusNum = Number(code);
     const statusText = failedResp[3];
-    const known = STATUS_HINTS[code] || null;
+    const known = STATUS_HINTS[statusNum] || null;
     return {
       kind: 'http-error-body-dropped',
       ok: true,
+      isTimeout: false,
       url,
-      status: code,
+      status: statusNum,
+      code,
       statusText,
+      body: null,
       bodyDropped: true,
       name: known ? known.name : null,
       hint:
@@ -105,8 +113,35 @@ export function decodeProofProviderError(error) {
   return {
     kind: 'unrecognized',
     ok: false,
+    isTimeout: false,
     bodyDropped: false,
+    code: null,
+    body: null,
     hint: 'Not a known midnight-js proof-provider wrapper. Expected "Failed Proof Server response: url=…, code=…, status=…" or an AbortError timeout.',
+    upstream: UPSTREAM_PROOF_PROVIDER_BODY,
+    official: OFFICIAL_PROOF_ERRORS,
+    credit: CREDIT,
+  };
+}
+
+/** Self-check used by the vitest file. */
+export function checkProofProviderBody() {
+  const failures = [];
+  const dropped = decodeProofProviderError(
+    'Error: Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request"',
+  );
+  if (!dropped.bodyDropped) failures.push('400 must mark bodyDropped');
+  if (dropped.code !== '400') failures.push('code must be the string "400"');
+  if (dropped.body !== null) failures.push('body must stay null (dropped)');
+  if (dropped.kind !== 'http-error-body-dropped') failures.push('400 kind');
+
+  const timeout = decodeProofProviderError('AbortError: The user aborted a request.');
+  if (!timeout.isTimeout) failures.push('AbortError must set isTimeout');
+  if (timeout.kind !== 'timeout') failures.push('timeout kind');
+
+  return {
+    ok: failures.length === 0,
+    failures,
     upstream: UPSTREAM_PROOF_PROVIDER_BODY,
     official: OFFICIAL_PROOF_ERRORS,
     credit: CREDIT,
@@ -116,27 +151,10 @@ export function decodeProofProviderError(error) {
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMain) {
-  const sample400 =
-    'Error: Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request"';
-  const sampleAbort = 'AbortError: The user aborted a request.';
-  const d400 = decodeProofProviderError(sample400);
-  const dAbort = decodeProofProviderError(sampleAbort);
-  const ok =
-    d400.ok &&
-    d400.kind === 'http-error-body-dropped' &&
-    d400.status === 400 &&
-    d400.bodyDropped &&
-    dAbort.ok &&
-    dAbort.kind === 'timeout-or-abort';
-  if (!ok) {
-    console.error(JSON.stringify({ d400, dAbort }, null, 2));
+  const result = checkProofProviderBody();
+  if (!result.ok) {
+    console.error(JSON.stringify(result, null, 2));
     process.exit(1);
   }
-  console.log(
-    JSON.stringify(
-      { ok: true, status: d400.status, timeout: dAbort.kind, credit: CREDIT },
-      null,
-      2,
-    ),
-  );
+  console.log(JSON.stringify({ ok: true, upstream: UPSTREAM_PROOF_PROVIDER_BODY, credit: CREDIT }, null, 2));
 }
