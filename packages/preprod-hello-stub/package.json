@@ -92,7 +92,8 @@
     "check:proof-server-skew": "node --test test/proof-server-matrix-skew.test.mjs",
     "check:assert-verify": "node --test test/assert-verify-invariant.test.mjs",
     "check:no-toplevel-const": "node src/no-toplevel-const-invariant.mjs",
-    "check:proof-server-command": "node src/proof-server-command.mjs"
+    "check:proof-server-command": "node src/proof-server-command.mjs",
+    "check:proof-provider-body": "node --test test/proof-provider-body-decode.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
