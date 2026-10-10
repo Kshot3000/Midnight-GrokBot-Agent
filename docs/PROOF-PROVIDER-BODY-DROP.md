@@ -1,26 +1,54 @@
-# midnight-js proof provider drops the proof-server body
+# Proof-provider error body drop (servicedesk#243)
 
-Upstream: [midnightntwrk/servicedesk#243](https://github.com/midnightntwrk/servicedesk/issues/243)
+Lab decoder for the midnight-js proof provider behavior reported in
+[midnightntwrk/servicedesk#243](https://github.com/midnightntwrk/servicedesk/issues/243).
 
-`@midnight-ntwrk/midnight-js-http-client-proof-provider` 4.1.1 (the matrix pin) throws
+## What the upstream issue says
 
-```text
+`@midnight-ntwrk/midnight-js-http-client-proof-provider` 4.1.1 (and 5.0.0-rc.4) throws
+
+```
 Failed Proof Server response: url="…", code="400", status="Bad Request"
 ```
 
-and never reads the response body. On proof-server 8.x the body is the only place the server says what went wrong (`bad input`, `Job Queue full`, or `internal error`). A timeout is reported as `AbortError: The user aborted a request.` with no duration.
+without reading the response body. On proof-server 8.x the body is the only place that
+says `bad input`, `Job Queue full`, or `internal error`. From 9.x the body also carries
+the reason, e.g. ``bad input: `couldn't find built-in key increment` ``.
 
-Official proof-server error table: https://docs.midnight.network/api-reference/error-reference/proof-server-errors  
-Official provider reference: https://docs.midnight.network/api-reference/midnight-js/@midnight-ntwrk/midnight-js-http-client-proof-provider  
-DEFAULT_CONFIG.timeout is 300000 ms.
+A timeout is reported as `AbortError: The user aborted a request.` instead of a
+timeout message.
 
-This lab classifier only inspects a string or Error the caller already has. It does not call a proof server, does not patch midnight-js, and does not claim the public proof server, indexer, or node is fixed.
+Official error names and status codes live at
+[Proof server errors](https://docs.midnight.network/api-reference/error-reference/proof-server-errors).
 
-Check: `node --test test/proof-provider-body-decode.test.mjs` from `packages/preprod-hello-stub`.
+## Lab helper
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+`packages/preprod-hello-stub/src/proof-provider-body-decode.mjs` classifies the two
+wrappers so a caller can surface a useful hint without inventing an API.
 
-Also read this run: servicedesk#236 (runtime mismatch messages), midnight-docs#1527 (docker flag drop), midnight-docs#1509 (1010 decode), example-hello-world#41 (unused deps). None of those are fixed here.
+```js
+import { decodeProofProviderError } from './proof-provider-body-decode.mjs';
+
+const decoded = decodeProofProviderError(err);
+// decoded.kind === 'http-error-body-dropped' | 'timeout-or-abort' | 'unrecognized'
+// decoded.bodyDropped, decoded.status, decoded.hint, decoded.upstream
+```
+
+Run the self-check:
+
+```bash
+node packages/preprod-hello-stub/src/proof-provider-body-decode.mjs
+```
+
+## Pins (unchanged)
+
+- Compact ~0.31.1 / language ~0.23
+- midnight-js 4.1.1
+- DApp Connector 4.0.1
+- proof-server 8.1.0
+
+This does **not** fix the public indexer, node, or the upstream midnight-js package.
+It is a local decoding aid that cites the open servicedesk issue.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
