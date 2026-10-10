@@ -51,7 +51,11 @@ function collectErrorText(err, depth = 0, seen = new Set()) {
 
 /** Documented LedgerApiError u8 codes. Source: https://docs.midnight.network/nodes/error-codes */
 export const LEDGER_CUSTOM_ERRORS = {
+  100: { name: 'EffectsMismatch', hint: 'Declared transaction effects do not match the computed effects. Rebuild the transaction. https://docs.midnight.network/nodes/error-codes' },
+  101: { name: 'ContractAlreadyDeployed', hint: 'A contract already exists at the target address. Use a different address or find the existing deployment. https://docs.midnight.network/nodes/error-codes' },
+  102: { name: 'ContractNotPresent', hint: 'Called a contract that does not exist at the given address. Verify the address and deploy first. https://docs.midnight.network/nodes/error-codes' },
   103: { name: 'Zswap', hint: 'Zswap-level rejection (double-spend or unknown Merkle root). Check nullifier reuse and that the coin tree root is current. https://docs.midnight.network/nodes/error-codes' },
+  104: { name: 'Transcript', hint: 'The node rejected on-chain transcript execution. Check contract logic. https://docs.midnight.network/nodes/error-codes' },
   106: { name: 'VerifierKeyNotFound', hint: 'Verifier key missing for the circuit operation. Deploy the verifier key before calling the circuit.' },
   111: { name: 'TransactionTooLarge', hint: 'Transaction exceeds maximum allowed size. Reduce the payload or split the transaction.' },
   115: { name: 'InvalidProof', hint: 'Zero-knowledge proof verification failed. Regenerate the proof with a compatible proof server (lab pin 8.1.0).' },
@@ -62,6 +66,7 @@ export const LEDGER_CUSTOM_ERRORS = {
   166: { name: 'InvalidNetworkId', hint: 'Transaction network ID does not match the node. Check setNetworkId() against the target (Preprod vs undeployed).' },
   174: { name: 'MalformedContractDeploy', hint: 'Contract deployment is structurally invalid. Check non-zero balance or charged state in the deploy.' },
   179: { name: 'UnsupportedProofVersion', hint: 'Proof version not supported. Align the proof server and SDK (lab pins: proof-server 8.1.0, midnight-js 4.1.1).' },
+  193: { name: 'ReplayProtectionViolation', hint: 'Transaction violates replay protection (duplicate intent). This transaction or intent was already submitted. https://docs.midnight.network/nodes/error-codes' },
   196: { name: 'DustDoubleSpend', hint: 'Attempt to spend the same DUST twice. Resync DUST wallet state. Official docs use Custom error: 196 as the example.' },
   231: { name: 'FeeCalculation.OutsideTimeToDismiss', hint: 'Documented malformed-transaction variant. Contract unshielded-token ops have been rejected with FeeCalculation(OutsideTimeToDismiss). Not a proof-server crash. https://github.com/midnightntwrk/servicedesk/issues/117' },
 };
