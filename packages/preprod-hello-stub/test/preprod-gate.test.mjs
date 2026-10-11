@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readWalletCredentials } from '../src/require-wallet-env.mjs';
 import { assembleProvidersWithoutWallet, applyPreprodNetwork } from '../src/providers.mjs';
-import { PREPROD } from '../src/preprod-config.mjs';
+import { PREPROD, PREPROD_PUBLIC } from '../src/preprod-config.mjs';
 import { setNetworkId, getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 
 describe('preprod wallet gate', () => {
@@ -41,7 +41,7 @@ describe('preprod providers wiring', () => {
     expect(a.providers.proofProvider).toBeTruthy();
     expect(a.providers.walletProvider).toBeNull();
     expect(a.providers.midnightProvider).toBeNull();
-    expect(a.endpoints.indexer).toBe(PREPROD.indexer);
+    expect(a.endpoints.indexer).toBe(PREPROD_PUBLIC.indexer);
     expect(a.missingForDeploy.length).toBeGreaterThan(0);
   });
 });

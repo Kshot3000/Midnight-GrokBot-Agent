@@ -15,7 +15,7 @@ import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
 import { WebSocket } from 'ws';
 
-import { PREPROD } from './preprod-config.mjs';
+import { PREPROD, PREPROD_PUBLIC } from './preprod-config.mjs';
 import { HELLO_OUT } from './paths.mjs';
 import './check-artifacts.mjs';
 
@@ -75,10 +75,10 @@ export function assembleProvidersWithoutWallet(opts = {}) {
     claim: 'partial providers — wallet slots null until funded seed + WalletFacade',
     networkId: PREPROD.networkId,
     endpoints: {
-      indexer: PREPROD.indexer,
-      indexerWS: PREPROD.indexerWS,
-      node: PREPROD.node,
-      nodeWS: PREPROD.nodeWS,
+      indexer: PREPROD_PUBLIC.indexer,
+      indexerWS: PREPROD_PUBLIC.indexerWS,
+      node: PREPROD_PUBLIC.node,
+      nodeWS: PREPROD_PUBLIC.nodeWS,
       proofServer: PREPROD.proofServer,
     },
     helloOut: HELLO_OUT,

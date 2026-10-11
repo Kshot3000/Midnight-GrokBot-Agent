@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { setNetworkId, getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
-import { PREPROD, BRAND } from './preprod-config.mjs';
+import { PREPROD_PUBLIC as PREPROD, BRAND } from './preprod-config.mjs';
 import { banner, section, kv, note, brandLine, printJson } from './cli-format.mjs';
 
 setNetworkId(PREPROD.networkId);
