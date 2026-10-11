@@ -95,7 +95,8 @@
     "check:proof-server-command": "node src/proof-server-command.mjs",
     "check:proof-provider-body": "node --test test/proof-provider-body-decode.test.mjs",
     "check:proof-server-image-flags": "node --test test/proof-server-image-flags.test.mjs",
-    "check:prove-path-recommended": "node --test test/prove-path-recommended.test.mjs"
+    "check:prove-path-recommended": "node --test test/prove-path-recommended.test.mjs",
+    "check:proof-server-key-download": "node --test test/proof-server-key-download.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
