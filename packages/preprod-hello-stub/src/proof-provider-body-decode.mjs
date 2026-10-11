@@ -56,8 +56,26 @@ function textOf(error) {
 }
 
 /**
+ * Extract a short reason from a proof-server body string when it is available.
+ * On 8.x the body is typically "bad input", "Job Queue full", or "internal error".
+ * On 9.x it can be "bad input: `reason`".
+ * @param {string} body
+ */
+export function extractProofServerReason(body) {
+  const raw = String(body || '').trim();
+  if (!raw) return null;
+  const m = raw.match(/bad input:\s*`([^`]*)`/i) || raw.match(/bad input:\s*(.+)/i);
+  if (m) return m[1].trim();
+  if (/bad input/i.test(raw)) return 'bad input';
+  if (/Job Queue full/i.test(raw)) return 'Job Queue full';
+  if (/internal error/i.test(raw)) return 'internal error';
+  return raw.length > 120 ? raw.slice(0, 117) + '...' : raw;
+}
+
+/**
  * Classify a proof-provider failure that lost the response body or misreported a timeout.
  * Shape matches the lab test for servicedesk#243.
+ * If the error text already contains a body=... fragment (future or wrapped clients), the reason is extracted.
  * @param {unknown} error
  */
 export function decodeProofProviderError(error) {
@@ -65,7 +83,7 @@ export function decodeProofProviderError(error) {
   const isAbort =
     /AbortError/i.test(text) || /user aborted a request/i.test(text) || /timed? ?out/i.test(text);
   const failedResp = text.match(
-    /Failed Proof Server response:\s*url="([^"]*)",\s*code="(\d+)",\s*status="([^"]*)"/,
+    /Failed Proof Server response:\s*url="([^"]*)",\s*code="(\d+)",\s*status="([^"]*)"(?:,\s*body="([^"]*)")?/,
   );
 
   if (isAbort && !failedResp) {
@@ -77,6 +95,7 @@ export function decodeProofProviderError(error) {
       code: null,
       body: null,
       bodyDropped: false,
+      reason: null,
       hint: 'AbortError / "The user aborted a request" is how midnight-js 4.1.1 reports a proof-server timeout. The configured timeout fired; it is not a user cancel.',
       upstream: UPSTREAM_PROOF_PROVIDER_BODY,
       official: OFFICIAL_PROOF_ERRORS,
@@ -89,21 +108,26 @@ export function decodeProofProviderError(error) {
     const code = failedResp[2];
     const statusNum = Number(code);
     const statusText = failedResp[3];
+    const body = failedResp[4] || null;
     const known = STATUS_HINTS[statusNum] || null;
+    const reason = body ? extractProofServerReason(body) : null;
     return {
-      kind: 'http-error-body-dropped',
+      kind: body ? 'http-error-with-body' : 'http-error-body-dropped',
       ok: true,
       isTimeout: false,
       url,
       status: statusNum,
       code,
       statusText,
-      body: null,
-      bodyDropped: true,
+      body,
+      bodyDropped: !body,
+      reason,
       name: known ? known.name : null,
       hint:
-        (known ? known.hint : `HTTP ${code} ${statusText}. Response body was not included.`) +
-        ' See servicedesk#243: the provider never reads the body, so the server reason ("bad input", "Job Queue full", or "couldn\'t find built-in key …") is lost.',
+        (known ? known.hint : `HTTP ${code} ${statusText}.`) +
+        (body
+          ? ` Body reason: ${reason}.`
+          : ' Response body was not included. See servicedesk#243: the provider never reads the body, so the server reason ("bad input", "Job Queue full", or "couldn\'t find built-in key …") is lost.'),
       upstream: UPSTREAM_PROOF_PROVIDER_BODY,
       official: OFFICIAL_PROOF_ERRORS,
       credit: CREDIT,
@@ -117,6 +141,7 @@ export function decodeProofProviderError(error) {
     bodyDropped: false,
     code: null,
     body: null,
+    reason: null,
     hint: 'Not a known midnight-js proof-provider wrapper. Expected "Failed Proof Server response: url=…, code=…, status=…" or an AbortError timeout.',
     upstream: UPSTREAM_PROOF_PROVIDER_BODY,
     official: OFFICIAL_PROOF_ERRORS,
@@ -134,6 +159,14 @@ export function checkProofProviderBody() {
   if (dropped.code !== '400') failures.push('code must be the string "400"');
   if (dropped.body !== null) failures.push('body must stay null (dropped)');
   if (dropped.kind !== 'http-error-body-dropped') failures.push('400 kind');
+  if (dropped.reason !== null) failures.push('dropped must have null reason');
+
+  const withBody = decodeProofProviderError(
+    'Error: Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request", body="bad input: `couldn\'t find built-in key increment`"',
+  );
+  if (withBody.bodyDropped) failures.push('with-body must not mark bodyDropped');
+  if (withBody.reason !== "couldn't find built-in key increment") failures.push('reason extract');
+  if (withBody.kind !== 'http-error-with-body') failures.push('with-body kind');
 
   const timeout = decodeProofProviderError('AbortError: The user aborted a request.');
   if (!timeout.isTimeout) failures.push('AbortError must set isTimeout');

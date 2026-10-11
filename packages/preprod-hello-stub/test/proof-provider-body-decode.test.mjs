@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { checkProofProviderBody, decodeProofProviderError } from '../src/proof-provider-body-decode.mjs';
+import { checkProofProviderBody, decodeProofProviderError, extractProofServerReason } from '../src/proof-provider-body-decode.mjs';
 
 test('proof-provider body decoder matches servicedesk#243 shapes', () => {
   const result = checkProofProviderBody();
@@ -12,10 +12,20 @@ test('proof-provider body decoder matches servicedesk#243 shapes', () => {
   assert.equal(dropped.bodyDropped, true);
   assert.equal(dropped.code, '400');
   assert.equal(dropped.body, null);
+  assert.equal(dropped.reason, null);
+
+  const withBody = decodeProofProviderError(
+    'Error: Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request", body="bad input: `couldn\'t find built-in key increment`"',
+  );
+  assert.equal(withBody.bodyDropped, false);
+  assert.equal(withBody.reason, "couldn't find built-in key increment");
 
   const timeout = decodeProofProviderError('AbortError: The user aborted a request.');
   assert.equal(timeout.isTimeout, true);
   assert.equal(timeout.kind, 'timeout');
+
+  assert.equal(extractProofServerReason('bad input: `Job Queue full`'), 'Job Queue full');
+  assert.equal(extractProofServerReason('bad input'), 'bad input');
 });
 
 // Built by @kshot9000 https://x.com/kshot9000
