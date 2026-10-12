@@ -10,7 +10,7 @@
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { decodeProofProviderError } from '../src/proof-provider-error-decode.mjs';
+import { decodeProofProviderError, suggestProofServerBody } from '../src/proof-provider-error-decode.mjs';
 
 test('names the dropped 400 body from servicedesk#243', () => {
   const err = new Error('Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request"');
@@ -27,4 +27,14 @@ test('names the timeout reported as user abort', () => {
   assert.equal(result.ok, false);
   assert.equal(result.kind, 'timeout-as-abort');
   assert.ok(result.notes.some((n) => /timeout/.test(n)));
+});
+
+test('suggests the 9.x ZKIR reason when body is provided', () => {
+  const suggested = suggestProofServerBody('Bad Request', "bad input: `couldn't find built-in key increment`");
+  assert.ok(suggested.includes("couldn't find built-in key"));
+});
+
+test('suggests Job Queue full', () => {
+  const suggested = suggestProofServerBody('Bad Request', 'Job Queue full');
+  assert.ok(/Job Queue full/i.test(suggested));
 });

@@ -59,6 +59,14 @@ export function decodeProofProviderError(error, hints = {}) {
     notes.push(
       'proof provider returned 400 Bad Request but dropped the response body. On proof-server 8.x the body is "bad input" (or "Job Queue full" / "internal error"). On 9.x it includes the reason, e.g. bad input: `couldn\'t find built-in key increment` when ZKIR is missing. Check zk-config / keys and the official proof-server error page.',
     );
+    if (/Job Queue full/i.test(text) || /queue full/i.test(text)) {
+      kind = 'queue-full';
+      notes.push('body likely "Job Queue full" — proof server busy; retry later or increase capacity.');
+    }
+    if (/couldn\'t find built-in key|zkir|ZKIR/i.test(text)) {
+      kind = 'zkir-missing';
+      notes.push('body likely mentions missing built-in key or ZKIR — ensure circuit IR/keys are readable by the provider.');
+    }
   }
 
   if (/user aborted a request/i.test(text) || /AbortError/.test(text)) {
@@ -93,6 +101,12 @@ export function decodeProofProviderError(error, hints = {}) {
 export function suggestProofServerBody(statusText, body) {
   const raw = String(body || '');
   if (/bad input/i.test(raw) || /Bad Request/i.test(statusText)) {
+    if (/couldn\'t find built-in key/i.test(raw)) {
+      return raw || 'bad input: `couldn\'t find built-in key increment` (ZKIR missing; body dropped by midnight-js-http-client-proof-provider 4.1.1)';
+    }
+    if (/Job Queue full/i.test(raw)) {
+      return raw || 'Job Queue full (body dropped by midnight-js-http-client-proof-provider 4.1.1)';
+    }
     return raw || 'bad input (body dropped by midnight-js-http-client-proof-provider 4.1.1)';
   }
   return raw || '(no body captured)';
