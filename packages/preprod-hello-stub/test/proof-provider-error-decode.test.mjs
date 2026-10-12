@@ -38,3 +38,16 @@ test('suggests Job Queue full', () => {
   const suggested = suggestProofServerBody('Bad Request', 'Job Queue full');
   assert.ok(/Job Queue full/i.test(suggested));
 });
+
+test('names internal error body when mentioned', () => {
+  const err = new Error('Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request" body="internal error"');
+  const result = decodeProofProviderError(err);
+  assert.equal(result.ok, false);
+  assert.equal(result.kind, 'internal-error-dropped-body');
+  assert.ok(result.notes.some((n) => /internal error/i.test(n)));
+});
+
+test('suggests internal error', () => {
+  const suggested = suggestProofServerBody('Bad Request', 'internal error');
+  assert.ok(/internal error/i.test(suggested));
+});

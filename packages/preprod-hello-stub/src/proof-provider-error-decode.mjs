@@ -63,6 +63,10 @@ export function decodeProofProviderError(error, hints = {}) {
       kind = 'queue-full';
       notes.push('body likely "Job Queue full" — proof server busy; retry later or increase capacity.');
     }
+    if (/internal error/i.test(text)) {
+      kind = 'internal-error-dropped-body';
+      notes.push('body likely "internal error" — proof server failed internally; check server logs (verbose via MIDNIGHT_PROOF_SERVER_VERBOSE=true) and official proof-server error page.');
+    }
     if (/couldn\'t find built-in key|zkir|ZKIR/i.test(text)) {
       kind = 'zkir-missing';
       notes.push('body likely mentions missing built-in key or ZKIR — ensure circuit IR/keys are readable by the provider.');
@@ -106,6 +110,9 @@ export function suggestProofServerBody(statusText, body) {
     }
     if (/Job Queue full/i.test(raw)) {
       return raw || 'Job Queue full (body dropped by midnight-js-http-client-proof-provider 4.1.1)';
+    }
+    if (/internal error/i.test(raw)) {
+      return raw || 'internal error (body dropped by midnight-js-http-client-proof-provider 4.1.1)';
     }
     return raw || 'bad input (body dropped by midnight-js-http-client-proof-provider 4.1.1)';
   }

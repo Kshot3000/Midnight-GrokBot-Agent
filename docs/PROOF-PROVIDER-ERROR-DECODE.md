@@ -2,7 +2,7 @@
 
 Upstream: [midnightntwrk/servicedesk#243](https://github.com/midnightntwrk/servicedesk/issues/243)
 
-`@midnight-ntwrk/midnight-js-http-client-proof-provider` 4.1.1 (matrix version) and 5.0.0-rc.4 throw `Failed Proof Server response: url="…", code="400", status="Bad Request"` when the proof server rejects a request. The response body is never read. On proof-server 8.x the body is the only place that says `bad input`, `Job Queue full`, or `internal error`. From 9.0.0-rc.9 the body carries the reason (for example `bad input: \`couldn't find built-in key increment\`` when ZKIR is missing). A timeout becomes `AbortError: The user aborted a request.` with no duration.
+`@midnight-ntwrk/midnight-js-http-client-proof-provider` 4.1.1 (matrix version) and 5.0.0-rc.4 throw `Failed Proof Server response: url="…", code="400", status="Bad Request"` when the proof server rejects a request. The response body is never read. On proof-server 8.x the body is the only place that says `bad input`, `Job Queue full`, or `internal error` (now explicitly named as kind `internal-error-dropped-body` when the text mentions it). From 9.0.0-rc.9 the body carries the reason (for example `bad input: \`couldn't find built-in key increment\`` when ZKIR is missing). A timeout becomes `AbortError: The user aborted a request.` with no duration.
 
 This lab does not patch midnight-js, does not call the live proof server, and does not claim a fix of the public indexer or node. `packages/preprod-hello-stub/src/proof-provider-error-decode.mjs` maps the two incomplete shapes already reported upstream onto the official proof-server error page so a builder can name the dropped body or the timeout.
 
