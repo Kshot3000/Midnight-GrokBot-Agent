@@ -31,6 +31,8 @@ node src/proof-provider-body-decode.mjs
 npm run check:proof-provider-body
 ```
 
+The wallet SDK prover client does include the body (`ClientError: Failed to prove: Job Queue full`), so the two clients disagree. The lab decoder now classifies that shape as `wallet-sdk-with-body` with `bodyDropped: false`.
+
 Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000

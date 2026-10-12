@@ -24,6 +24,11 @@ test('proof-provider body decoder matches servicedesk#243 shapes', () => {
   assert.equal(timeout.isTimeout, true);
   assert.equal(timeout.kind, 'timeout');
 
+  const wallet = decodeProofProviderError('ClientError: Failed to prove: Job Queue full');
+  assert.equal(wallet.bodyDropped, false);
+  assert.equal(wallet.reason, 'Job Queue full');
+  assert.equal(wallet.kind, 'wallet-sdk-with-body');
+
   assert.equal(extractProofServerReason('bad input: `Job Queue full`'), 'Job Queue full');
   assert.equal(extractProofServerReason('bad input'), 'bad input');
 });

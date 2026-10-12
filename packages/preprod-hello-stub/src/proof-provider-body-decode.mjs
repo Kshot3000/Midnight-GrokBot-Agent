@@ -134,6 +134,31 @@ export function decodeProofProviderError(error) {
     };
   }
 
+  // Wallet SDK prover client includes the body (servicedesk#243).
+  // Example: ClientError: Failed to prove: Job Queue full
+  const walletProve = text.match(/Failed to prove:\s*(.+)/i);
+  if (walletProve) {
+    const body = walletProve[1].trim();
+    const reason = extractProofServerReason(body);
+    return {
+      kind: 'wallet-sdk-with-body',
+      ok: true,
+      isTimeout: false,
+      url: null,
+      status: null,
+      code: null,
+      statusText: null,
+      body,
+      bodyDropped: false,
+      reason,
+      name: null,
+      hint: `Wallet SDK prover client included the proof-server reason: ${reason}. midnight-js 4.1.1 http-client drops the same body (servicedesk#243).`,
+      upstream: UPSTREAM_PROOF_PROVIDER_BODY,
+      official: OFFICIAL_PROOF_ERRORS,
+      credit: CREDIT,
+    };
+  }
+
   return {
     kind: 'unrecognized',
     ok: false,
@@ -171,6 +196,11 @@ export function checkProofProviderBody() {
   const timeout = decodeProofProviderError('AbortError: The user aborted a request.');
   if (!timeout.isTimeout) failures.push('AbortError must set isTimeout');
   if (timeout.kind !== 'timeout') failures.push('timeout kind');
+
+  const wallet = decodeProofProviderError('ClientError: Failed to prove: Job Queue full');
+  if (wallet.bodyDropped) failures.push('wallet SDK must not mark bodyDropped');
+  if (wallet.reason !== 'Job Queue full') failures.push('wallet reason');
+  if (wallet.kind !== 'wallet-sdk-with-body') failures.push('wallet kind');
 
   return {
     ok: failures.length === 0,
