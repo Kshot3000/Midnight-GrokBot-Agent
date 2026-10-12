@@ -14,13 +14,15 @@ Forms that start a server but drop `-v`, `--network`, `--port`, and `--no-fetch-
 
 On 8.x the reason for a 400 `bad input` is logged only at DEBUG, so verbose stays off.
 
-Working form (env var, no command):
+The same issue notes that a brief failure while downloading keys ends the process after three attempts with no backoff. Until the keys are present nothing listens on 6300.
+
+Working form (env var + cache volume, no command):
 
 ```bash
-docker run -p 127.0.0.1:6300:6300 -e MIDNIGHT_PROOF_SERVER_VERBOSE=true midnightntwrk/proof-server:8.1.0
+docker run -p 127.0.0.1:6300:6300 -e MIDNIGHT_PROOF_SERVER_VERBOSE=true -v midnight-zk-params:/.cache/midnight midnightntwrk/proof-server:8.1.0
 ```
 
-This lab's prove-path selector now emits that form. It does not run Docker and does not claim a fix of the public proof server, indexer, or node.
+The volume keeps completed parameter files across restarts so only missing keys are fetched again. This lab's prove-path selector now emits that form. It does not run Docker and does not claim a fix of the public proof server, indexer, or node.
 
 Related: the proof provider still drops the response body ([servicedesk#243](https://github.com/midnightntwrk/servicedesk/issues/243)); see `packages/preprod-hello-stub/src/proof-provider-body-decode.mjs`.
 
