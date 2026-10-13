@@ -8,7 +8,7 @@ Official reference: [ModuleResolutionFailure](https://docs.midnight.network/api-
 
 CoIP 2 currently lists `pure` circuits in contract type declarations as supported. With compactc ~0.31.1 / 0.35.0 the declaration compiles (including ZKIR and keys), but every call through the type fails at runtime with `ModuleResolutionError` kind `PureInterfaceCircuit`. CoIP 4's list of failure kinds omits it.
 
-Lab invariant: `contracts/hello-midnight/no-pure-interface.compact` keeps pure circuits as ordinary helpers and never places them inside a contract type used for a cross-contract call. The decoder in `packages/preprod-hello-stub/src/pure-interface-invariant.mjs` recognises the runtime error text when it appears.
+Lab invariant: `contracts/hello-midnight/no-pure-interface.compact` keeps pure circuits as ordinary helpers and never places them inside a contract type used for a cross-contract call. The decoder in `packages/preprod-hello-stub/src/pure-interface-invariant.mjs` recognises the runtime error text when it appears and also scans Compact source for a pure circuit declared inside a contract type.
 
 It does not patch the compiler, does not claim a public contract deploy, and does not fix the public indexer or node.
 

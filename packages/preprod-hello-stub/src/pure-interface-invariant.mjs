@@ -1,6 +1,7 @@
 /**
  * Flag the PureInterfaceCircuit runtime refusal that midnight-js / compact-runtime raise
  * when a contract type declares a pure circuit and someone calls through it.
+ * Also scans Compact source for the forbidden pure-in-contract-type pattern.
  * Does not call a node, indexer, proof server, or wallet.
  * Does not claim to fix the public compiler or runtime.
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/249
@@ -43,19 +44,26 @@ export function decodePureInterface(text) {
   return { ok: false, hint: 'No PureInterfaceCircuit marker found.' };
 }
 
-function selfCheck() {
-  const bad = 'ModuleResolutionError: kind PureInterfaceCircuit';
-  const good = 'ModuleResolutionError: kind OperationAbsent';
-  const a = decodePureInterface(bad);
-  const b = decodePureInterface(good);
-  const ok = a.ok && !b.ok;
-  console.log(ok ? 'PASS' : 'FAIL', a.ok, b.ok);
-  console.log(CREDIT);
-  process.exit(ok ? 0 : 1);
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  selfCheck();
+/**
+ * Scan Compact source for a pure circuit declared inside a contract type.
+ * This is the pattern that compiles but fails every call (servicedesk#249).
+ * Local pure helpers outside a contract type are allowed.
+ * @param {string} source
+ * @returns {{ ok: boolean, hint: string }}
+ */
+export function scanPureInContractType(source) {
+  if (typeof source !== 'string') {
+    return { ok: false, hint: 'Expected Compact source string.' };
+  }
+  // Rough window: pure circuit appears after a contract type declaration.
+  const pureInType = /contract\s+type\s+\w+[\s\S]{0,400}?pure\s+circuit/i.test(source);
+  if (pureInType) {
+    return {
+      ok: false,
+      hint: 'Pure circuit declared inside a contract type. Compiler accepts it; runtime refuses every call with PureInterfaceCircuit (servicedesk#249). Move the pure helper out of the type.',
+    };
+  }
+  return { ok: true, hint: 'No pure-in-contract-type pattern detected.' };
 }
 
 /**
@@ -64,4 +72,23 @@ if (import.meta.url === `file://${process.argv[1]}`) {
  */
 export function coipOmissionNote() {
   return 'CoIP 4 lists 10 failure kinds and omits PureInterfaceCircuit (servicedesk#249). compact-runtime has 11 kinds.';
+}
+
+function selfCheck() {
+  const bad = 'ModuleResolutionError: kind PureInterfaceCircuit';
+  const good = 'ModuleResolutionError: kind OperationAbsent';
+  const a = decodePureInterface(bad);
+  const b = decodePureInterface(good);
+  const srcBad = 'contract type Foo { pure circuit bar(): []; }';
+  const srcOk = 'export pure circuit helper(): [] { return; } export circuit bump(): [] {}';
+  const c = scanPureInContractType(srcBad);
+  const d = scanPureInContractType(srcOk);
+  const ok = a.ok && !b.ok && !c.ok && d.ok;
+  console.log(ok ? 'PASS' : 'FAIL', a.ok, b.ok, c.ok, d.ok);
+  console.log(CREDIT);
+  process.exit(ok ? 0 : 1);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  selfCheck();
 }
