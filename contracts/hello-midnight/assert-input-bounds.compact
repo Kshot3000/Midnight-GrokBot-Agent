@@ -1,0 +1,40 @@
+/*
+ * assert-input-bounds.compact — reject a zero or oversized transfer before
+ * any ledger write.
+ *
+ * Official (security best practices, not an invented API):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   "Validate all inputs" / "Never trust witness data or circuit parameters
+ *   without validation."
+ *   https://docs.midnight.network/compact/smart-contract-security
+ *   Assertions provide pre-condition checks, input validation, authorization,
+ *   and invariant preservation.
+ *
+ * Compact 0.31.1 / language ~0.23 treats assert as a function-like expression.
+ * The two asserts run before the ledger assignment. No witness is introduced
+ * here; the caller supplies the amount. This file is not compiled and is not
+ * a deploy.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1387
+ * (Compact reference gaps; Kapa could not answer circuit and validation
+ * questions. This lab source copies the official validation pattern.)
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Uint<64>;
+
+const MAX_TRANSFER: Uint<64> = 1000;
+
+export circuit transferBounded(amount: Uint<64>): [] {
+  assert(amount > 0, "Amount must be greater than zero");
+  assert(amount <= MAX_TRANSFER, "Amount exceeds limit");
+  stored = disclose(amount);
+}
