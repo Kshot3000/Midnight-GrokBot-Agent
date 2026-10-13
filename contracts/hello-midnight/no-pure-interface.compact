@@ -1,0 +1,40 @@
+/*
+ * no-pure-interface.compact — do not declare pure circuits in contract types.
+ *
+ * Official: https://docs.midnight.network/api-reference/compact-runtime/type-aliases/ModuleResolutionFailure
+ *   PureInterfaceCircuit: "The contract type declares the called circuit pure,
+ *   so it has no verifier key and is never a deployed operation. The compiler
+ *   accepts the declaration and the call, so this is where one stops."
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/249
+ * CoIP 2 currently lists pure in contract type declarations as supported;
+ * every call then fails at runtime with ModuleResolutionError kind PureInterfaceCircuit.
+ *
+ * This lab sample keeps pure circuits as local helpers (or exported pure
+ * circuits that are never part of a contract-type interface). It does not
+ * declare a pure circuit inside a contract type used for a cross-contract call.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+// Pure helper — fine. It has no ledger access and is not part of any contract type.
+export pure circuit double(x: Uint<8>): Uint<8> {
+  return x + x;
+}
+
+export ledger counter: Counter;
+
+// Impure circuit that uses the pure helper. This is the supported pattern.
+export circuit bump(): [] {
+  counter.increment(disclose(double(1)));
+}
