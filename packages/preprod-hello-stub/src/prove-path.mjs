@@ -27,9 +27,11 @@ export const PROOF_SERVER_IMAGE = 'midnightntwrk/proof-server:8.1.0';
 export const CONNECTOR_API = '4.0.1';
 export const DEPRECATED_PROVER_FIELD = 'Configuration.proverServerUri';
 
-/** Working start: env var, no args after the image (servicedesk#242 / midnight-docs#1527). */
+/** Working start: env var, no args after the image, volume for key cache (servicedesk#242 / midnight-docs#1527).
+ * The volume at /.cache/midnight lets completed key downloads survive restarts so a brief outage does not force three full retries from byte 0.
+ */
 export const WORKING_PROOF_SERVER_START =
-  `docker run -p 6300:6300 -e MIDNIGHT_PROOF_SERVER_VERBOSE=true ${PROOF_SERVER_IMAGE}`;
+  `docker run -p 6300:6300 -e MIDNIGHT_PROOF_SERVER_VERBOSE=true -v midnight-zk-params:/.cache/midnight ${PROOF_SERVER_IMAGE}`;
 
 const CREDIT = [
   'Built by @kshot9000 https://x.com/kshot9000',
