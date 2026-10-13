@@ -4,7 +4,10 @@ Upstream: [midnightntwrk/midnight-docs#1383](https://github.com/midnightntwrk/mi
 
 Official wallet integration (DApp Connector API 4.0.1) names three places a ZK proof can be built. This lab does not add a connector method and does not claim the public Preprod indexer or node was fixed.
 
-- Local proof server. Lace has no `getProvingProvider()`. Settings, Midnight, Local points at `http://localhost:6300`. Start with the documented image pin: `docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 midnight-proof-server -v` (https://docs.midnight.network/getting-started/installation). The lab hello prove path already uses `httpClientProvingProvider` against that URL.
+**Note on start command:** the form with `midnight-proof-server -v` after the image name is dropped by the image entrypoint (servicedesk#242, midnight-docs#1527). Use the environment variable form shown below instead of the installation.mdx example.
+
+
+- Local proof server. Lace has no `getProvingProvider()`. Settings, Midnight, Local points at `http://localhost:6300`. Start with the documented image pin: `docker run -p 6300:6300 -e MIDNIGHT_PROOF_SERVER_VERBOSE=true midnightntwrk/proof-server:8.1.0` (https://docs.midnight.network/getting-started/installation). The lab hello prove path already uses `httpClientProvingProvider` against that URL.
 - Wallet-delegated. `ConnectedAPI.getProvingProvider(keyMaterialProvider)` is the v4 method. Feature-detect with `typeof api.getProvingProvider === "function"` before calling it. 1AM implements it; Lace does not. Do not hard-code the deprecated `Configuration.proverServerUri`.
 - Hosted. The proof-server guide allows a remote machine you control, over an encrypted channel, because the payload includes witness data. An indexer GraphQL URL is not a proof server. This repo does not ship a public prover endpoint.
 
