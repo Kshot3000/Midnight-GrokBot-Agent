@@ -110,6 +110,7 @@
     "check:test-debug-sample-gap": "node src/test-debug-sample-gap.mjs",
     "check:proof-server-port": "node src/proof-server-port-env.mjs",
     "check:pure-interface": "node --test test/pure-interface-invariant.test.mjs",
+    "check:runtime-mismatch": "node --test test/runtime-mismatch-decode.test.mjs",
     "check:latest-upstream-sweep": "node src/latest-upstream-sweep.mjs"
   },
   "dependencies": {
