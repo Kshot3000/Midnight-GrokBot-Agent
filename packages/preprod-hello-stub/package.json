@@ -102,7 +102,8 @@
     "check:proof-ready-503": "node src/proof-ready-503.mjs",
     "check:proof-official-errors": "node src/proof-server-official-error-map.mjs",
     "check:impl-limits": "node src/compact-impl-limits.mjs",
-    "check:submission-10999": "node src/node-submission-10999-decode.mjs"
+    "check:submission-10999": "node src/node-submission-10999-decode.mjs",
+    "check:proof-status-map": "node src/proof-status-map.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
