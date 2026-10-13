@@ -57,3 +57,11 @@ function selfCheck() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   selfCheck();
 }
+
+/**
+ * Note that CoIP 4 omits PureInterfaceCircuit from its failure kinds list.
+ * @returns {string}
+ */
+export function coipOmissionNote() {
+  return 'CoIP 4 lists 10 failure kinds and omits PureInterfaceCircuit (servicedesk#249). compact-runtime has 11 kinds.';
+}

@@ -8,6 +8,8 @@
  *
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/249
  * CoIP 2 currently lists pure in contract type declarations as supported;
+
+ * CoIP 4 omits PureInterfaceCircuit from its list of failure kinds (11 in runtime vs 10 listed).
  * every call then fails at runtime with ModuleResolutionError kind PureInterfaceCircuit.
  *
  * This lab sample keeps pure circuits as local helpers (or exported pure
