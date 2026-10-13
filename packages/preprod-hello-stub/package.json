@@ -99,7 +99,8 @@
     "check:proof-server-key-download": "node --test test/proof-server-key-download.test.mjs",
     "check:proof-timeout": "node src/proof-timeout-decode.mjs",
     "check:builtin-key": "node --test test/builtin-key-decode.test.mjs",
-    "check:proof-ready-503": "node src/proof-ready-503.mjs"
+    "check:proof-ready-503": "node src/proof-ready-503.mjs",
+    "check:proof-official-errors": "node src/proof-server-official-error-map.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
