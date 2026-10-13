@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Preprod path: hello + agent-escrow Compact artifacts, multi-circuit local prove vs :6300, midnight-js 4.1.1 providers, clear-fail deploy gate. NOT a fake deploy.",
+  "description": "Preprod path: hello + agent-escrow Compact artifacts, multi-circuit local prove vs :6300, midnight-js 4.1.1 providers, clear-fail deploy gate. NOT a fake deploy.\nBuilt by @kshot9000 https://x.com/kshot9000\nEmail: kshot9000@gmail.com\nCardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v\nTeams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation",
   "engines": {
     "node": ">=22"
   },
@@ -94,6 +94,7 @@
     "check:no-toplevel-const": "node src/no-toplevel-const-invariant.mjs",
     "check:proof-server-command": "node src/proof-server-command.mjs",
     "check:proof-provider-body": "node --test test/proof-provider-body-decode.test.mjs",
+    "check:proof-server-body-reason": "node --test test/proof-server-body-reason.test.mjs",
     "check:proof-server-image-flags": "node --test test/proof-server-image-flags.test.mjs",
     "check:prove-path-recommended": "node --test test/prove-path-recommended.test.mjs",
     "check:proof-server-key-download": "node --test test/proof-server-key-download.test.mjs",
