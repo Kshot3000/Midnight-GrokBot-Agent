@@ -105,7 +105,8 @@
     "check:submission-10999": "node src/node-submission-10999-decode.mjs",
     "check:proof-status-map": "node src/proof-status-map.mjs",
     "check:proof-provider-full": "node src/proof-provider-full-decode.mjs",
-    "check:proof-server-official-command": "node src/proof-server-official-command.mjs"
+    "check:proof-server-official-command": "node src/proof-server-official-command.mjs",
+    "check:test-debug-sample-gap": "node src/test-debug-sample-gap.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
