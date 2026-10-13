@@ -30,7 +30,7 @@ This lab does not invent a replacement for `tx.wait` or `APPLIED_TO_CHAIN`. Thos
 
 ## Lab check
 
-`packages/preprod-hello-stub/src/test-debug-sample.mjs` flags the published sample shapes. `packages/preprod-hello-stub/src/debug-sample-gap.mjs` flags the missing pragma and the undisclosed `amount` write. `contracts/hello-midnight/debug-sample-disclose.compact` is the bounds sample with both. `npm run check:debug-sample` covers the pragma scan. Neither scanner compiles Compact, calls proof-server 8.1.0, or claims a public deploy.
+`packages/preprod-hello-stub/src/test-debug-sample.mjs` flags the published sample shapes. `packages/preprod-hello-stub/src/debug-sample-gap.mjs` flags the missing pragma and the undisclosed `amount` write. `packages/preprod-hello-stub/src/test-debug-sample-gap.mjs` records the four core defects (hand-built context, result shape, assert messages, tx.wait). `contracts/hello-midnight/debug-sample-disclose.compact` is the bounds sample with both. `npm run check:debug-sample` covers the pragma scan. `npm run check:test-debug-sample-gap` covers the defect list. Neither scanner compiles Compact, calls proof-server 8.1.0, or claims a public deploy.
 
 Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
