@@ -1,19 +1,23 @@
-# Deploy errors that hide a runtime mismatch
+# midnight-js deploy fails without naming a runtime mismatch
 
 Upstream: [midnightntwrk/servicedesk#236](https://github.com/midnightntwrk/servicedesk/issues/236)
 
-`createUnprovenDeployTx` / `deployContract` in midnight-js 4.1.1 can fail without naming the cause when the contract runtime is not the SDK runtime. This lab only classifies the two strings recorded on that issue. It does not change midnight-js, and it does not fix the public indexer or node.
+Official: [Fix version mismatch errors](https://docs.midnight.network/how-to/fix-version-mismatches) and the [compatibility matrix](https://docs.midnight.network/relnotes/support-matrix).
 
-Recorded failures:
+When a contract's Compact runtime (or a second physical copy of `@midnight-ntwrk/onchain-runtime-v3`) differs from the midnight-js 4.1.1 pin, `createUnprovenDeployTx` / `deployContract` fails with opaque messages:
 
-1. `ContractConfigurationError: Failed to configure constructor context with coin public key`, caused by `TypeError: Cannot read properties of undefined (reading 'coinPublicKey')`. Issue 236 records this for a contract built by compiler 0.34.0 or 0.35.0 (runtime 0.19.0 / 0.20.0) loaded next to midnight-js 4.1.1.
-2. `Error: expected instance of ContractMaintenanceAuthority` when the contract package has its own `@midnight-ntwrk/onchain-runtime-v3`, even at the same version.
+- `TypeError: Cannot read properties of undefined (reading 'coinPublicKey')` (ContractConfigurationError wrapping it)
+- `Error: expected instance of ContractMaintenanceAuthority`
 
-Support matrix pairing used by this lab (https://docs.midnight.network/relnotes/support-matrix): Compact toolchain 0.31.1, compact-runtime 0.16.0, on-chain runtime 3.0.0, Midnight.js 4.1.1. Version-mismatch how-to: https://docs.midnight.network/how-to/fix-version-mismatches.
+Neither message names the version skew. The lab decoder in `packages/preprod-hello-stub/src/runtime-mismatch-decode.mjs` matches those shapes and points builders at the support-matrix versions (Compact ~0.31.1 / compact-runtime 0.16.x for midnight-js 4.1.1). It does not call a node, indexer, proof server, or wallet, and does not claim to fix the public SDK.
 
-`packages/preprod-hello-stub/src/runtime-mismatch.mjs` maps those two strings to that pairing. Other submit errors stay on `rpc-errors.mjs`.
+```bash
+cd packages/preprod-hello-stub
+node src/runtime-mismatch-decode.mjs
+npm run check:runtime-mismatch
+```
 
-Pins used by this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
