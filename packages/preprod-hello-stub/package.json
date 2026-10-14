@@ -112,7 +112,8 @@
     "check:pure-interface": "node --test test/pure-interface-invariant.test.mjs",
     "check:runtime-mismatch": "node --test test/runtime-mismatch-decode.test.mjs",
     "check:latest-upstream-sweep": "node src/latest-upstream-sweep.mjs",
-    "check:proof-error-classify": "node src/proof-error-classify.mjs"
+    "check:proof-error-classify": "node src/proof-error-classify.mjs",
+    "check:dust-spend-proof-170": "node src/dust-spend-proof-170-decode.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
