@@ -4,13 +4,12 @@ This lab read open issues in the three orgs it cannot push to. It does not claim
 
 ## midnightntwrk/servicedesk (open)
 - [#251](https://github.com/midnightntwrk/servicedesk/issues/251) — Wallet SDK DUST sync never notices a subscription that stays open but stops delivering events. Lab: `docs/DUST-SILENT-SUBSCRIPTION.md`, `packages/preprod-hello-stub/src/dust-silent-subscription.mjs`.
-
-
 - [#249](https://github.com/midnightntwrk/servicedesk/issues/249) — pure circuits in contract types compile but every call is refused; CoIP 4 omits PureInterfaceCircuit. Lab: `docs/PURE-INTERFACE-CIRCUIT.md`, `contracts/hello-midnight/no-pure-interface.compact`, `packages/preprod-hello-stub/src/pure-interface-invariant.mjs`.
 - [#243](https://github.com/midnightntwrk/servicedesk/issues/243) — midnight-js proof provider drops the proof-server response body and reports a timeout as AbortError. Lab: `docs/PROOF-PROVIDER-BODY-DECODE.md`, `packages/preprod-hello-stub/src/proof-provider-body-decode.mjs`.
 - [#242](https://github.com/midnightntwrk/servicedesk/issues/242) — proof-server image silently drops command-line flags and exits on three failed key downloads. Lab: `docs/PROOF-SERVER-IMAGE-FLAGS.md`, `docs/PROOF-SERVER-KEY-DOWNLOAD.md`.
 - [#236](https://github.com/midnightntwrk/servicedesk/issues/236) — deploy construction errors do not name a runtime mismatch. Lab: `docs/RUNTIME-MISMATCH-DECODE.md`.
 - [#225](https://github.com/midnightntwrk/servicedesk/issues/225) — RPC 1010 “Transaction would exhaust the block limits” surfaces only as a generic submission error. Lab: `docs/PREPROD-RPC-1010-DECODE.md`.
+- [#193](https://github.com/midnightntwrk/servicedesk/issues/193) — Preprod faucet crashes on bare "/api" due to unguarded null regex match. Lab: `docs/FAUCET-BARE-API-CRASH.md`, `packages/preprod-hello-stub/src/faucet-bare-api.mjs`.
 
 ## midnightntwrk/midnight-docs (open)
 
