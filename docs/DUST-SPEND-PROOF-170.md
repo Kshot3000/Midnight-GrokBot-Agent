@@ -10,9 +10,14 @@ Observed on Midnight Stagenet (node 2.0.0-d9729c13, specVersion 2000000): transa
 
 The same wallet, contract, and transaction shape proved by 9.0.0-rc.5 finalize. Error 170 is reported as InvalidDustSpendProof. The contract-call proof itself is not the failure point.
 
-This lab pins proof-server **8.1.0** (with Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1). It does not claim to fix the public node, indexer, or proof-server image. The note is only a classification aid for builders hitting the same surface while the compatibility of the 9.x RCs is clarified.
+Official node error codes name 170 `InvalidDustSpendProof`: the DUST spend proof failed to verify against the node's DUST state at the transaction's declared time. A common cause is a wallet that builds the transaction before it has synced every DUST event. On Stagenet the same code has also been observed when proofs come from proof-server 9.0.0-rc.9 against node 2.0.0.
 
-Official docs remain the source of truth for supported versions: https://docs.midnight.network/relnotes/support-matrix
+This lab pins proof-server **8.1.0** (with Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1). The Preprod decoder in `packages/preprod-hello-stub/src/rpc-errors.mjs` now maps Custom error: 170 to that official name and points at the servicedesk issue. It does not claim to fix the public node, indexer, or proof-server image. The note is only a classification aid for builders hitting the same surface while the compatibility of the 9.x RCs is clarified.
+
+Official docs remain the source of truth for supported versions and error tables:
+- https://docs.midnight.network/nodes/error-codes
+- https://docs.midnight.network/relnotes/support-matrix
+- https://docs.midnight.network/guides/manage-dust
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
