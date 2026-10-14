@@ -1,8 +1,10 @@
-# Latest open upstream issues sweep (2026-10-13)
+# Latest open upstream issues sweep (2026-10-14)
 
 This lab read open issues in the three orgs it cannot push to. It does not claim any public indexer, node, or compiler fix. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
 
 ## midnightntwrk/servicedesk (open)
+- [#251](https://github.com/midnightntwrk/servicedesk/issues/251) — Wallet SDK DUST sync never notices a subscription that stays open but stops delivering events. Lab: `docs/DUST-SILENT-SUBSCRIPTION.md`, `packages/preprod-hello-stub/src/dust-silent-subscription.mjs`.
+
 
 - [#249](https://github.com/midnightntwrk/servicedesk/issues/249) — pure circuits in contract types compile but every call is refused; CoIP 4 omits PureInterfaceCircuit. Lab: `docs/PURE-INTERFACE-CIRCUIT.md`, `contracts/hello-midnight/no-pure-interface.compact`, `packages/preprod-hello-stub/src/pure-interface-invariant.mjs`.
 - [#243](https://github.com/midnightntwrk/servicedesk/issues/243) — midnight-js proof provider drops the proof-server response body and reports a timeout as AbortError. Lab: `docs/PROOF-PROVIDER-BODY-DECODE.md`, `packages/preprod-hello-stub/src/proof-provider-body-decode.mjs`.
