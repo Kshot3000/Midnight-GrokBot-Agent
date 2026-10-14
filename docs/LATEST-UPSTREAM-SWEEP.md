@@ -3,6 +3,7 @@
 This lab read open issues in the three orgs it cannot push to. It does not claim any public indexer, node, or compiler fix. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
 
 ## midnightntwrk/servicedesk (open)
+- [#226](https://github.com/midnightntwrk/servicedesk/issues/226) — subset deploy and multi-insert verifier-key API missing in midnight-js 4.1.1. Lab: `docs/SUBSET-CIRCUIT-BOUND.md`, `contracts/hello-midnight/subset-circuit-bound.compact`, `packages/preprod-hello-stub/src/subset-circuit-bound.mjs`.
 - [#252](https://github.com/midnightntwrk/servicedesk/issues/252) — proof-server 9.0.0-rc.9 DUST-spend proofs rejected by Stagenet node 2.0.0 with 1010 Custom error 170 (InvalidDustSpendProof). Lab pins proof-server 8.1.0; classifier in `docs/DUST-SPEND-PROOF-170.md` and `packages/preprod-hello-stub/src/dust-spend-proof-170-decode.mjs`.
 - [#251](https://github.com/midnightntwrk/servicedesk/issues/251) — Wallet SDK DUST sync never notices a subscription that stays open but stops delivering events. Lab: `docs/DUST-SILENT-SUBSCRIPTION.md`, `packages/preprod-hello-stub/src/dust-silent-subscription.mjs`.
 - [#249](https://github.com/midnightntwrk/servicedesk/issues/249) — pure circuits in contract types compile but every call is refused; CoIP 4 omits PureInterfaceCircuit. Lab: `docs/PURE-INTERFACE-CIRCUIT.md`, `contracts/hello-midnight/no-pure-interface.compact`, `packages/preprod-hello-stub/src/pure-interface-invariant.mjs`.

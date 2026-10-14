@@ -1,0 +1,29 @@
+pragma language_version >= 0.22 && <= 0.23;
+
+// Circuit-count bound for deploy weight.
+// Upstream: https://github.com/midnightntwrk/servicedesk/issues/226
+// Related: https://github.com/midnightntwrk/servicedesk/issues/225 (RPC 1010 block-limit surface)
+// Official: https://docs.midnight.network/guides/compact-javascript-runtime
+// Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1.
+//
+// midnight-js 4.1.1 always deploys every exported circuit. A deploy writes
+// roughly 1.2x the verifier-key bytes. The per-block bytesWritten limit is
+// 50_000. Keep exported circuits small so a single deploy stays under that
+// budget. No subset-deploy API exists in this pin.
+//
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+import CompactStandardLibrary;
+
+export ledger counter: Counter;
+
+export circuit increment(): [] {
+  counter.increment(1);
+}
+
+export circuit reset(): [] {
+  counter = Counter();
+}
