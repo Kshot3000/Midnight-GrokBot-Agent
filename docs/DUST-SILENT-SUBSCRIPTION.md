@@ -8,11 +8,12 @@ Official source: [Wallet SDK](https://docs.midnight.network/) (no dedicated page
 
 This lab does not patch the wallet SDK, the public indexer, or the node. It only classifies the symptom so a builder can tell a silent open subscription from a disconnected one:
 
-- `appliedIndex` does not advance
+- `appliedIndex` does not advance (appliedIndex < highestRelevantWalletIndex)
 - `isConnected` remains `true`
+- silence of at least 60 seconds with no events
 - no resubscribe occurs until the connection is dropped
 
-A local classifier lives in `packages/preprod-hello-stub/src/dust-silent-subscription.mjs`. It does not open a WebSocket or contact Blockfrost.
+The classifier in `packages/preprod-hello-stub/src/dust-silent-subscription.mjs` now returns the applied and highest indices on a silent-open hit and includes a multi-sample self-check (caught-up, disconnected, short silence). It does not open a WebSocket or contact Blockfrost.
 
 Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
