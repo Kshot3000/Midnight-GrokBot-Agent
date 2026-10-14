@@ -1,0 +1,53 @@
+/*
+ * domain-separation.compact — use distinct domain prefixes for different hash purposes.
+ *
+ * Official security best practices (not an invented API):
+ *   https://docs.midnight.network/compact/smart-contract-security
+ *   "Best practice: Use domain separation"
+ *   Prevent hash collision attacks by using distinct domain separators for different purposes.
+ *   Use persistentHash for values stored in ledger state or used for authentication.
+ *
+ * Compact ~0.31.1 / language ~0.23. This file is not compiled and is not a deploy.
+ * It demonstrates the pattern so builders do not reuse the same prefix across
+ * public-key derivation and nullifiers.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1387
+ * (Compact reference gaps; domain separation and hash usage were among the
+ * questions the reference did not fully surface for builders.)
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger authority: Bytes<32>;
+export ledger usedNullifiers: Set<Bytes<32>>;
+
+circuit publicKey(_sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "commitment-domain"),
+    _sk
+  ]);
+}
+
+circuit nullifier(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "nullifier-domain"),
+    sk
+  ]);
+}
+
+export circuit setAuthority(_sk: Bytes<32>): [] {
+  authority = disclose(publicKey(_sk));
+}
+
+export circuit spend(sk: Bytes<32>): [] {
+  const nul = nullifier(sk);
+  assert(!usedNullifiers.member(nul), "Already spent");
+  usedNullifiers.insert(disclose(nul));
+}
