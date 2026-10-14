@@ -5,6 +5,7 @@
  * Does not invent RPC methods. Maps strings already returned by the
  * public Preprod node and indexer. Upstream: midnightntwrk/servicedesk#225
  * (RPC 1010 block-limit), #230 (Preprod indexer stall),
+ * #252 (Custom error 170 InvalidDustSpendProof on Stagenet with proof-server 9.0.0-rc.9),
  * midnight-docs#1385 (code 10999 missing from error tables).
  * LOCAL-TRUE helper. Not a node fix.
  * Credit: @kshot9000 https://x.com/kshot9000
@@ -62,6 +63,7 @@ export const LEDGER_CUSTOM_ERRORS = {
   126: { name: 'Unbalanced', hint: 'Negative balance in a token type. The transaction does not balance.' },
   154: { name: 'BlockLimitExceededError', hint: 'Infrastructure LedgerApiError. Official how-to: the transaction would exceed block resource limits. Reduce intents or calls, or split batched work. Not the Substrate sentence "Transaction would exhaust the block limits". https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors' },
   155: { name: 'FeeCalculationError', hint: 'Fee calculation failed. Official how-to: refresh fee estimates and confirm runtime packages match the support matrix. https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors' },
+  170: { name: 'InvalidDustSpendProof', hint: 'DUST spend proof failed to verify against the node\'s DUST state at the transaction\'s declared time. Official: a wallet that builds the transaction before it has synced every DUST event produces this error. Wait for the wallet to sync, then build, prove, and submit a new transaction. On Stagenet, proof-server 9.0.0-rc.9 has also been observed to produce proofs rejected with this code by node 2.0.0 (servicedesk#252); pin a compatible proof server (lab uses 8.1.0). https://docs.midnight.network/nodes/error-codes https://github.com/midnightntwrk/servicedesk/issues/252' },
   232: { name: 'FeeCalculation.BlockLimitExceeded', hint: 'Malformed-transaction variant from the official how-to table. Distinct from infrastructure code 154 BlockLimitExceededError and from a 1010 that has no Custom error u8. https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors' },
   166: { name: 'InvalidNetworkId', hint: 'Transaction network ID does not match the node. Check setNetworkId() against the target (Preprod vs undeployed).' },
   174: { name: 'MalformedContractDeploy', hint: 'Contract deployment is structurally invalid. Check non-zero balance or charged state in the deploy.' },
@@ -140,7 +142,7 @@ export function decodeMidnightRpcError(err) {
         : overRange
           ? 'Node ledger codes are u8 (0-255). A larger number did not come from the node error tables. Look for Custom error: N elsewhere in the chain.'
           : 'RPC 1010 carried Custom error: N. Look up N in the official node error tables. This lab does not invent a name for codes it has not copied from that page.',
-      upstream: 'https://github.com/midnightntwrk/servicedesk/issues/225',
+      upstream: known && custom === 170 ? 'https://github.com/midnightntwrk/servicedesk/issues/252' : 'https://github.com/midnightntwrk/servicedesk/issues/225',
       docs: 'https://docs.midnight.network/nodes/error-codes',
       raw: text,
     };
