@@ -10,6 +10,7 @@ This lab read open issues in the three orgs it cannot push to. It does not claim
 - [#236](https://github.com/midnightntwrk/servicedesk/issues/236) — deploy construction errors do not name a runtime mismatch. Lab: `docs/RUNTIME-MISMATCH-DECODE.md`.
 - [#225](https://github.com/midnightntwrk/servicedesk/issues/225) — RPC 1010 “Transaction would exhaust the block limits” surfaces only as a generic submission error. Lab: `docs/PREPROD-RPC-1010-DECODE.md`.
 - [#193](https://github.com/midnightntwrk/servicedesk/issues/193) — Preprod faucet crashes on bare "/api" due to unguarded null regex match. Lab: `docs/FAUCET-BARE-API-CRASH.md`, `packages/preprod-hello-stub/src/faucet-bare-api.mjs`.
+- [#186](https://github.com/midnightntwrk/servicedesk/issues/186) — TransactionResult.successfulSegments is inverted on ledger 9 (true marks FAILED segments). Lab: `docs/SUCCESSFUL-SEGMENTS-INVERTED.md`, `packages/preprod-hello-stub/src/successful-segments-decode.mjs`.
 
 ## midnightntwrk/midnight-docs (open)
 
