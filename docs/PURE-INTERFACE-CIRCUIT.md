@@ -1,23 +1,24 @@
-# Pure circuits in contract types compile but every call is refused
+# Pure circuits in contract types compile, then every call is refused
 
 Upstream: [midnightntwrk/servicedesk#249](https://github.com/midnightntwrk/servicedesk/issues/249)
 
-Official reference: [ModuleResolutionFailure](https://docs.midnight.network/api-reference/compact-runtime/type-aliases/ModuleResolutionFailure) documents the `PureInterfaceCircuit` kind:
+Official pure-circuit rules (do not invent a cross-contract pure call):
 
-> The contract type declares the called circuit `pure`, so it has no verifier key and is never a deployed operation. The compiler accepts the declaration and the call, so this is where one stops. TODO: reject the declaration at compile time instead.
+- https://docs.midnight.network/compact/lang-ref — "Pure and impure circuits"
+- https://docs.midnight.network/guides/compact-javascript-runtime — `pureCircuits` is called with no `CircuitContext`
 
-CoIP 2 currently lists `pure` circuits in contract type declarations as supported. With compactc ~0.31.1 / 0.35.0 the declaration compiles (including ZKIR and keys), but every call through the type fails at runtime with `ModuleResolutionError` kind `PureInterfaceCircuit`. CoIP 4's list of failure kinds omits it.
+A pure circuit computes only from its arguments. It must not touch the ledger, call a witness, or call an impure circuit. The `pure` modifier makes the compiler reject the declaration if analysis finds those. An exported pure circuit is on the generated `pureCircuits` object, not `impureCircuits`.
 
-Lab invariant: `contracts/hello-midnight/no-pure-interface.compact` keeps pure circuits as ordinary helpers and never places them inside a contract type used for a cross-contract call. The decoder in `packages/preprod-hello-stub/src/pure-interface-invariant.mjs` recognises the runtime error text when it appears and also scans Compact source for a pure circuit declared inside a contract type.
+Issue #249 reports that CoIP 2 (LFDT-Minokawa/compact `coips/coip-0002.md`, lines 173–187) lists pure circuits inside contract type declarations as supported. With compactc 0.35.0 such a declaration compiles (ZKIR and keys included), then every call through the type fails at runtime with `ModuleResolutionError` kind `PureInterfaceCircuit` (`runtime/src/contract.ts:606`). CoIP 4 lists 10 failure kinds; compact-runtime 0.20.0 has 11, and `PureInterfaceCircuit` is the missing one.
 
-It does not patch the compiler, does not claim a public contract deploy, and does not fix the public indexer or node.
+This lab does not edit CoIP, compactc, or midnight-docs. It does not claim the public indexer or node is fixed. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-```bash
-cd packages/preprod-hello-stub
-node src/pure-interface-invariant.mjs
-```
+Lab files:
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+- `contracts/hello-midnight/pure-interface.compact` — an `export pure circuit` that only doubles a `Uint<64>` with the documented cast. No contract type declaration, no cross-contract call.
+- `packages/preprod-hello-stub/src/pure-interface-invariant.mjs` — source check only. It confirms the lab file uses the pure form and flags a `pure circuit` inside a `contract { }` type declaration so a builder sees the known refusal before they compile.
+
+Workaround until the Compact team decides whether to reject pure interface circuits at compile time: keep pure circuits in the implementing contract, call them through `pureCircuits` in JavaScript, and do not declare them pure on a contract type used for cross-contract calls.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

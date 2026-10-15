@@ -1,0 +1,36 @@
+/*
+ * pure-interface.compact — pure circuit that stays pure (no ledger, no witness).
+ *
+ * Official pure circuits:
+ *   https://docs.midnight.network/compact/lang-ref
+ *   section "Pure and impure circuits"
+ *   https://docs.midnight.network/guides/compact-javascript-runtime
+ *   pureCircuits.publicKey is called with no CircuitContext.
+ *
+ * A pure circuit computes only from its arguments. The pure modifier makes the
+ * compiler reject the declaration if analysis finds ledger, witness, or impure
+ * calls. Generated TypeScript exposes it on pureCircuits, not impureCircuits.
+ *
+ * Upstream limitation (do not invent a call that works):
+ *   https://github.com/midnightntwrk/servicedesk/issues/249
+ * CoIP 2 lists pure circuits in contract type declarations. With compactc
+ * 0.35.0 those declarations compile, then every call fails at runtime with
+ * ModuleResolutionError kind PureInterfaceCircuit. CoIP 4 omits that kind.
+ * This lab contract does not declare a contract type and does not call through
+ * one. It only shows the documented pure form for language ~0.23.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export pure circuit double(n: Uint<64>): Uint<64> {
+  return (n + n) as Uint<64>;
+}

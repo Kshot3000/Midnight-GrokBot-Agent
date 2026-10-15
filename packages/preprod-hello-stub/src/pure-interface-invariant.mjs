@@ -1,12 +1,8 @@
 /**
- * Flag the PureInterfaceCircuit runtime refusal that midnight-js / compact-runtime raise
- * when a contract type declares a pure circuit and someone calls through it.
- * Also scans Compact source for the forbidden pure-in-contract-type pattern.
- * Does not call a node, indexer, proof server, or wallet.
- * Does not claim to fix the public compiler or runtime.
+ * Source check for the pure-interface lab contract.
+ * Does not compile Compact, does not call midnight-js, and does not call a proof server.
+ * Official: https://docs.midnight.network/compact/lang-ref
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/249
- * Official: https://docs.midnight.network/api-reference/compact-runtime/type-aliases/ModuleResolutionFailure
- * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, proof-server 8.1.0
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -16,8 +12,8 @@
 
 export const UPSTREAM_PURE_INTERFACE =
   'https://github.com/midnightntwrk/servicedesk/issues/249';
-export const OFFICIAL_MODULE_FAILURE =
-  'https://docs.midnight.network/api-reference/compact-runtime/type-aliases/ModuleResolutionFailure';
+export const OFFICIAL_PURE =
+  'https://docs.midnight.network/compact/lang-ref';
 
 const CREDIT = [
   'Built by @kshot9000 https://x.com/kshot9000',
@@ -26,69 +22,62 @@ const CREDIT = [
   'Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation',
 ].join('\n');
 
-/**
- * Detect the PureInterfaceCircuit kind in a ModuleResolutionError or similar text.
- * @param {string} text
- * @returns {{ ok: boolean, hint: string }}
- */
-export function decodePureInterface(text) {
-  if (typeof text !== 'string') {
-    return { ok: false, hint: 'Expected a string error message.' };
-  }
-  if (/PureInterfaceCircuit/i.test(text) || /pure.*interface.*circuit/i.test(text)) {
-    return {
-      ok: true,
-      hint: 'Contract type declared a pure circuit. The compiler accepts it, but every call fails at runtime because a pure circuit has no verifier key. Move pure helpers out of the contract type (servicedesk#249).',
-    };
-  }
-  return { ok: false, hint: 'No PureInterfaceCircuit marker found.' };
+function stripComments(source) {
+  return String(source || '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1');
 }
 
 /**
- * Scan Compact source for a pure circuit declared inside a contract type.
- * This is the pattern that compiles but fails every call (servicedesk#249).
- * Local pure helpers outside a contract type are allowed.
- * @param {string} source
- * @returns {{ ok: boolean, hint: string }}
+ * @param {string} source Compact source
+ * @returns {{ok: boolean, failures: string[], hints: string[], upstream: string, official: string, credit: string}}
  */
-export function scanPureInContractType(source) {
-  if (typeof source !== 'string') {
-    return { ok: false, hint: 'Expected Compact source string.' };
+export function checkPureInterfaceSource(source) {
+  const code = stripComments(source);
+  const failures = [];
+  const hints = [];
+
+  const hasPureExport = /export\s+pure\s+circuit\s+double\s*\(/.test(code);
+  if (!hasPureExport) {
+    failures.push('lab contract must export pure circuit double(n: Uint<64>)');
+    hints.push('see contracts/hello-midnight/pure-interface.compact');
   }
-  // Rough window: pure circuit appears after a contract type declaration.
-  const pureInType = /contract\s+type\s+\w+[\s\S]{0,400}?pure\s+circuit/i.test(source);
-  if (pureInType) {
-    return {
-      ok: false,
-      hint: 'Pure circuit declared inside a contract type. Compiler accepts it; runtime refuses every call with PureInterfaceCircuit (servicedesk#249). Move the pure helper out of the type.',
-    };
+
+  // Flag pure circuits declared inside a contract type. Issue #249: they compile, then calls refuse.
+  const typeBlock = /contract\s+\w+\s*\{([\s\S]*?)\}/.exec(code);
+  if (typeBlock && /pure\s+circuit\s+\w+/.test(typeBlock[1])) {
+    failures.push(
+      'pure circuit inside a contract type declaration is the #249 refusal: ModuleResolutionError kind PureInterfaceCircuit',
+    );
+    hints.push(
+      'keep the pure circuit on the implementing contract and call it via pureCircuits; do not declare it pure on the type used for cross-contract calls',
+    );
   }
-  return { ok: true, hint: 'No pure-in-contract-type pattern detected.' };
+
+  if (/ledger\s+\w+/.test(code) && hasPureExport) {
+    // double must not touch ledger; the file has none.
+    failures.push('pure circuit double must not share a file with a ledger write');
+  }
+
+  return {
+    ok: failures.length === 0,
+    failures,
+    hints,
+    upstream: UPSTREAM_PURE_INTERFACE,
+    official: OFFICIAL_PURE,
+    pins: {
+      compact: '0.31.1',
+      language: '>= 0.23',
+      midnightJs: '4.1.1',
+    },
+    credit: CREDIT,
+  };
 }
 
-/**
- * Note that CoIP 4 omits PureInterfaceCircuit from its failure kinds list.
- * @returns {string}
- */
-export function coipOmissionNote() {
-  return 'CoIP 4 lists 10 failure kinds and omits PureInterfaceCircuit (servicedesk#249). compact-runtime has 11 kinds.';
-}
-
-function selfCheck() {
-  const bad = 'ModuleResolutionError: kind PureInterfaceCircuit';
-  const good = 'ModuleResolutionError: kind OperationAbsent';
-  const a = decodePureInterface(bad);
-  const b = decodePureInterface(good);
-  const srcBad = 'contract type Foo { pure circuit bar(): []; }';
-  const srcOk = 'export pure circuit helper(): [] { return; } export circuit bump(): [] {}';
-  const c = scanPureInContractType(srcBad);
-  const d = scanPureInContractType(srcOk);
-  const ok = a.ok && !b.ok && !c.ok && d.ok;
-  console.log(ok ? 'PASS' : 'FAIL', a.ok, b.ok, c.ok, d.ok);
-  console.log(CREDIT);
-  process.exit(ok ? 0 : 1);
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  selfCheck();
+const sample = process.argv[2];
+if (sample && import.meta.url === `file://${process.argv[1]}`) {
+  const fs = await import('node:fs');
+  const report = checkPureInterfaceSource(fs.readFileSync(sample, 'utf8'));
+  console.log(JSON.stringify(report, null, 2));
+  if (!report.ok) process.exitCode = 1;
 }
