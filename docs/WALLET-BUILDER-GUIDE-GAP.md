@@ -1,16 +1,22 @@
-# Gap: no published guide for teams building a Midnight wallet
+# Wallet-builder guide is still missing
 
 Upstream: [midnightntwrk/midnight-docs#1554](https://github.com/midnightntwrk/midnight-docs/issues/1554)
 
-Official docs currently split the material a wallet builder needs:
+The open issue asks for a guide aimed at teams building a Midnight wallet (browser extension, mobile app, or embedded wallet). Official material is currently split between the Wallet SDK guide (framed for using the SDK) and the DApp Connector API (framed for DApps that consume a wallet). The implementer side of the connector lives in the specification on GitHub.
 
-- The Wallet SDK guide (https://docs.midnight.network/sdks/official/wallet-developer-guide) covers HD derivation, facade init, state, address encoding, transfers, balancing, DUST, and lifecycle. It is written for using the SDK to manage wallets, and its DApp integration section is from the DApp side (reading `window.midnight`).
-- The DApp Connector API page (https://docs.midnight.network/api-reference/dapp-connector, package `@midnight-ntwrk/dapp-connector-api` v4.0.1) is for DApps that consume a wallet.
-- The implementer requirements live only in the raw specification: https://github.com/midnightntwrk/midnight-dapp-connector-api/blob/main/SPECIFICATION.md (InitialAPI under `window.midnight` keyed by UUID, CAIP-372 fields `rdns`/`name`/`icon`/`apiVersion`, frozen objects, `connect(networkId)`, ConnectedAPI surface, permission model, and `getProvingProvider`).
+Official pages this lab follows (read 2026-10-14). They are not a wallet-implementer guide:
 
-A wallet team must currently assemble the SDK guide, the connector page, and the GitHub spec themselves. This lab does not invent APIs or claim to fill the official gap. It only points builders at the published pages and the open docs issue while the upstream guide is written.
+- https://docs.midnight.network/sdks/official/wallet-dev-guide (Wallet SDK: key derivation, facade, state, transfers, DUST, swaps)
+- https://docs.midnight.network/api-reference/dapp-connector (DApp Connector API v4.0.1, InitialAPI under `window.midnight`, `connect`, ConnectedAPI)
+- https://docs.midnight.network/sdks/community/wallets/community-wallets-integration (DApp-side integration)
+- https://docs.midnight.network/relnotes/dapp-connector-api (release notes; lab pin is DApp Connector 4.0.1)
+- https://github.com/midnightntwrk/midnight-dapp-connector-api/blob/main/SPECIFICATION.md (implementer requirements; not published on the docs site)
 
-Pins this lab tracks: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official source of truth: https://docs.midnight.network/ and https://docs.midnight.network/relnotes/support-matrix.
+Issue #1554 lists what a wallet guide should cover: mapping the Wallet SDK onto a product (key management, sync, persistence), injecting the Initial API with CAIP-372 fields (`rdns`, `name`, `icon`, `apiVersion`), the connection and permission model, handling DApp requests (balancing, payments, swaps, submission, delegated proving via `getProvingProvider`), network configuration, and API versioning. Check every API against the support matrix before writing.
+
+This lab does not invent those APIs or publish a wallet implementation. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Related lab note for the Node seed-to-deploy gap: `docs/NODE-SEED-WALLET-GUIDE-GAP.md` (midnight-docs#1380).
+
+This does not fix the public docs site, indexer, or node.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

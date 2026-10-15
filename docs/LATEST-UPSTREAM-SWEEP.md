@@ -1,4 +1,4 @@
-# Latest open upstream issues sweep (2026-10-14, expanded ledger codes)
+# Latest open upstream issues sweep (2026-10-14, wallet-builder guide)
 
 This lab read open issues in the three orgs it cannot push to. It does not claim any public indexer, node, or compiler fix. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
 
@@ -16,6 +16,7 @@ This lab read open issues in the three orgs it cannot push to. It does not claim
 
 ## midnightntwrk/midnight-docs (open)
 
+- [#1554](https://github.com/midnightntwrk/midnight-docs/issues/1554) — missing guide for wallet builders (Wallet SDK + implementing the DApp Connector API). Lab: `docs/WALLET-BUILDER-GUIDE-GAP.md`.
 - [#1527](https://github.com/midnightntwrk/midnight-docs/issues/1527) — docs still show docker/Compose forms that drop `-v`, `--network`, `--port`. Matrix lists proof-server 8.1.3 while pages pin 8.1.0. Lab: `docs/PROOF-SERVER-START-COMMAND.md` (updated 2026-10-14).
 - [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page samples do not run as written. Lab: `docs/TEST-DEBUG-SAMPLE-GAP.md`.
 - [#1387](https://github.com/midnightntwrk/midnight-docs/issues/1387) — Compact reference gaps (Either, bitwise, circuit count, kernel.caller, emit, networkId, deserialize). Lab notes under `docs/` and samples under `contracts/hello-midnight/`.
@@ -31,4 +32,3 @@ Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
-- Expanded LedgerApiError map in rpc-errors.mjs (105,107,108,110,112,118,171,175) citing official error-codes page and servicedesk#225/#252. Lab: docs/LEDGER-CUSTOM-CODES-EXPANDED.md.
