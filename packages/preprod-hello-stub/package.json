@@ -115,7 +115,8 @@
     "check:latest-upstream-sweep": "node src/latest-upstream-sweep.mjs",
     "check:proof-error-classify": "node src/proof-error-classify.mjs",
     "check:dust-spend-proof-170": "node src/dust-spend-proof-170-decode.mjs",
-    "check:group-membership": "node src/group-membership-invariant.mjs"
+    "check:group-membership": "node src/group-membership-invariant.mjs",
+    "check:wallet-builder": "node --test test/wallet-builder-gap.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

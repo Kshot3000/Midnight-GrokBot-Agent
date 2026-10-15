@@ -1,22 +1,27 @@
-# Wallet-builder guide is still missing
+# Wallet builder guide gap (lab)
 
 Upstream: [midnightntwrk/midnight-docs#1554](https://github.com/midnightntwrk/midnight-docs/issues/1554)
 
-The open issue asks for a guide aimed at teams building a Midnight wallet (browser extension, mobile app, or embedded wallet). Official material is currently split between the Wallet SDK guide (framed for using the SDK) and the DApp Connector API (framed for DApps that consume a wallet). The implementer side of the connector lives in the specification on GitHub.
+The open docs issue asks for a guide that maps the Wallet SDK onto a wallet product and that describes implementing the DApp Connector API from the wallet side. The published site currently has no such page. The Wallet SDK guide path cited in the issue (`sdks/official/wallet-dev-guide.mdx`) returns Page Not Found on https://docs.midnight.network/sdks/official/wallet-dev-guide. The DApp Connector material is written for DApp consumers.
 
-Official pages this lab follows (read 2026-10-14). They are not a wallet-implementer guide:
+This lab does not edit midnight-docs. It only restates what the published DApp Connector page and the connector specification already say a wallet must expose. It does not invent methods, does not claim a public wallet, and does not fix the indexer or node.
 
-- https://docs.midnight.network/sdks/official/wallet-dev-guide (Wallet SDK: key derivation, facade, state, transfers, DUST, swaps)
-- https://docs.midnight.network/api-reference/dapp-connector (DApp Connector API v4.0.1, InitialAPI under `window.midnight`, `connect`, ConnectedAPI)
-- https://docs.midnight.network/sdks/community/wallets/community-wallets-integration (DApp-side integration)
-- https://docs.midnight.network/relnotes/dapp-connector-api (release notes; lab pin is DApp Connector 4.0.1)
-- https://github.com/midnightntwrk/midnight-dapp-connector-api/blob/main/SPECIFICATION.md (implementer requirements; not published on the docs site)
+Official sources (read 2026-10-15):
 
-Issue #1554 lists what a wallet guide should cover: mapping the Wallet SDK onto a product (key management, sync, persistence), injecting the Initial API with CAIP-372 fields (`rdns`, `name`, `icon`, `apiVersion`), the connection and permission model, handling DApp requests (balancing, payments, swaps, submission, delegated proving via `getProvingProvider`), network configuration, and API versioning. Check every API against the support matrix before writing.
+- https://docs.midnight.network/api-reference/dapp-connector (package `@midnight-ntwrk/dapp-connector-api` v4.0.1)
+- https://github.com/midnightntwrk/midnight-dapp-connector-api/blob/main/SPECIFICATION.md (InitialAPI, CAIP-372 fields, install rules)
 
-This lab does not invent those APIs or publish a wallet implementation. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Related lab note for the Node seed-to-deploy gap: `docs/NODE-SEED-WALLET-GUIDE-GAP.md` (midnight-docs#1380).
+Pins for this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-This does not fix the public docs site, indexer, or node.
+What a wallet must install, from those pages:
+
+1. Expose the Initial API under `window.midnight` keyed by a UUID. The published connector page says the shape is `window.midnight.{someWalletIdString}` so multiple wallets can inject without colliding.
+2. Initial API fields named on the connector page: `name`, `icon`, `apiVersion`, `connect(networkId)`. The specification additionally requires `rdns` (reverse DNS) for CAIP-372 compatibility. `apiVersion` is the version of `@midnight-ntwrk/dapp-connector-api` the wallet implemented (example on the page: a wallet implementing 3.1.5 reports `'3.1.5'`). This lab pins 4.0.1.
+3. `connect(networkId)` returns a promise of the ConnectedAPI. The published connect sample uses network ids such as `mainnet` and `preprod`.
+4. Once connected, the ConnectedAPI surface on the published page includes `getConfiguration`, `getConnectionStatus`, `getShieldedBalances`, `getUnshieldedBalances`, `getDustBalance`, `getShieldedAddresses`, `getUnshieldedAddress`, `getDustAddress`, `makeTransfer`, `balanceUnsealedTransaction`, `balanceSealedTransaction`, `submitTransaction`, and `getProvingProvider`. The specification lists the same groups (balances, addresses, InitActions, AccessConfiguration, DelegateProving, SubmitTransaction).
+5. The specification says the first wallet to install `window.midnight` must freeze the object against later overrides, install its InitialAPI under a fresh UUIDv4 with non-writable properties, and freeze both the InitialAPI and the later ConnectedAPI. DApps must sanitize `name` and `icon` (icon only inside an `img` tag) and must check `apiVersion` with semver before connecting.
+
+`packages/preprod-hello-stub/src/wallet-builder-gap.mjs` checks a local plan against those published field names. It does not open a wallet or a network.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
