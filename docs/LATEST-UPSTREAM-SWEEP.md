@@ -1,4 +1,4 @@
-# Latest open upstream issues sweep (2026-10-14, wallet-balance stall)
+# Latest open upstream issues sweep (2026-10-15, group-membership binding)
 
 This lab read open issues in the three orgs it cannot push to. It does not claim any public indexer, node, or compiler fix. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
 
@@ -20,7 +20,7 @@ This lab read open issues in the three orgs it cannot push to. It does not claim
 - [#1554](https://github.com/midnightntwrk/midnight-docs/issues/1554) — missing guide for wallet builders (Wallet SDK + implementing the DApp Connector API). Lab: `docs/WALLET-BUILDER-GUIDE-GAP.md`.
 - [#1527](https://github.com/midnightntwrk/midnight-docs/issues/1527) — docs still show docker/Compose forms that drop `-v`, `--network`, `--port`. Matrix lists proof-server 8.1.3 while pages pin 8.1.0. Lab: `docs/PROOF-SERVER-START-COMMAND.md` (updated 2026-10-14).
 - [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page samples do not run as written. Lab: `docs/TEST-DEBUG-SAMPLE-GAP.md`.
-- [#1387](https://github.com/midnightntwrk/midnight-docs/issues/1387) — Compact reference gaps (Either, bitwise, circuit count, kernel.caller, emit, networkId, deserialize). Lab notes under `docs/` and samples under `contracts/hello-midnight/`.
+- [#1387](https://github.com/midnightntwrk/midnight-docs/issues/1387) — Compact reference gaps (Either, bitwise, circuit count, kernel.caller, emit, networkId, deserialize). Lab notes under `docs/` and samples under `contracts/hello-midnight/`. This run adds the HistoricMerkleTree group-membership binding sample: `docs/GROUP-MEMBERSHIP-BIND.md`, `contracts/hello-midnight/group-membership.compact`, `packages/preprod-hello-stub/src/group-membership-invariant.mjs`.
 - [#1385](https://github.com/midnightntwrk/midnight-docs/issues/1385) — node error-codes page missing submission-layer codes such as 10999. Lab: `docs/NODE-SUBMISSION-10999.md`.
 
 ## midnightntwrk/example-hello-world (open)
