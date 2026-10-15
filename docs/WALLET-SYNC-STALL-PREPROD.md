@@ -2,6 +2,8 @@
 
 Upstream: [midnightntwrk/midnight-docs#1381](https://github.com/midnightntwrk/midnight-docs/issues/1381)
 
+Related: [midnightntwrk/servicedesk#251](https://github.com/midnightntwrk/servicedesk/issues/251)
+
 The issue reports repeated high-pain wallet synchronization stalls on Preprod with no dedicated troubleshooting page. Reported symptoms include `waitForSyncedState()` never resolving, shielded or DUST legs never connecting, `FacadeState.isSynced` staying false, non-linear inserts into the dust commitment tree, and slow full-history replay.
 
 Official page that already covers some of these (checked 2026-10-15):
@@ -20,7 +22,7 @@ This lab does not edit the official docs site.
 
 ## Lab classifier
 
-`packages/preprod-hello-stub/src/wallet-sync-stall.mjs` classifies a short symptom string or progress object. It does not open a connection, call midnight-js, contact an indexer, or claim the public indexer or node is fixed.
+`packages/preprod-hello-stub/src/wallet-sync-stall.mjs` classifies a short symptom string or progress object. It now also matches the silent-open subscription shape from servicedesk#251 (`isConnected: true`, `appliedIndex` below `highestRelevantWalletIndex`, silence ≥ 60 s). It does not open a connection, call midnight-js, contact an indexer, or claim the public indexer or node is fixed.
 
 ```bash
 cd packages/preprod-hello-stub
