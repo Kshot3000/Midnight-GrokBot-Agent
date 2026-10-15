@@ -1,4 +1,4 @@
-# Latest open upstream issues sweep (2026-10-14, wallet-builder guide)
+# Latest open upstream issues sweep (2026-10-14, wallet-balance stall)
 
 This lab read open issues in the three orgs it cannot push to. It does not claim any public indexer, node, or compiler fix. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
 
@@ -11,6 +11,7 @@ This lab read open issues in the three orgs it cannot push to. It does not claim
 - [#242](https://github.com/midnightntwrk/servicedesk/issues/242) — proof-server image silently drops command-line flags and exits on three failed key downloads. Lab: `docs/PROOF-SERVER-IMAGE-FLAGS.md`, `docs/PROOF-SERVER-KEY-DOWNLOAD.md`, `docs/PROOF-SERVER-START-COMMAND.md`.
 - [#236](https://github.com/midnightntwrk/servicedesk/issues/236) — deploy construction errors do not name a runtime mismatch. Lab: `docs/RUNTIME-MISMATCH-DECODE.md`.
 - [#225](https://github.com/midnightntwrk/servicedesk/issues/225) — RPC 1010 “Transaction would exhaust the block limits” surfaces only as a generic submission error. Lab: `docs/PREPROD-RPC-1010-DECODE.md`.
+- [#194](https://github.com/midnightntwrk/servicedesk/issues/194) — WalletFacade balance/finalization pins CPU and grows RSS indefinitely before submission. Lab: `docs/WALLET-BALANCE-CPU-PIN.md`, `packages/preprod-hello-stub/src/wallet-balance-stall.mjs`.
 - [#193](https://github.com/midnightntwrk/servicedesk/issues/193) — Preprod faucet crashes on bare "/api" due to unguarded null regex match. Lab: `docs/FAUCET-BARE-API-CRASH.md`, `packages/preprod-hello-stub/src/faucet-bare-api.mjs`.
 - [#186](https://github.com/midnightntwrk/servicedesk/issues/186) — TransactionResult.successfulSegments is inverted on ledger 9 (true marks FAILED segments). Lab: `docs/SUCCESSFUL-SEGMENTS-INVERTED.md`, `packages/preprod-hello-stub/src/successful-segments-decode.mjs`.
 
