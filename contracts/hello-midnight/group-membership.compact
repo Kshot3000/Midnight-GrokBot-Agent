@@ -1,0 +1,54 @@
+/*
+ * group-membership.compact — HistoricMerkleTree membership with caller binding.
+ *
+ * Official procedure (security guide, Restricting a circuit to a group):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   https://docs.midnight.network/compact/smart-contract-security
+ *
+ * Store member identities in HistoricMerkleTree (hides which leaf, accepts
+ * earlier roots). Verify the path root, then bind the leaf to the caller
+ * via the derived identity. Without the binding assert, a observed path
+ * could be replayed by a non-member.
+ *
+ * The official sample uses pragma language_version 0.23.0 and domain
+ * separator "myapp:member". This lab pin is >= 0.23 and uses a lab
+ * separator. Extra assert: secret must be non-empty. Not compiled here.
+ * Not a deploy. Does not fix the public indexer or node.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * (Compact reference pages are synced and do not carry this procedure.)
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger members: HistoricMerkleTree<10, Bytes<32>>;
+export ledger actions: Counter;
+
+witness secretKey(): Bytes<32>;
+
+circuit derivePublicKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "hello-midnight:member"),
+    sk
+  ]);
+}
+
+export circuit addMember(pk: Bytes<32>): [] {
+  members.insert(disclose(pk));
+}
+
+export circuit act(path: MerkleTreePath<10, Bytes<32>>): [] {
+  assert(members.checkRoot(disclose(merkleTreePathRoot<10, Bytes<32>>(path))),
+    "not a member");
+  const sk = secretKey();
+  assert(sk != pad(32, ""), "secret must be non-empty");
+  assert(path.leaf == derivePublicKey(sk), "path not bound to caller");
+  actions.increment(1);
+}
