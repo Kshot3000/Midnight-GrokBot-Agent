@@ -1,0 +1,20 @@
+// Compact sample: assert circuit input bounds before use.
+// Language form ~0.23 / Compact ~0.31.1. assert is a function-like expression.
+// Does not invent APIs. Official: https://docs.midnight.network/guides/security-best-practices
+// Cites midnightntwrk/midnight-docs#1487 (stale samples) and the security page.
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+pragma language_version 0.23;
+
+contract InputBoundAssert {
+  ledger last: Uint<64>;
+
+  export circuit setBounded(n: Uint<64>): [] {
+    // Assert range before any use so a bad input fails with a clear message.
+    assert(n <= 1_000_000, "input exceeds documented bound");
+    last = disclose(n);
+  }
+}

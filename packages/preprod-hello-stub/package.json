@@ -118,7 +118,8 @@
     "check:group-membership": "node src/group-membership-invariant.mjs",
     "check:wallet-builder": "node --test test/wallet-builder-gap.test.mjs",
     "check:circuit-context-pin": "node src/circuit-context-pin.mjs",
-    "check:circuit-context-type-error": "node src/circuit-context-type-error-decode.mjs"
+    "check:circuit-context-type-error": "node src/circuit-context-type-error-decode.mjs",
+    "check:input-bound-assert": "node src/input-bound-assert.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
