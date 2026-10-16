@@ -1,0 +1,33 @@
+/*
+ * circuit-context-pin.compact — language pin for the documented CircuitContext shape.
+ *
+ * Official JS guide (compact-runtime 0.16.0):
+ *   https://docs.midnight.network/guides/compact-javascript-runtime
+ *   createConstructorContext / createCircuitContext
+ *   call returns { result, context, proofData, gasCost }
+ *   read with ledger(result.context.currentQueryContext.state)
+ *
+ * The Test and debug page still shows hand-built { privateState, ledgerState }
+ * and reads newLedgerState / newContext. That shape fails the runtime check.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1487
+ * This file does not edit midnight-docs and does not claim the public page is fixed.
+ * Language pin: Compact ~0.31.1 / language >= 0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger message: Opaque<"string">;
+
+export circuit storeMessage(newMessage: Opaque<"string">): [] {
+  message = disclose(newMessage);
+}
