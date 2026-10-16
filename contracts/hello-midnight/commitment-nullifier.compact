@@ -1,0 +1,70 @@
+/*
+ * commitment-nullifier.compact — single-use authorization via Merkle
+ * commitments and a nullifier Set.
+ *
+ * Official pattern (private data, commitment/nullifier):
+ *   https://docs.midnight.network/concepts/how-midnight-works/keeping-data-private
+ *   "The commitment/nullifier pattern"
+ *
+ * Store authorized public keys (commitments) in a HistoricMerkleTree so the
+ * membership proof hides which key was used. On use, derive a nullifier with
+ * a distinct domain separator, assert it is not already in the Set, then
+ * insert it. The path.leaf binding assert is required; without it a prover
+ * can supply any valid path for an unauthorized key.
+ *
+ * Domain separators and the non-empty secret assert follow the official
+ * security guidance. Language pin: Compact ~0.31.1 / language ~0.23.
+ * This file is not compiled here and is not a deploy.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * (Compact reference gaps; the private-data page carries the pattern, the
+ * Compact language reference does not walk it end-to-end.)
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+witness findAuthPath(pk: Bytes<32>): MerkleTreePath<10, Bytes<32>>;
+witness secretKey(): Bytes<32>;
+
+export ledger authorizedCommitments: HistoricMerkleTree<10, Bytes<32>>;
+export ledger authorizedNullifiers: Set<Bytes<32>>;
+export ledger restrictedCounter: Counter;
+
+export circuit addAuthority(pk: Bytes<32>): [] {
+  authorizedCommitments.insert(disclose(pk));
+}
+
+export circuit increment(): [] {
+  const sk = secretKey();
+  assert(sk != pad(32, ""), "secret must be non-empty");
+  const pk = publicKey(sk);
+  const authPath = findAuthPath(pk);
+  assert(authPath.leaf == pk, "path is not for this key");
+  assert(authorizedCommitments.checkRoot(
+    disclose(merkleTreePathRoot<10, Bytes<32>>(authPath))), "not authorized");
+  const nul = nullifier(sk);
+  assert(!authorizedNullifiers.member(disclose(nul)), "already incremented");
+  authorizedNullifiers.insert(disclose(nul));
+  restrictedCounter.increment(1);
+}
+
+circuit publicKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "hello-midnight:commitment"),
+    sk
+  ]);
+}
+
+circuit nullifier(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "hello-midnight:nullifier"),
+    sk
+  ]);
+}
