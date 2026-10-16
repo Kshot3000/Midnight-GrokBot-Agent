@@ -117,7 +117,8 @@
     "check:dust-spend-proof-170": "node src/dust-spend-proof-170-decode.mjs",
     "check:group-membership": "node src/group-membership-invariant.mjs",
     "check:wallet-builder": "node --test test/wallet-builder-gap.test.mjs",
-    "check:circuit-context-pin": "node src/circuit-context-pin.mjs"
+    "check:circuit-context-pin": "node src/circuit-context-pin.mjs",
+    "check:circuit-context-type-error": "node src/circuit-context-type-error-decode.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
