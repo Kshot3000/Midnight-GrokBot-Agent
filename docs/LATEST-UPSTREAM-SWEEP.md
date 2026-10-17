@@ -1,27 +1,20 @@
-# Latest open upstream issues sweep (2026-10-15, circuit-context pin)
+# Latest open upstream issues sweep (2026-10-17, nodejs wallet seed note)
 
 This lab read open issues in the three orgs it cannot push to. It does not claim any public indexer, node, or compiler fix. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
 
 ## midnightntwrk/servicedesk (open)
-- [#226](https://github.com/midnightntwrk/servicedesk/issues/226) — subset deploy and multi-insert verifier-key API missing in midnight-js 4.1.1. Lab: `docs/SUBSET-CIRCUIT-BOUND.md`, `contracts/hello-midnight/subset-circuit-bound.compact`, `packages/preprod-hello-stub/src/subset-circuit-bound.mjs`.
+- [#254](https://github.com/midnightntwrk/servicedesk/issues/254) — faucet POST /drips multiplies amount by 5 tNIGHT. Lab: `docs/FAUCET-AMOUNT-UNIT.md`, `packages/preprod-hello-stub/src/faucet-amount-unit.mjs`.
 - [#252](https://github.com/midnightntwrk/servicedesk/issues/252) — proof-server 9.0.0-rc.9 DUST-spend proofs rejected by Stagenet node 2.0.0 with 1010 Custom error 170 (InvalidDustSpendProof). Lab pins proof-server 8.1.0; classifier in `docs/DUST-SPEND-PROOF-170.md` and `packages/preprod-hello-stub/src/dust-spend-proof-170-decode.mjs`.
 - [#251](https://github.com/midnightntwrk/servicedesk/issues/251) — Wallet SDK DUST sync never notices a subscription that stays open but stops delivering events. Lab: `docs/DUST-SILENT-SUBSCRIPTION.md`, `packages/preprod-hello-stub/src/dust-silent-subscription.mjs`.
-- [#249](https://github.com/midnightntwrk/servicedesk/issues/249) — pure circuits in contract types compile but every call is refused; CoIP 4 omits PureInterfaceCircuit. Lab: `docs/PURE-INTERFACE-CIRCUIT.md`, `contracts/hello-midnight/no-pure-interface.compact`, `packages/preprod-hello-stub/src/pure-interface-invariant.mjs`.
-- [#243](https://github.com/midnightntwrk/servicedesk/issues/243) — midnight-js proof provider drops the proof-server response body and reports a timeout as AbortError. Lab: `docs/PROOF-PROVIDER-BODY-DECODE.md`, `packages/preprod-hello-stub/src/proof-provider-body-decode.mjs`.
-- [#242](https://github.com/midnightntwrk/servicedesk/issues/242) — proof-server image silently drops command-line flags and exits on three failed key downloads. Lab: `docs/PROOF-SERVER-IMAGE-FLAGS.md`, `docs/PROOF-SERVER-KEY-DOWNLOAD.md`, `docs/PROOF-SERVER-START-COMMAND.md`.
-- [#236](https://github.com/midnightntwrk/servicedesk/issues/236) — deploy construction errors do not name a runtime mismatch. Lab: `docs/RUNTIME-MISMATCH-DECODE.md`.
-- [#225](https://github.com/midnightntwrk/servicedesk/issues/225) — RPC 1010 “Transaction would exhaust the block limits” surfaces only as a generic submission error. Lab: `docs/PREPROD-RPC-1010-DECODE.md`.
-- [#194](https://github.com/midnightntwrk/servicedesk/issues/194) — WalletFacade balance/finalization pins CPU and grows RSS indefinitely before submission. Lab: `docs/WALLET-BALANCE-CPU-PIN.md`, `packages/preprod-hello-stub/src/wallet-balance-stall.mjs`.
-- [#193](https://github.com/midnightntwrk/servicedesk/issues/193) — Preprod faucet crashes on bare "/api" due to unguarded null regex match. Lab: `docs/FAUCET-BARE-API-CRASH.md`, `packages/preprod-hello-stub/src/faucet-bare-api.mjs`.
-- [#186](https://github.com/midnightntwrk/servicedesk/issues/186) — TransactionResult.successfulSegments is inverted on ledger 9 (true marks FAILED segments). Lab: `docs/SUCCESSFUL-SEGMENTS-INVERTED.md`, `packages/preprod-hello-stub/src/successful-segments-decode.mjs`.
+- [#226](https://github.com/midnightntwrk/servicedesk/issues/226) — subset deploy and multi-insert verifier-key API missing in midnight-js 4.1.1. Lab: `docs/SUBSET-CIRCUIT-BOUND.md`, `contracts/hello-midnight/subset-circuit-bound.compact`, `packages/preprod-hello-stub/src/subset-circuit-bound.mjs`.
 
 ## midnightntwrk/midnight-docs (open)
 
 - [#1554](https://github.com/midnightntwrk/midnight-docs/issues/1554) — missing guide for wallet builders (Wallet SDK + implementing the DApp Connector API). Lab: `docs/WALLET-BUILDER-GUIDE-GAP.md`.
-- [#1527](https://github.com/midnightntwrk/midnight-docs/issues/1527) — docs still show docker/Compose forms that drop `-v`, `--network`, `--port`. Matrix lists proof-server 8.1.3 while pages pin 8.1.0. Lab: `docs/PROOF-SERVER-START-COMMAND.md` (updated 2026-10-14).
-- [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page samples do not run as written. This run adds the language-pinned CircuitContext sample: `docs/CIRCUIT-CONTEXT-PIN.md`, `contracts/hello-midnight/circuit-context-pin.compact`, `packages/preprod-hello-stub/src/circuit-context-pin.mjs`.
-- [#1387](https://github.com/midnightntwrk/midnight-docs/issues/1387) — Compact reference gaps. Closed 2026-10-14. Prior lab notes under `docs/` and samples under `contracts/hello-midnight/` remain as local classifiers.
-- [#1385](https://github.com/midnightntwrk/midnight-docs/issues/1385) — node error-codes page missing submission-layer codes such as 10999. Lab: `docs/NODE-SUBMISSION-10999.md`.
+- [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page samples do not run as written. Lab: `docs/CIRCUIT-CONTEXT-PIN.md`, `contracts/hello-midnight/circuit-context-pin.compact`, `packages/preprod-hello-stub/src/circuit-context-pin.mjs`.
+- [#1380](https://github.com/midnightntwrk/midnight-docs/issues/1380) — no dedicated Node.js server-side wallet guide from seed to synced facade to deploy. Lab: `docs/NODEJS-WALLET-SEED-TO-SYNC.md`, `packages/preprod-hello-stub/src/nodejs-wallet-seed-invariant.mjs`, `contracts/hello-midnight/nodejs-wallet-seed-note.compact`.
+- [#1383](https://github.com/midnightntwrk/midnight-docs/issues/1383) — Document proving topology: local vs wallet-delegated vs hosted. Lab: `docs/PROVING-TOPOLOGY.md`.
+- [#1396](https://github.com/midnightntwrk/midnight-docs/issues/1396) — Sunset Academy and make Hello World the main quick start. Lab: `docs/HELLO-WORLD-QUICKSTART-GAP.md`.
 
 ## midnightntwrk/example-hello-world (open)
 
