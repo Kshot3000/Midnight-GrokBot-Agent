@@ -8,6 +8,8 @@
  *   https://docs.midnight.network/getting-started/installation
  * Upstream open: https://github.com/midnightntwrk/example-hello-world/issues/13
  *   (Renovate lists midnightntwrk/proof-server 8.1.0 → 8.1.3; this lab stays on 8.1.0)
+ * Flag drop: https://github.com/midnightntwrk/servicedesk/issues/242
+ *   (image entrypoint is bash -c; array form after the image name drops flags)
  * Closed related: https://github.com/midnightntwrk/midnight-docs/issues/556
  *
  * Built by @kshot9000 https://x.com/kshot9000
@@ -19,6 +21,7 @@
 import { pathToFileURL } from 'node:url';
 
 export const UPSTREAM_ISSUE = 'https://github.com/midnightntwrk/example-hello-world/issues/13';
+export const UPSTREAM_FLAG_DROP = 'https://github.com/midnightntwrk/servicedesk/issues/242';
 export const OFFICIAL_WINDOWS = 'https://docs.midnight.network/guides/windows-compact-setup';
 export const OFFICIAL_INSTALL = 'https://docs.midnight.network/getting-started/installation';
 export const CLOSED_INSTALL_ISSUE = 'https://github.com/midnightntwrk/midnight-docs/issues/556';
@@ -54,6 +57,7 @@ export function classifyProofServerArgv(command) {
   const binaryAt = parts.indexOf('midnight-proof-server');
   const hasVerbose = parts.includes('-v');
   const publishedPort = parts.includes('6300:6300');
+  const warnings = [];
 
   if (!image) {
     failures.push('command has no midnightntwrk/proof-server image');
@@ -77,9 +81,20 @@ export function classifyProofServerArgv(command) {
       ? 'image-then-binary'
       : 'other';
 
+  // servicedesk#242: image entrypoint is bash -c with a fixed command string,
+  // so tokens after the image name are dropped (or become $0). The array form
+  // used in many compose files therefore silently loses -v. Prefer the Windows
+  // -- form, a single string command, or MIDNIGHT_PROOF_SERVER_VERBOSE=true.
+  if (form === 'image-then-binary') {
+    warnings.push(
+      'servicedesk#242: array form after the image name is dropped by the bash -c entrypoint. Prefer "-- midnight-proof-server -v", a single command string, or -e MIDNIGHT_PROOF_SERVER_VERBOSE=true. This lab does not claim the public proof server is fixed.',
+    );
+  }
+
   return {
     ok: failures.length === 0 && (form === 'windows-end-of-flags' || form === 'image-then-binary'),
     failures,
+    warnings,
     form,
     image,
     pin: PROOF_SERVER_PIN,
@@ -87,6 +102,7 @@ export function classifyProofServerArgv(command) {
     staleInstallArgv: STALE_INSTALL_ARGV,
     claim: 'local argv classification against official samples — not a proof-server, indexer, or node fix',
     upstream: UPSTREAM_ISSUE,
+    flagDrop: UPSTREAM_FLAG_DROP,
     official: OFFICIAL_WINDOWS,
     installPage: OFFICIAL_INSTALL,
     closedInstallIssue: CLOSED_INSTALL_ISSUE,
@@ -106,7 +122,9 @@ if (isMain) {
   const bump = classifyProofServerArgv(
     'docker run -p 6300:6300 midnightntwrk/proof-server:8.1.3 -- midnight-proof-server -v',
   );
-  if (!windows.ok || windows.form !== 'windows-end-of-flags' || !sameBinary.ok || stale.ok || bump.ok) {
+  if (!windows.ok || windows.form !== 'windows-end-of-flags' || windows.warnings.length !== 0
+      || !sameBinary.ok || sameBinary.warnings.length === 0
+      || stale.ok || bump.ok) {
     console.error(JSON.stringify({ windows, sameBinary, stale, bump }, null, 2));
     process.exit(1);
   }
@@ -114,6 +132,7 @@ if (isMain) {
     ok: true,
     form: windows.form,
     pin: PROOF_SERVER_PIN,
+    flagDropWarning: sameBinary.warnings[0],
     credit: CREDIT,
   }, null, 2));
 }
