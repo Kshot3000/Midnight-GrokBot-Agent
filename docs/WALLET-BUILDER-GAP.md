@@ -1,42 +1,27 @@
-# Wallet builder guide gap (Wallet SDK + DApp Connector)
+# Wallet builder guide gap
 
 Upstream: [midnightntwrk/midnight-docs#1554](https://github.com/midnightntwrk/midnight-docs/issues/1554)
 
-Official pages (as of 2026-10-16):
+The published docs have a Wallet SDK guide framed for using the SDK to manage wallets, and a DApp Connector API reference framed for DApps that consume `window.midnight`. There is no single guide that tells a team building a browser extension, mobile app, or embedded wallet how to implement the connector on top of the SDK.
 
-- Wallet SDK developer guide: https://docs.midnight.network/sdks/official/wallet-developer-guide
+Official sources only (do not invent APIs):
+
+- Wallet SDK guide: https://docs.midnight.network/sdks/official/wallet-developer-guide
 - Wallet SDK API reference: https://docs.midnight.network/api-reference/wallet-sdk
-- DApp Connector API (v4.0.1): https://docs.midnight.network/api-reference/dapp-connector
-- InitialAPI type: https://docs.midnight.network/api-reference/dapp-connector/type-aliases/InitialAPI
-- Community wallet integration (CAIP-372 notes): https://docs.midnight.network/sdks/community/wallets/community-wallets-integration
-- Support matrix / release notes: https://docs.midnight.network/relnotes/support-matrix (and wallet / dapp-connector-api notes)
+- DApp Connector API: https://docs.midnight.network/api-reference/dapp-connector
+- Community wallets integration (consumer side): https://docs.midnight.network/sdks/community/wallets/community-wallets-integration
+- Connector specification: https://github.com/midnightntwrk/midnight-dapp-connector-api/blob/main/SPECIFICATION.md
 
-## What the issue records
+Documented surfaces a wallet product owns (restated from those pages):
 
-There is no dedicated guide for teams building a Midnight wallet (browser extension, mobile, or embedded). The Wallet SDK guide covers building blocks (HD derivation, facade, state, addresses, transfers, balancing, DUST registration, swaps, WASM proving, lifecycle) but is framed for using the SDK, not for implementing a wallet product that exposes the DApp Connector API. The connector implementer surface lives mainly in the external SPECIFICATION.md; the docs link out rather than publishing the wallet-side requirements.
+- HD key derivation via `@midnightntwrk/wallet-sdk-hd` (BIP-32 / BIP-44 / CIP-1852).
+- `WalletFacade.init` coordinating `ShieldedWallet`, `UnshieldedWallet`, and `DustWallet`.
+- Inject an Initial API under `window.midnight` keyed by an identifier, exposing `name`, `icon`, `apiVersion`, and `connect(networkId)`.
+- ConnectedAPI methods for balances, addresses, configuration, transfers, balancing, submission, and `getProvingProvider` (feature-detect; Lace does not expose it).
 
-## Lab checklist (no invented APIs)
+This lab does not implement a wallet, does not edit midnight-docs, and does not claim a public fix. `packages/preprod-hello-stub/src/wallet-builder-gap.mjs` only flags the missing implementer guide so a builder can locate the published pieces.
 
-This lab does **not** implement a wallet and does **not** claim to fix the public indexer or node. The helper in `packages/preprod-hello-stub/src/wallet-builder-gap.mjs` only checks that a candidate InitialAPI object (the shape a wallet injects under `window.midnight`) carries the fields documented on the official InitialAPI page and the community integration page:
-
-- `rdns` (stable reverse-DNS identifier)
-- `name`
-- `icon`
-- `apiVersion` (string matching the `@midnight-ntwrk/dapp-connector-api` version the wallet implements; pin in this lab is 4.0.1)
-- `connect` (function that accepts a networkId string and returns a Promise of ConnectedAPI)
-
-Network id note from official community page: only `'mainnet'` is connector-standard; other ids (`preprod`, `preview`, `undeployed`) are wallet-defined.
-
-Pins for this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
-
-Run:
-
-```bash
-cd packages/preprod-hello-stub
-node src/wallet-builder-gap.mjs
-```
-
-Or `npm run check:wallet-builder-gap` after the script is registered.
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
