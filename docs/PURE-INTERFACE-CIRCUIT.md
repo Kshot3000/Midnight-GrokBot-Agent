@@ -17,6 +17,7 @@ Lab files:
 
 - `contracts/hello-midnight/pure-interface.compact` — an `export pure circuit` that only doubles a `Uint<64>` with the documented cast. No contract type declaration, no cross-contract call.
 - `packages/preprod-hello-stub/src/pure-interface-invariant.mjs` — source check only. It confirms the lab file uses the pure form and flags a `pure circuit` inside a `contract { }` type declaration so a builder sees the known refusal before they compile.
+- `packages/preprod-hello-stub/src/pure-interface-circuit.mjs` — runtime error classifier. It matches `PureInterfaceCircuit` or `ModuleResolutionError` + pure in error text and returns a structured note pointing at #249 and the official pure-circuit docs. No network, no invented API.
 
 Workaround until the Compact team decides whether to reject pure interface circuits at compile time: keep pure circuits in the implementing contract, call them through `pureCircuits` in JavaScript, and do not declare them pure on a contract type used for cross-contract calls.
 
