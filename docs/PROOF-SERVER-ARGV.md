@@ -11,6 +11,8 @@ Official samples disagree on the image tag and on Docker's end-of-flags marker:
 
 `packages/preprod-hello-stub/src/proof-server-argv.mjs` accepts both argv shapes when the image is `midnightntwrk/proof-server:8.1.0`, and rejects 8.0.3, 8.1.3, and `latest`. The `--` is Docker's end-of-flags separator; it is not a proof-server flag. This helper does not run Docker and does not claim a fix of the public indexer, node, or proof server.
 
+Flag drop (this run): [midnightntwrk/servicedesk#242](https://github.com/midnightntwrk/servicedesk/issues/242). The published image entrypoint is `bash -c` with a fixed command string, so tokens after the image name never reach `midnight-proof-server`. The array form used in many compose files (`command: ['midnight-proof-server', '-v']`) therefore silently drops `-v`. Prefer the Windows form with `--`, a single string command, or the environment variable `MIDNIGHT_PROOF_SERVER_VERBOSE=true`. The classifier now warns on the image-then-binary form and points at #242. It still does not claim the public proof server is fixed.
+
 Official:
 
 - https://docs.midnight.network/guides/windows-compact-setup
