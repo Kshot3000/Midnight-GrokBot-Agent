@@ -1,0 +1,42 @@
+/*
+ * validation-disclose-pin.compact — corrected shape of the transfer sample
+ * on the Test and debug page.
+ *
+ * Official:
+ *   https://docs.midnight.network/compact/test-and-debug
+ *     (sample uses top-level typed const, Bytes<32>{}, and a bare ledger write)
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *     ledger stores of potentially private data require disclose()
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ *     default<T> yields the default value of T (all-zero Bytes)
+ *
+ * The public sample does not compile as written under Compact language ~0.23:
+ * Bytes<32>{} is not a value form, and the assignment to balance needs disclose
+ * because circuit parameters are treated as potentially private. This lab file
+ * moves the bounds inside the circuit, rejects the all-zero recipient with
+ * default<Bytes<32>>, and discloses the amount before the write. It is not
+ * compiled here and is not a deploy.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1487
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger balance: Uint<64>;
+
+export circuit transfer(recipient: Bytes<32>, amount: Uint<64>): [] {
+  const MAX_AMOUNT: Uint<64> = 1000000;
+  const MIN_AMOUNT: Uint<64> = 1;
+  assert(amount >= MIN_AMOUNT, "Amount too small");
+  assert(amount <= MAX_AMOUNT, "Amount exceeds maximum");
+  assert(balance >= amount, "Insufficient funds");
+  assert(recipient != default<Bytes<32>>, "Invalid recipient");
+  balance = disclose(balance - amount);
+}
