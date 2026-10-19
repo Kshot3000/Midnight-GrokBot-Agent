@@ -175,6 +175,10 @@ or use prove-bridge `:6399` (`POST /prove?contract=hello`).
 
 Official ledger index still lists 8.1.2 as LATEST. midnight-docs#1453 tracks the missing 8.1.3 notes page. Lab proof-server stays 8.1.0. See [`docs/LEDGER-813-NOTES-GAP.md`](../../docs/LEDGER-813-NOTES-GAP.md). This does not fix the public indexer or node.
 
+## Release notes shared description (midnight-docs#1561)
+
+`src/release-notes-description-gap.mjs` classifies a component against the shared-description groups reported in midnight-docs#1561. It does not invent a description API and does not claim the public docs site is fixed. See [`docs/RELEASE-NOTES-SHARED-DESCRIPTION.md`](../../docs/RELEASE-NOTES-SHARED-DESCRIPTION.md).
+
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
