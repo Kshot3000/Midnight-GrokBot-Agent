@@ -1,0 +1,16 @@
+// Note for Compact ~0.31.1 / language ~0.23 and runtime 0.16.0.
+// Upstream midnight-docs#1564: API reference documents compact-runtime 0.20.0
+// while the support matrix lists 0.16.0 for Preview/Preprod/Mainnet.
+// Do not copy 0.20.0-only functions into contracts targeting this pin.
+//
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+pragma language_version >= 0.23;
+
+export circuit noteRuntimeApiGap() {
+  // Educational stub only. No ledger state, no prove path.
+  assert(true, "runtime api gap note");
+}
