@@ -1,0 +1,26 @@
+/*
+ * deploy-pending-note.compact — no circuit; mainnet deploy-pending pointer only.
+ * Official deploy docs (https://docs.midnight.network/guides/deploy-and-operate) describe
+ * deployContract / submitDeployTx. They do not document a public --filter-deploy-txs flag.
+ * Upstream servicedesk#257 reports that valid mainnet contract-deploy txs stay in public
+ * RPC pools until TTL (validate_transaction Valid, apply_extrinsic Ok) while contract calls
+ * are included. The report asks whether producers or relays still run --filter-deploy-txs.
+ * Compact has no node-pool API. This file only pins the known symptom for builders.
+ * LOCAL-TRUE. No on-chain deploy is claimed. Does not fix the public node or indexer.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/257
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+// No exported circuit. Deploy-pending classification is off-chain.
+// See docs/MAINNET-DEPLOY-PENDING.md and
+// packages/preprod-hello-stub/src/deploy-pending-ttl-decode.mjs.
