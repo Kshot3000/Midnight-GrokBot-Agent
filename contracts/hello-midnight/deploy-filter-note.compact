@@ -1,0 +1,25 @@
+/*
+ * deploy-filter-note.compact — Compact note only; no circuit.
+ * Official deploy docs do not document a public --filter-deploy-txs flag.
+ * Upstream servicedesk#257: valid mainnet deploys stay pending until TTL
+ * (validate_transaction Valid, apply_extrinsic Ok) while contract calls are included.
+ * The report asks if producers/relays still run --filter-deploy-txs.
+ * Compact has no node-pool or filter API. This file only pins the known symptom.
+ * LOCAL-TRUE. No on-chain deploy claimed. Does not fix the public node or indexer.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/257
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+// No exported circuit. Classification is off-chain.
+// See docs/MAINNET-DEPLOY-FILTER-HYPOTHESIS.md and
+// packages/preprod-hello-stub/src/deploy-filter-decode.mjs.
