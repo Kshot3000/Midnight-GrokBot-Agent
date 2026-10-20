@@ -1,0 +1,35 @@
+/*
+ * board-input-bounds.compact — reject out-of-range board positions before any ledger write.
+ *
+ * Official pattern from the battleship tutorial (not an invented API):
+ *   https://docs.midnight.network/tutorials/bship/smart-contract
+ *   assert(_x1 != _x2, "Cannot use the same number twice");
+ *   assert(_x1 > 0 && _x2 > 0, "No zero index, board starts at 1");
+ *   assert(_x1 <= 20 && _x2 <= 20, "Out of bounds, please keep ships on the board");
+ * Security best practices: https://docs.midnight.network/guides/security-best-practices
+ *   Validate all inputs. Never trust circuit parameters without validation.
+ *
+ * Compact ~0.31.1 / language ~0.23. assert is a function-like expression.
+ * This file is not compiled and is not a deploy.
+ *
+ * Upstream open issues read this run: servicedesk#257 (mainnet deploys pending),
+ * midnight-docs#1487 (test-and-debug samples), midnight-docs#1564 (runtime version gap).
+ * This lab source copies the official validation pattern. No public indexer or node fix is claimed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger lastShot: Uint<8>;
+
+export circuit shootBounded(x: Uint<8>): [] {
+  assert(x > 0, "No zero index, board starts at 1");
+  assert(x <= 20, "Out of bounds, please keep ships on the board");
+  lastShot = disclose(x);
+}
