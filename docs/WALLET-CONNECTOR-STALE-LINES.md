@@ -1,27 +1,36 @@
-# Wallet and connector pages: stale lines against DApp Connector 4.0.1
+# Wallet and connector pages: stale lines vs DApp Connector API 4.0.1
 
 Upstream: [midnightntwrk/midnight-docs#1569](https://github.com/midnightntwrk/midnight-docs/issues/1569)
 
-Open docs issue collected from the SME review of the wallet builder guide. Published lines disagree with DApp Connector API 4.0.1 and Wallet SDK 1.2.0. This lab only records the mismatches so builders on the pinned stack do not copy them. It does not edit the public docs site, invent methods, or claim a fix of the indexer or node.
+Issue #1569 lists published lines that are wrong or out of date against DApp Connector API 4.0.1 and Wallet SDK 1.2.0. This lab does not edit the public docs site and does not claim a fix of the public indexer or node. Pins remain Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-Official sources (checked 2026-10-19):
+Official API (source of truth for signatures):
 
-- https://docs.midnight.network/api-reference/dapp-connector (v4.0.1)
-- https://docs.midnight.network/api-reference/dapp-connector/type-aliases/ConnectedAPI
-- Support matrix and pins used by this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0
+- https://docs.midnight.network/api-reference/dapp-connector/type-aliases/WalletConnectedAPI
+- https://docs.midnight.network/relnotes/dapp-connector-api/dapp-connector-api-4-0-1
 
-Known stale points from the issue, restated against the published connector page:
+What the official WalletConnectedAPI type shows for 4.0.1:
 
-1. `submitTransaction` takes only the transaction. The connector page sample is `connected.submitTransaction(resultTransaction)`. There is no `payFees` option on that method. `payFees` appears on `makeTransfer`, `makeIntent`, and the balance methods.
-2. Network IDs on the connector page and midnight-js network-id helpers are lowercase (`mainnet`, `preprod`, `preview`, `undeployed`). Capitalized `'Preview'` / `'PreProd'` will be refused by a wallet that checks the id.
-3. Sealed and unsealed balancing are different methods: `balanceUnsealedTransaction` (typical after a contract call) and `balanceSealedTransaction` (typical after `makeIntent` / swap). They are not interchangeable.
-4. DApps must filter wallets on `apiVersion` with a semver check before `connect`. The connector page "Connect" sample does this. Helpers that skip the filter do not follow the published requirement.
-5. `getConfiguration` still returns `proverServerUri`. The issue notes it is deprecated and planned for removal in 5.0.0. Prefer `getProvingProvider()` when the wallet implements it; do not log or depend on the deprecated field as the long-term path.
-6. For atomic swaps, `initSwap` defaults `payFees` to `false`. If a token kind's inputs key is missing, Wallet SDK 1.2.0 skips outputs of that kind; pass an empty object for the inputs key when needed.
+- `submitTransaction(tx): Promise<void>` — no options, no `payFees`. The transaction must already be balanced and sealed.
+- `makeTransfer(desiredOutputs, options?)` — options include `payFees?: boolean` (true by default).
+- `makeIntent(desiredInputs, desiredOutputs, options)` — options include `payFees: boolean`.
+- `balanceUnsealedTransaction(tx, options?)` and `balanceSealedTransaction(tx, options?)` — options include `payFees?: boolean` (true by default). Unsealed balances in the same intent; sealed balances in a separate one.
 
-This lab stays on the pinned 4.0.1 surface. `packages/preprod-hello-stub/src/wallet-connector-stale-lines.mjs` only classifies the points above; it does not call a wallet or a network.
+Reported mismatches in #1569 (builders should prefer the API reference above until the pages are updated):
 
-Also read this run: servicedesk#257 (mainnet deploys pending until TTL; not a public node fix), servicedesk#254 (faucet amount unit), midnight-docs#1564 (runtime API ref version), midnight-docs#1561 (release notes descriptions), example-hello-world#41 (unused deps). None of those are fixed here.
+- Community integration page says `submitTransaction` takes a `payFees` option. The type does not.
+- Same page uses `'Preview'` and `'PreProd'` as network IDs. The issue notes the SDK IDs are `preview`, `preprod`, and `undeployed` (only `mainnet` is fixed by the spec). Capitalized forms may be refused by a wallet that checks them.
+- Sealed and unsealed balancing are grouped together as "contract-built". They differ as above.
+- React and Next.js `selectWallet` helpers do not filter on `apiVersion` (the spec says a DApp must).
+- Atomic-swap section does not note that `initSwap` defaults `payFees` to `false`, or the Wallet SDK 1.2.0 skip of outputs for a token kind when that kind's inputs key is missing.
+- `proverServerUri` is logged with no deprecation note (planned removal in 5.0.0). Prefer `getProvingProvider()` with a fallback.
+
+Lab files:
+
+- `packages/preprod-hello-stub/src/wallet-connector-stale-lines.mjs` — classifies a pasted snippet. No network calls.
+- `contracts/hello-midnight/wallet-connector-stale-note.compact` — Compact note only. No circuit.
+
+Workaround: copy method signatures from the WalletConnectedAPI page, pass lowercase network IDs that the target wallet documents, filter on `apiVersion` when selecting a wallet, and put `payFees` only on methods that declare it.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
