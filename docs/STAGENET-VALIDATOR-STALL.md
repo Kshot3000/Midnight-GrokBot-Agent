@@ -1,22 +1,20 @@
-# Stagenet validator-04 stall and contract-state failures
+# Stagenet validator-04 stall can surface as Unable to get requested contract state
 
 Upstream: [midnightntwrk/servicedesk#264](https://github.com/midnightntwrk/servicedesk/issues/264)
 
-One backend behind `rpc.stagenet.shielded.tools` was reported stalled at block 803,155 (from 2026-10-08) while the rest of the network was near 948,000. Requests that land on the stalled peer (about 1 in 4, via 54.217.86.134) fail with `Unable to get requested contract state`. The peer id given is `12D3KooWPmkYvPL3NSGFGpsV3J8UD3iWVZrVuksS3JYqBhjagAa8`. Telemetry: https://telemetry-internal.shielded.tools/#list/0x2f76825abc239fecf6107c9df99016de57037b451ae57a4394b76c8cf53a9491.
+Official docs only: https://docs.midnight.network/
 
-This lab does not operate nodes, does not claim the public indexer or node is fixed, and does not invent an RPC method. Official docs already document `midnight_contractState` and that indexer `GetContractState` means the indexer cannot fetch contract state from the node. When a builder sees the exact string on Stagenet, the first check is whether the request hit a lagged validator rather than a bad contract address or a Compact runtime mismatch.
+Issue #264 reports one backend behind `rpc.stagenet.shielded.tools` stuck at block 803,155 (observed 2026-10-08) while the rest of the network was near 948,000. Calls that land on that backend fail with `Unable to get requested contract state`. The peer is identified as `12D3KooWPmkYvPL3NSGFGpsV3J8UD3iWVZrVuksS3JYqBhjagAa8` (validator-04). Telemetry: https://telemetry-internal.shielded.tools/#list/0x2f76825abc239fecf6107c9df99016de57037b451ae57a4394b76c8cf53a9491
 
-`packages/preprod-hello-stub/src/stagenet-validator-stall.mjs` classifies the reported error string and the peer id. It does not call any network. `contracts/hello-midnight/stagenet-stall-note.compact` is a no-circuit pin for the same issue.
+The official networks guide at https://docs.midnight.network/guides/networks-and-environments documents undeployed, preview, preprod, and mainnet. It does not list a public Stagenet endpoint. The indexer error reference at https://docs.midnight.network/api-reference/error-reference/indexer-errors lists `GetContractState` as an internal ledger / chain-indexer failure: "Failed to retrieve contract state" / "The indexer cannot fetch contract state from the node. Node RPC failure; check node logs and connectivity."
 
-Official:
+When a load-balanced public RPC returns that message on a minority of requests, the cause can be a single stalled validator rather than a missing contract or a client bug. Retry the same call, or point at a different endpoint if you have one. This lab does not call Stagenet, does not claim a fix of the public node or indexer, and does not invent APIs.
 
-- https://docs.midnight.network/concepts/network-architecture/rpc-networking
-- https://docs.midnight.network/api-reference/error-reference/indexer-errors
-- https://docs.midnight.network/nodes/error-codes
+`packages/preprod-hello-stub/src/stagenet-stall-decode.mjs` classifies the exact error string from the issue and returns a retry hint. It does not open a network connection.
 
 Pins used by this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-Also read this run: servicedesk#254 (faucet amount unit), midnight-docs#1564 (runtime API reference version), example-hello-world#41 (unused deps). None of those are fixed here.
+Also read this run: servicedesk#254 (faucet amount unit), servicedesk#252 (proof-server 9.0.0-rc.9 DUST proofs), midnight-docs#1577 (bboard tutorial retirement), midnight-docs#1569 (DApp Connector stale lines), example-hello-world#41 (unused deps). None of those are fixed here.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
