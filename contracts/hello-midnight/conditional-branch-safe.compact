@@ -1,0 +1,33 @@
+/*
+ * conditional-branch-safe.compact — keep downcasts outside conditionals.
+ *
+ * Official: https://docs.midnight.network/relnotes/compact/toolchain-0.31.0
+ *   Workarounds so operations in untaken branches cannot fail during proof
+ *   construction. Affected: Uint downcasts, Field->Uint, byte conversions,
+ *   relational comparisons on possibly-unknown inputs. Circuit size can grow.
+ *
+ * This sample moves the downcast outside the branch so the conditional itself
+ * only sees a Boolean and a value already narrowed. LOCAL-TRUE. Source only.
+ * Not deployed. Pins: Compact ~0.31.1 / language ~0.23.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger total: Uint<32>;
+
+// Narrow first, then branch. Avoids a downcast inside an untaken arm.
+export circuit addIfPositive(raw: Uint<32>): [] {
+  const amount = disclose(raw);
+  assert(amount <= 1000, "amount too large");
+  const narrowed = amount as Uint<16>;
+  if (narrowed > 0) {
+    total = total + disclose(narrowed as Uint<32>);
+  }
+}
