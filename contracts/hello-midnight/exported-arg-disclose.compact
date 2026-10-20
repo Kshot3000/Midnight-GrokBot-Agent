@@ -1,0 +1,52 @@
+/*
+ * exported-arg-disclose.compact — exported circuit and constructor arguments
+ * that can be observed on chain must be wrapped in disclose when they
+ * originate from private data.
+ *
+ * Official release notes (do not invent APIs):
+ *   https://docs.midnight.network/relnotes/compact/compact-0-16-24-0
+ *   "[Breaking] Exported circuit and constructor arguments are required to be disclose d"
+ *   Compact requires witness return values that can be observed on chain to be
+ *   wrapped in the disclose operator. The argument values passed to exported
+ *   circuits and to a contract's constructor can be observed on chain.
+ *   In Compact 0.16.0 this requirement was extended to those arguments.
+ *
+ *   https://docs.midnight.network/compact/reference/writing
+ *   https://docs.midnight.network/guides/security-best-practices
+ *
+ * Upstream: midnightntwrk/midnight-docs#1487 (test-and-debug samples fail on
+ * context and disclosure patterns). Also related to runtime pin in #1564.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger note: Bytes<32>;
+
+// Private witness. Its return value is private until disclosed.
+witness privateNote(): Bytes<32>;
+
+// Constructor argument that is written to the ledger must be disclosed.
+constructor(initial: Bytes<32>) {
+  note = disclose(initial);
+}
+
+// Exported circuit argument that is written to the ledger must be disclosed.
+export circuit setNote(value: Bytes<32>): [] {
+  note = disclose(value);
+}
+
+// Returning a private witness value from an exported circuit also requires disclose.
+export circuit echoPrivate(): Bytes<32> {
+  return disclose(privateNote());
+}
