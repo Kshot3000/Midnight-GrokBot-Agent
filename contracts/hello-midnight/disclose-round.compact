@@ -1,0 +1,47 @@
+/*
+ * disclose-round.compact — round counter + disclosed publicKey pattern.
+ *
+ * Official writing guide (do not invent APIs):
+ *   https://docs.midnight.network/compact/reference/writing
+ * The guide's lock example stores a disclosed persistentHash of
+ * pad + round as Bytes + secret key, then increments round on clear.
+ * That breaks linkability of the same key across rounds.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1487
+ * Test-and-debug samples omit disclose and use retired Counter shapes.
+ * This lab pin is Compact ~0.31.1 / language ~0.23 (not the guide's 0.26).
+ * Source only. Not compiled. No on-chain deploy is claimed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger authority: Bytes<32>;
+export ledger round: Counter;
+
+witness secretKey(): Bytes<32>;
+
+circuit publicKey(round: Field, sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "hello-midnight:disclose-round:pk"),
+    round as Bytes<32>,
+    sk
+  ]);
+}
+
+export circuit setAuthority(): [] {
+  const sk = secretKey();
+  authority = disclose(publicKey(round, sk));
+}
+
+export circuit rotate(): [] {
+  const sk = secretKey();
+  assert(authority == publicKey(round, sk), "Attempted to rotate without authorization");
+  round.increment(1);
+}
