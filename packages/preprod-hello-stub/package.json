@@ -127,7 +127,8 @@
     "check:release-notes-description": "node --test test/release-notes-description-gap.test.mjs",
     "check:wallet-connector-stale": "node --test test/wallet-connector-stale-lines.test.mjs",
     "check:bboard-retirement": "node --test test/bboard-tutorial-retirement.test.mjs",
-    "check:board-bounds": "node src/board-bounds-invariant.mjs"
+    "check:board-bounds": "node src/board-bounds-invariant.mjs",
+    "check:open-issues-2026-10-20": "node src/open-issues-2026-10-20.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
