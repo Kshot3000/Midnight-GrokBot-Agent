@@ -1,36 +1,27 @@
-# Wallet and connector pages: stale lines vs DApp Connector API 4.0.1
+# Wallet and connector pages: stale lines (lab)
 
 Upstream: [midnightntwrk/midnight-docs#1569](https://github.com/midnightntwrk/midnight-docs/issues/1569)
 
-Issue #1569 lists published lines that are wrong or out of date against DApp Connector API 4.0.1 and Wallet SDK 1.2.0. This lab does not edit the public docs site and does not claim a fix of the public indexer or node. Pins remain Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+The open docs issue collects published lines that are wrong or out of date against DApp Connector API 4.0.1 and Wallet SDK 1.2.0. This lab does not edit midnight-docs. It only restates the mismatches the issue lists and what the published connector reference currently shows. It does not invent methods, does not claim a public indexer or node fix, and does not change any studio HTML, CSS, or Pages.
 
-Official API (source of truth for signatures):
+Official sources (read 2026-10-19):
 
-- https://docs.midnight.network/api-reference/dapp-connector/type-aliases/WalletConnectedAPI
-- https://docs.midnight.network/relnotes/dapp-connector-api/dapp-connector-api-4-0-1
+- https://docs.midnight.network/api-reference/dapp-connector (package `@midnight-ntwrk/dapp-connector-api` v4.0.1)
+- https://docs.midnight.network/api-reference/dapp-connector/type-aliases/WalletConnectedAPI (submitTransaction takes only `tx`)
+- https://docs.midnight.network/guides/react-wallet-connect (network id sample uses `'preprod'`)
+- https://docs.midnight.network/relnotes/dapp-connector-api/dapp-connector-api-4-0-1 (`payFees` added to all transacting methods that already had the option pattern)
 
-What the official WalletConnectedAPI type shows for 4.0.1:
+Pins for this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-- `submitTransaction(tx): Promise<void>` — no options, no `payFees`. The transaction must already be balanced and sealed.
-- `makeTransfer(desiredOutputs, options?)` — options include `payFees?: boolean` (true by default).
-- `makeIntent(desiredInputs, desiredOutputs, options)` — options include `payFees: boolean`.
-- `balanceUnsealedTransaction(tx, options?)` and `balanceSealedTransaction(tx, options?)` — options include `payFees?: boolean` (true by default). Unsealed balances in the same intent; sealed balances in a separate one.
+Points the issue flags, checked against those pages:
 
-Reported mismatches in #1569 (builders should prefer the API reference above until the pages are updated):
+1. `submitTransaction` does not take a `payFees` option. The connector type page shows `submitTransaction(tx): Promise<void>`. The option lives on `makeTransfer`, `makeIntent`, `balanceSealedTransaction`, and `balanceUnsealedTransaction` (true by default). The integration page cited in the issue is no longer at the old path; the published community integration page now says `submitTransaction(tx)` with no option in the method table, while an earlier sentence still mentions a `payFees` option on submit.
+2. Network IDs. The SDK and the published connect samples use lowercase `preview`, `preprod`, and `undeployed`. Only `mainnet` is fixed by the spec. Capitalized `'Preview'` / `'PreProd'` strings appear in some CLI-oriented snippets and would be refused by a wallet that checks the SDK IDs.
+3. Sealed vs unsealed balancing. The connector page separates them: unsealed balances inside the same intent (typical for a contract call), sealed balances in a separate intent (typical for completing a swap). Grouping both as simply "contract-built" loses that distinction.
+4. `selectWallet` helpers in the React and Next.js connect guides do not filter on `apiVersion`. The connector page and the specification say a DApp must check `apiVersion` (semver) before connecting.
+5. Other items in the issue (initSwap default `payFees`, deprecated `proverServerUri`, leaderboard tutorial optional field) are outside the connector surface this lab pins. The lab does not restate Wallet SDK method details that are not on the published connector pages.
 
-- Community integration page says `submitTransaction` takes a `payFees` option. The type does not.
-- Same page uses `'Preview'` and `'PreProd'` as network IDs. The issue notes the SDK IDs are `preview`, `preprod`, and `undeployed` (only `mainnet` is fixed by the spec). Capitalized forms may be refused by a wallet that checks them.
-- Sealed and unsealed balancing are grouped together as "contract-built". They differ as above.
-- React and Next.js `selectWallet` helpers do not filter on `apiVersion` (the spec says a DApp must).
-- Atomic-swap section does not note that `initSwap` defaults `payFees` to `false`, or the Wallet SDK 1.2.0 skip of outputs for a token kind when that kind's inputs key is missing.
-- `proverServerUri` is logged with no deprecation note (planned removal in 5.0.0). Prefer `getProvingProvider()` with a fallback.
-
-Lab files:
-
-- `packages/preprod-hello-stub/src/wallet-connector-stale-lines.mjs` — classifies a pasted snippet. No network calls.
-- `contracts/hello-midnight/wallet-connector-stale-note.compact` — Compact note only. No circuit.
-
-Workaround: copy method signatures from the WalletConnectedAPI page, pass lowercase network IDs that the target wallet documents, filter on `apiVersion` when selecting a wallet, and put `payFees` only on methods that declare it.
+Builders on this lab should follow the connector type pages and the 4.0.1 release notes, not the stale lines. Re-check the compatibility matrix before any deploy.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
