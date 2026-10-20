@@ -1,0 +1,29 @@
+// Lab Compact: assert on private data is allowed without disclose().
+// Official: https://docs.midnight.network/compact/explicit_disclosure
+// "the use of private data to compute the value of an assert subexpression is allowed to be implicitly disclosed"
+// Upstream related: https://github.com/midnightntwrk/midnight-docs/issues/1487 (test-and-debug samples)
+// Pins: Compact ~0.31.1 / language ~0.23
+// LOCAL-TRUE. Source only. Not deployed.
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+witness secretKey(): Bytes<32>;
+
+export ledger owner: Bytes<32>;
+
+// Private derivation stays private. assert may read it without disclose.
+export circuit claim(): [] {
+  const sk = secretKey();
+  // publicKey is a documented helper; result is private until disclosed.
+  const pk = publicKey(sk);
+  assert(pk != owner, "already claimed");
+  // Only the ledger write needs disclose.
+  owner = disclose(pk);
+}
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
