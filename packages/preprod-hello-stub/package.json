@@ -124,7 +124,8 @@
     "check:wallet-sync-stall": "node src/wallet-sync-stall-classify.mjs",
     "check:deploy-pending-ttl": "node --test test/deploy-pending-ttl-decode.test.mjs",
     "check:release-notes-description": "node --test test/release-notes-description-gap.test.mjs",
-    "check:wallet-connector-stale": "node --test test/wallet-connector-stale-lines.test.mjs"
+    "check:wallet-connector-stale": "node --test test/wallet-connector-stale-lines.test.mjs",
+    "check:bboard-retirement": "node --test test/bboard-tutorial-retirement.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

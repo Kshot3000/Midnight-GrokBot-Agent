@@ -1,0 +1,57 @@
+/*
+ * bboard-retirement-note.compact
+ *
+ * Source-only note. Not a deployable contract. LOCAL-TRUE.
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1577
+ *
+ * midnight-docs#1577 plans to retire the bulletin board tutorial pages and
+ * the Examples DApp page, redirecting them to /tutorials. The example-bboard
+ * repo and create-mn-app --template bboard stay. This file does not invent
+ * APIs and does not claim a public indexer or node fix.
+ *
+ * Official examples page (still live as of 2026-10-20) publishes the
+ * bulletin board contract with pragma language_version 0.23 and these
+ * asserts (not invented):
+ *   Attempted to post to an occupied board
+ *   Attempted to take down post from an empty board
+ *   Attempted to take down post, but not the current owner
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1,
+ * DApp Connector 4.0.1, proof-server 8.1.0.
+ * Official docs only: https://docs.midnight.network/
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+// Language pin matching the published bulletin board contract and this lab.
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+// Occupancy flag only. Message and owner stay in the example repo.
+export ledger vacant: Boolean;
+
+constructor() {
+  vacant = true;
+}
+
+/**
+ * post — same occupancy invariant as the published bulletin board post circuit.
+ * Does not copy Opaque or publicKey; those stay in example-bboard.
+ */
+export circuit notePostAllowed(): [] {
+  assert(vacant, "Attempted to post to an occupied board");
+  vacant = false;
+}
+
+/**
+ * takeDown — same vacancy invariant as the published takeDown circuit.
+ * Ownership check stays in the example; this note only tracks occupancy.
+ */
+export circuit noteTakeDownAllowed(): [] {
+  assert(vacant == false, "Attempted to take down post from an empty board");
+  vacant = true;
+}
