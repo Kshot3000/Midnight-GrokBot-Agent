@@ -1,0 +1,42 @@
+/*
+ * safe-stdlib-commit-vs-hash.compact — commit functions disguise witness data;
+ * hash functions do not.
+ *
+ * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+ *   section "Safe Compact standard library routines"
+ *
+ * transientCommit and persistentCommit are recognized as sufficiently
+ * disguising their input (assuming a sufficiently random rand argument),
+ * so their results may be stored or returned without disclose().
+ * transientHash, persistentHash, keccak256, and sha512 are not: their
+ * results carry the same witness data as their inputs. The compiler
+ * reports an undeclared disclosure of a hash of the witness data.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * Source only. Not compiled here. Not a deploy.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+witness secret(): Bytes<32>;
+witness nonce(): Bytes<32>;
+
+export ledger commitment: Bytes<32>;
+export ledger hashOfSecret: Bytes<32>;
+
+export circuit storeCommitment(): [] {
+  // Official: commit result does not require disclose when rand is random.
+  commitment = persistentCommit(nonce(), secret());
+}
+
+export circuit storeHash(): [] {
+  // Official: hash result carries the witness data; disclose is required.
+  hashOfSecret = disclose(persistentHash<Vector<1, Bytes<32>>>([secret()]));
+}
