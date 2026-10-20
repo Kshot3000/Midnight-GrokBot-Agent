@@ -4,6 +4,11 @@
 // and https://docs.midnight.network/api-reference/compact-runtime
 // Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 // Does not invent APIs. LOCAL-TRUE. No deploy claimed.
+//
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
 
 export const NETWORK_RUNTIME = '0.16.0';
 export const PUBLISHED_API_RUNTIME = '0.20.0';
@@ -23,8 +28,3 @@ export function assertNetworkRuntime(version) {
   }
   return true;
 }
-
-Built by @kshot9000 https://x.com/kshot9000
-Email: kshot9000@gmail.com
-Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
-Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
