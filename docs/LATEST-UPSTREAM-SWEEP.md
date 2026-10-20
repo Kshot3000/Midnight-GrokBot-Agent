@@ -16,7 +16,7 @@ This lab read open issues in the three orgs it cannot push to. It does not claim
 - [#1564](https://github.com/midnightntwrk/midnight-docs/issues/1564) — Compact runtime API reference documents 0.20.0, but the networks run 0.16.0. Lab: `docs/COMPACT-RUNTIME-API-VERSION-GAP.md`.
 - [#1561](https://github.com/midnightntwrk/midnight-docs/issues/1561) — Release notes pages share the same description across versions. Lab: `docs/RELEASE-NOTES-SHARED-DESCRIPTION.md`.
 - [#1554](https://github.com/midnightntwrk/midnight-docs/issues/1554) — missing guide for wallet builders (Wallet SDK + implementing the DApp Connector API). Lab: `docs/WALLET-BUILDER-GUIDE-GAP.md`.
-- [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page samples do not run as written. Lab: `docs/CIRCUIT-CONTEXT-PIN.md`, `contracts/hello-midnight/circuit-context-pin.compact`, `packages/preprod-hello-stub/src/circuit-context-pin.mjs`.
+- [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page samples do not run as written. Lab: `docs/CIRCUIT-CONTEXT-PIN.md`, `contracts/hello-midnight/circuit-context-pin.compact`, `packages/preprod-hello-stub/src/circuit-context-pin.mjs`, `docs/NO-EMPTY-BYTES-CONSTRUCTOR.md`, `contracts/hello-midnight/no-empty-bytes.compact`, `packages/preprod-hello-stub/src/no-empty-bytes-invariant.mjs`.
 - [#1383](https://github.com/midnightntwrk/midnight-docs/issues/1383) — Document proving topology: local vs wallet-delegated vs hosted. Lab: `docs/PROVING-TOPOLOGY.md`.
 - [#1396](https://github.com/midnightntwrk/midnight-docs/issues/1396) — Sunset Academy and make Hello World the main quick start. Lab: `docs/HELLO-WORLD-QUICKSTART-GAP.md`.
 
