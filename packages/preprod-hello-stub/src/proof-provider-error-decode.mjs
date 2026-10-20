@@ -1,17 +1,17 @@
 /**
- * Classifies proof-server error messages reported by midnight-js 4.1.1
- * httpClientProvingProvider (servicedesk#243).
- *
- * Does not invent APIs. Does not call a proof server. Does not claim the
- * public indexer, node, or proof server is fixed. Lab pin: proof-server 8.1.0,
- * midnight-js 4.1.1.
- *
- * Official error reference:
- * https://docs.midnight.network/api-reference/error-reference/proof-server-errors
- * Local proving guide (VERBOSE logs the reason):
- * https://docs.midnight.network/guides/local-proving
+ * Classify midnight-js proof-provider errors that drop the proof-server body
+ * or surface a timeout as an AbortError. Does not call a proof server.
  *
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/243
+ * Proof-server errors table:
+ *   https://docs.midnight.network/api-reference/error-reference/proof-server-errors
+ * Verbose logging for rejected requests:
+ *   https://docs.midnight.network/guides/local-proving
+ * Default prove timeout (300000 ms):
+ *   https://docs.midnight.network/0.0.0/develop/reference/midnight-api/midnight-js/@midnight-ntwrk/midnight-js-http-client-proof-provider/variables/DEFAULT_CONFIG
+ *
+ * Pins: midnight-js 4.1.1, proof-server 8.1.0, DApp Connector 4.0.1.
+ * Official docs only: https://docs.midnight.network/.
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -19,90 +19,91 @@
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
-export const UPSTREAM_PROOF_PROVIDER_ERROR =
-  'https://github.com/midnightntwrk/servicedesk/issues/243';
-export const OFFICIAL_PROOF_SERVER_ERRORS =
+export const UPSTREAM = 'https://github.com/midnightntwrk/servicedesk/issues/243';
+export const PROOF_SERVER_ERRORS =
   'https://docs.midnight.network/api-reference/error-reference/proof-server-errors';
-export const OFFICIAL_LOCAL_PROVING =
-  'https://docs.midnight.network/guides/local-proving';
+export const LOCAL_PROVING = 'https://docs.midnight.network/guides/local-proving';
+export const DEFAULT_TIMEOUT_MS = 300000;
+
+const CREDIT = [
+  'Built by @kshot9000 https://x.com/kshot9000',
+  'Email: kshot9000@gmail.com',
+  'Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v',
+  'Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation',
+].join('\n');
 
 /**
- * @param {unknown} err - thrown Error or message string
- * @returns {{ kind: string, note: string, upstream: string, docs: string[], body?: string, timeoutMs?: number }}
+ * @param {string | { message?: string }} err
  */
-export function classifyProofProviderError(err) {
-  const message = err instanceof Error ? err.message : String(err ?? '');
-  const chain = [];
-  let c = err;
-  while (c && typeof c === 'object') {
-    if (c.message) chain.push(String(c.message));
-    c = c.cause;
-  }
-  const shown = chain.join(' <- ') || message;
+export function decodeProofProviderError(err) {
+  const text =
+    typeof err === 'string'
+      ? err
+      : err && typeof err.message === 'string'
+        ? err.message
+        : '';
 
-  // Timeout reported as user abort (4.1.1 AbortError).
-  if (/The user aborted a request/i.test(shown) || /AbortError/i.test(shown)) {
+  if (!text.trim()) {
     return {
-      kind: 'timeout-reported-as-abort',
-      note: 'midnight-js 4.1.1 reports AbortSignal.timeout as "The user aborted a request." It is a timeout, not a user cancel. servicedesk#243.',
-      upstream: UPSTREAM_PROOF_PROVIDER_ERROR,
-      docs: [OFFICIAL_LOCAL_PROVING, OFFICIAL_PROOF_SERVER_ERRORS],
+      ok: false,
+      classification: 'incomplete',
+      title: 'proof-provider error empty',
+      hint: 'Pass the Error.message from httpClientProvingProvider. This helper does not call a proof server.',
+      upstream: UPSTREAM,
+      docs: PROOF_SERVER_ERRORS,
+      credit: CREDIT,
     };
   }
 
-  // Dropped body: only status, no server text.
-  const statusMatch = shown.match(/Failed Proof Server response: url="([^"]+)", code="(\d+)", status="([^"]+)"/);
-  if (statusMatch && !/body=/.test(shown)) {
-    const [, url, code, status] = statusMatch;
+  const failedResponse = /Failed Proof Server response:\s*url="([^"]*)".*code="(\d+)".*status="([^"]*)"/i.exec(
+    text,
+  );
+  if (failedResponse) {
+    const [, url, code, status] = failedResponse;
     return {
-      kind: 'body-dropped',
-      note: `Proof provider dropped the response body (servicedesk#243). Status ${code} ${status} at ${url}. On 8.x the body is usually "bad input", "Job Queue full" or "internal error". Enable MIDNIGHT_PROOF_SERVER_VERBOSE to see the reason in logs.`,
-      upstream: UPSTREAM_PROOF_PROVIDER_ERROR,
-      docs: [OFFICIAL_PROOF_SERVER_ERRORS, OFFICIAL_LOCAL_PROVING],
-      code,
-      status,
+      ok: true,
+      classification: 'dropped-body',
       url,
+      code: Number(code),
+      status,
+      title: 'midnight-js dropped the proof-server response body',
+      hint:
+        'On midnight-js 4.1.1 the httpClientProvingProvider throws this string and never reads the body. The body is where proof-server 8.x reports BadInput, Job Queue full, or InternalError. Enable MIDNIGHT_PROOF_SERVER_VERBOSE=true (see local-proving) so the server logs the reason at DEBUG. This decode does not fix the public indexer or node.',
+      upstream: UPSTREAM,
+      docs: PROOF_SERVER_ERRORS,
+      verbose: LOCAL_PROVING,
+      claim: 'message classification only — not a node or indexer fix',
+      credit: CREDIT,
     };
   }
 
-  // If body is somehow present (future or wallet SDK style).
-  const bodyMatch = shown.match(/body="([^"]+)"/);
-  if (bodyMatch) {
+  const abort =
+    /AbortError:\s*The user aborted a request/i.test(text) ||
+    /Proof Server request failed:.*AbortError/i.test(text);
+  if (abort) {
     return {
-      kind: 'body-present',
-      note: 'Body was included. This is the expected form after the fix tracked by servicedesk#243.',
-      body: bodyMatch[1],
-      upstream: UPSTREAM_PROOF_PROVIDER_ERROR,
-      docs: [OFFICIAL_PROOF_SERVER_ERRORS],
-    };
-  }
-
-  if (/Job Queue full|bad input|internal error/i.test(shown)) {
-    return {
-      kind: 'server-text-visible',
-      note: 'Server text is visible. Common 8.x bodies per official error reference.',
-      upstream: UPSTREAM_PROOF_PROVIDER_ERROR,
-      docs: [OFFICIAL_PROOF_SERVER_ERRORS],
+      ok: true,
+      classification: 'timeout-as-abort',
+      defaultTimeoutMs: DEFAULT_TIMEOUT_MS,
+      title: 'proof request timed out but surfaced as AbortError',
+      hint:
+        'AbortSignal.timeout on the prove/check fetch becomes AbortError: The user aborted a request. on midnight-js 4.1.1. The documented default timeout is 300000 ms. Raise the timeout option on httpClientProvingProvider or reduce circuit size. This is not a user cancellation.',
+      upstream: UPSTREAM,
+      docs: LOCAL_PROVING,
+      claim: 'message classification only — not a node or indexer fix',
+      credit: CREDIT,
     };
   }
 
   return {
-    kind: 'unclassified',
-    note: 'Does not match the patterns in servicedesk#243. Check proof-server logs with MIDNIGHT_PROOF_SERVER_VERBOSE=true.',
-    upstream: UPSTREAM_PROOF_PROVIDER_ERROR,
-    docs: [OFFICIAL_PROOF_SERVER_ERRORS, OFFICIAL_LOCAL_PROVING],
-    shown,
+    ok: false,
+    classification: 'unrecognized',
+    title: 'not the recorded proof-provider drop or abort',
+    hint: 'Look for Failed Proof Server response: ... code=... or AbortError: The user aborted a request.',
+    upstream: UPSTREAM,
+    docs: PROOF_SERVER_ERRORS,
+    credit: CREDIT,
   };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const cases = [
-    classifyProofProviderError(new Error('Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request"')),
-    classifyProofProviderError(new Error('AbortError: The user aborted a request.')),
-  ];
-  console.log(JSON.stringify(cases, null, 2));
-  if (cases[0].kind !== 'body-dropped' || cases[1].kind !== 'timeout-reported-as-abort') {
-    process.exit(1);
-  }
-  console.log('self-check ok');
-}
+export const proofProviderErrorCredit = CREDIT;
