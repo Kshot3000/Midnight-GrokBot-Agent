@@ -1,0 +1,25 @@
+/*
+ * stagenet-stall-note.compact — no circuit; Stagenet stall pointer only.
+ * Official docs describe midnight_contractState and indexer GetContractState
+ * (the indexer cannot fetch contract state from the node).
+ * Upstream servicedesk#264 reports that one Stagenet validator is stalled
+ * and requests that land on it fail with "Unable to get requested contract state".
+ * Compact has no node API. This file only pins the known string for builders
+ * who see it while calling circuits. LOCAL-TRUE. No on-chain deploy is claimed.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/264
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+// No exported circuit. Classification is off-chain.
+// See docs/STAGENET-VALIDATOR-STALL.md and
+// packages/preprod-hello-stub/src/stagenet-validator-stall.mjs.
