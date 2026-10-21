@@ -133,7 +133,8 @@
     "check:dust-silent-subscription": "node src/dust-silent-subscription-classify.mjs",
     "check:js-runtime-deploy": "node --test test/js-runtime-deploy-gap.test.mjs",
     "check:runtime-api-gap": "node --test test/compact-runtime-api-gap-decode.test.mjs",
-    "check:language-ref-pin": "node src/language-ref-pin.mjs"
+    "check:language-ref-pin": "node src/language-ref-pin.mjs",
+    "check:language-version-mismatch": "node src/language-version-mismatch-decode.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
