@@ -131,7 +131,8 @@
     "check:open-issues-2026-10-20": "node src/open-issues-2026-10-20.mjs",
     "check:no-empty-bytes": "node src/no-empty-bytes-invariant.mjs",
     "check:dust-silent-subscription": "node src/dust-silent-subscription-classify.mjs",
-    "check:js-runtime-deploy": "node --test test/js-runtime-deploy-gap.test.mjs"
+    "check:js-runtime-deploy": "node --test test/js-runtime-deploy-gap.test.mjs",
+    "check:runtime-api-gap": "node --test test/compact-runtime-api-gap-decode.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
