@@ -1,0 +1,37 @@
+/*
+ * no-recursion.compact — Compact disallows recursion.
+ *
+ * Official reference (language pin ~0.23; docs reviewed for 0.27.0 text):
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ * "the language is bounded: all Compact types have sizes that are fixed at
+ * compile time, loops are bounded either by constant bounds or by the size
+ * of an object of constant size, and recursion is disallowed. The compiler
+ * is required to unroll loops and inline circuits if necessary to produce
+ * constant loop bounds whenever it can."
+ *
+ * A circuit must not call itself. Circuits must be finite proving circuits.
+ * This sample shows a non-recursive increment. It does not attempt a
+ * recursive call.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1387
+ * (Compact reference gaps; pages are synced from the Compact repo).
+ * This file does not edit midnight-docs and does not fix the public indexer
+ * or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger round: Counter;
+
+export circuit increment(): [] {
+  round.increment(1);
+}
