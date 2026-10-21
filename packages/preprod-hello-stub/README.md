@@ -183,3 +183,12 @@ Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+## Explicit disclosure return (servicedesk#266)
+
+`src/explicit-disclosure-return.mjs` classifies the reported cases: return of a circuit argument needs no `disclose()` and reaches the DApp but not the published transaction; return of a witness is rejected; a disclosed ledger store is in the transaction. See [`docs/EXPLICIT-DISCLOSURE-RETURN.md`](../../docs/EXPLICIT-DISCLOSURE-RETURN.md). LOCAL-TRUE. Does not fix the public indexer or node.
+
+Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation

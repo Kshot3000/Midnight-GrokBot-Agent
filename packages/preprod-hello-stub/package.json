@@ -135,7 +135,8 @@
     "check:runtime-api-gap": "node --test test/compact-runtime-api-gap-decode.test.mjs",
     "check:language-ref-pin": "node src/language-ref-pin.mjs",
     "check:language-version-mismatch": "node src/language-version-mismatch-decode.mjs",
-    "check:persistent-hash": "node --test test/persistent-hash-invariant.test.mjs || node src/persistent-hash-invariant.mjs"
+    "check:persistent-hash": "node --test test/persistent-hash-invariant.test.mjs || node src/persistent-hash-invariant.mjs",
+    "check:explicit-disclosure-return": "node --test test/explicit-disclosure-return.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
