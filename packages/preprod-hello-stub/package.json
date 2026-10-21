@@ -129,7 +129,8 @@
     "check:bboard-retirement": "node --test test/bboard-tutorial-retirement.test.mjs",
     "check:board-bounds": "node src/board-bounds-invariant.mjs",
     "check:open-issues-2026-10-20": "node src/open-issues-2026-10-20.mjs",
-    "check:no-empty-bytes": "node src/no-empty-bytes-invariant.mjs"
+    "check:no-empty-bytes": "node src/no-empty-bytes-invariant.mjs",
+    "check:dust-silent-subscription": "node src/dust-silent-subscription-classify.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",

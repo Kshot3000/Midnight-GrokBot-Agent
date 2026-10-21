@@ -1,23 +1,21 @@
-# Wallet SDK DUST sync never notices a silent subscription
+# DUST silent subscription stall (lab)
 
-Upstream: [midnightntwrk/servicedesk#251](https://github.com/midnightntwrk/servicedesk/issues/251)
+Upstream: [midnightntwrk/servicedesk#251](https://github.com/midnightntwrk/servicedesk/issues/251) reports that Wallet SDK 1.2.0 never notices a Preprod DUST indexer subscription that stays open but stops delivering events. `progress.isConnected` stays true, the applied index stays put, and nothing errors, times out, or resubscribes until the connection drops.
 
-On Preprod the Wallet SDK 1.2.0 DUST sync can sit still while `progress.isConnected` stays `true`. The indexer subscription stays open but stops delivering events. Nothing in the sync path times out on inactivity, so the wallet only resumes when something else drops the socket.
+Related docs request: [midnightntwrk/midnight-docs#1381](https://github.com/midnightntwrk/midnight-docs/issues/1381) asks for a troubleshooting page on wallet sync stalls on Preprod.
 
-Official source: [Wallet SDK](https://docs.midnight.network/) (no dedicated page names this stall). The issue describes the update stream in `wallet-sdk-dust-wallet` 4.2.0 and the graphql-ws keep-alive that does not close a quiet connection.
+Official sources only:
 
-This lab does not patch the wallet SDK, the public indexer, or the node. It only classifies the symptom so a builder can tell a silent open subscription from a disconnected one:
+- https://docs.midnight.network/guides/manage-dust (DUST troubleshooting: wait for sync before building a fee spend)
+- https://docs.midnight.network/nodes/error-codes (code 170 = InvalidDustSpendProof: "A wallet that builds the transaction before it has synced every DUST event produces this error.")
+- https://docs.midnight.network/how-to/decode-1010-transaction-rejection-errors (extract the inner u8 from a 1010 Invalid Transaction)
+- https://docs.midnight.network/relnotes/support-matrix (Preprod: Wallet SDK 1.2.0, Midnight.js 4.1.1, proof-server 8.1.3 / lab pin 8.1.0)
 
-- `appliedIndex` does not advance (appliedIndex < highestRelevantWalletIndex)
-- `isConnected` remains `true`
-- silence of at least 60 seconds with no events
-- no resubscribe occurs until the connection is dropped
+This lab does not invent APIs, does not claim to fix the public indexer or node, and does not change Wallet SDK behaviour. A silent subscription that leaves the wallet behind can later surface as 1010 Custom error 170 when a DUST spend proof is built against a stale commitment tree. The official fix surface is to wait for events (or drop and resubscribe) before proving and submitting.
 
-The classifier in `packages/preprod-hello-stub/src/dust-silent-subscription.mjs` now returns the applied and highest indices on a silent-open hit and includes a multi-sample self-check (caught-up, disconnected, short silence). It does not open a WebSocket or contact Blockfrost.
+Lab checker (no network): `packages/preprod-hello-stub/src/dust-silent-subscription-classify.mjs`.
 
 Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
-
-This does not claim a fix of the public indexer or node.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
