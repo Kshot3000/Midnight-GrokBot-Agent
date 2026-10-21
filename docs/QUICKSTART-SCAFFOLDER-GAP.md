@@ -1,24 +1,21 @@
-# Quickstart still documents create-mn-app while a new scaffolder is planned
+# Quickstart page still documents create-mn-app
 
 Upstream: [midnightntwrk/midnight-docs#1587](https://github.com/midnightntwrk/midnight-docs/issues/1587)
 
-Official docs only: https://docs.midnight.network/
+The published Quickstart at https://docs.midnight.network/getting-started/quickstart still documents the `create-mn-app` 0.5.x CLI (Contract / Full DApp prompts, `bboard` default, `npm run setup -- --network`, hello-world / battleship / leaderboard templates). The issue asks to rewrite it for the new scaffolder from the `midnight-examples` monorepo once that tool is published to npm. The rewrite is blocked on https://github.com/midnightntwrk/midnight-examples/issues/59.
 
-Issue #1587 asks to rewrite `docs/getting-started/quickstart.mdx` so it documents a new scaffolder built from the `midnight-examples` monorepo, not `create-mn-app` 0.5.x. The work is **blocked on** [midnight-examples#59](https://github.com/midnightntwrk/midnight-examples/issues/59). The instruction is to start once the new tool is published to npm, and to write from its README and from commands that have actually been run.
+This lab does not invent a new CLI and does not claim the public page is updated. Do not run an unpublished scaffolder. Prefer the official page and the linked examples until the rewrite lands.
 
-Checked live on 2026-10-20:
+Official:
 
-- https://docs.midnight.network/getting-started/quickstart still opens with `npx create-mn-app [project-name]`, the Contract / Full DApp prompts, `hello-world` / `battleship` / `bboard` / `leaderboard` templates, `npm run setup -- --network`, and the local docker-compose devnet.
-- The same page's Compact sample uses `pragma language_version >= 0.23` and a simple `storeMessage` circuit, which matches the lab pin (Compact ~0.31.1 / language ~0.23).
-- Related pages still mention `create-mn-app` (for example the networks-and-environments guide).
+- https://docs.midnight.network/getting-started/quickstart
+- https://docs.midnight.network/getting-started/hello-world
 
-This lab does not invent the unpublished scaffolder command, does not edit midnight-docs, and does not claim a fix of the public quickstart. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+Lab note: `contracts/hello-midnight/quickstart-scaffolder-note.compact` (source only, not compiled). `packages/preprod-hello-stub/src/quickstart-scaffolder-gap.mjs` classifies a pasted command string so a builder can see the documented tool versus the planned one. It does not call npm, Compact, or a proof server.
 
-Until the new tool lands, builders should follow the published quickstart or clone a maintained example directly (for example `midnightntwrk/example-hello-world`).
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-`packages/preprod-hello-stub/src/quickstart-scaffolder-gap.mjs` classifies a `create-mn-app` command as the legacy path and refuses to treat an unpublished midnight-examples CLI as documented. LOCAL-TRUE. No network call.
-
-Also read this run: servicedesk#264 (Stagenet validator stall), servicedesk#254 (faucet amount unit), midnight-docs#1579 (rewrite guides off bboard), example-hello-world#41 (unused deps). None of those are fixed here.
+This lab note does not fix the public indexer or node.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
