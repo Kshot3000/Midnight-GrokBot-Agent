@@ -1,0 +1,42 @@
+/*
+ * return-arg-no-disclose.compact
+ * Demonstrates the distinction reported in midnightntwrk/servicedesk#266:
+ * Returning an exported circuit argument does not require disclose().
+ * Returning a witness value does.
+ * A returned value reaches the DApp but is not published on-chain like a ledger write.
+ *
+ * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+ * Pins: Compact ~0.31.1 / language ~0.23
+ * LOCAL-TRUE. Source sample only. Not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+witness secretNum(): Uint<64>;
+
+export ledger stored: Uint<64>;
+
+// Accepted without disclose(): the caller already knows its argument.
+export circuit returnArg(x: Uint<64>): Uint<64> {
+  return x;
+}
+
+// Rejected without disclose(): potential witness-value disclosure.
+// export circuit returnWitness(): Uint<64> { return secretNum(); }
+
+// Accepted: disclose the witness before returning.
+export circuit returnWitnessDisclosed(): Uint<64> {
+  return disclose(secretNum());
+}
+
+// Ledger write of disclosed value is the public on-chain boundary.
+export circuit storeDisclosed(x: Uint<64>): [] {
+  stored = disclose(x);
+}
