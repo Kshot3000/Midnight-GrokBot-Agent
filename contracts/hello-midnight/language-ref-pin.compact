@@ -1,0 +1,34 @@
+/*
+ * language-ref-pin.compact — pin Compact language to the public-network floor.
+ *
+ * Official Compact reference (reviewed for language 0.27.0):
+ *   https://docs.midnight.network/compact/reference/compact-reference
+ * Official support matrix (public networks, ledger 8):
+ *   https://docs.midnight.network/relnotes/support-matrix
+ *   Compact toolchain 0.31.1 pairs with language ~0.23 and compact-runtime 0.16.0.
+ * Official toolchain 0.31.0 notes:
+ *   https://docs.midnight.network/relnotes/compact/toolchain-0.31.0
+ *   Language version: 0.23.0
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1564
+ * The runtime API reference documents 0.20.0 (ledger 9 line). The language
+ * reference is reviewed for 0.27.0. Both are ahead of the matrix pin that
+ * Preview, Preprod, and Mainnet actually run. This file keeps the 0.23
+ * pragma used by toolchain 0.31.1. It does not invent APIs and is not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger rounds: Counter;
+
+export circuit tick(n: Uint<16>): [] {
+  assert(n < 64, "n out of bound for language-ref pin sample");
+  rounds.increment(1);
+}
