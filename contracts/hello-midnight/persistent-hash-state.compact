@@ -1,0 +1,36 @@
+/*
+ * persistent-hash-state.compact — derive public ledger state with
+ * persistentHash, then assert a range. persistentHash is the official
+ * SHA-256 compression for state data; it is not a circuit-optimized
+ * consistency check.
+ *
+ * Official:
+ *   https://docs.midnight.network/compact/standard-library/exports
+ *   persistentHash<T>(value: T): Bytes<32>
+ *   "It should be used to derive state data, and not for consistency
+ *   checks where avoidable."
+ *
+ * Upstream: midnightntwrk/servicedesk#203
+ * That issue measures prover keys of 90–570 MB and notes that persistentHash
+ * appears in every state-writing circuit. This sample does not claim a
+ * smaller key or a native gadget. It only shows the official form for
+ * deriving a 32-byte state key under Compact ~0.31.1 / language ~0.23.
+ * Not compiled here. Does not invent APIs.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger noteId: Bytes<32>;
+
+export circuit storeNote(tag: Bytes<16>, body: Bytes<32>): [] {
+  const id = persistentHash<Vector<2, Bytes<32>>>([pad(16, tag) as Bytes<32>, body]);
+  assert(id != default<Bytes<32>>, "derived note id is the zero hash");
+  noteId = id;
+}
