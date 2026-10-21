@@ -1,0 +1,54 @@
+/*
+ * return-disclose-not-publish.compact — return from exported circuit is not on-chain publication.
+ *
+ * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+ * "a Compact program must explicitly declare its intention to disclose data that might be private before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract."
+ * "disclosure does not occur just when witness data is stored in the ledger but also when returned from an exported circuit."
+ *
+ * Upstream: midnightntwrk/servicedesk#266
+ * Local tests (compiler 0.31.1 / language 0.23, ledger 8) show:
+ * - return x; on an exported circuit argument compiles without disclose() (caller already knows it).
+ * - return of a witness requires disclose().
+ * - A returned value (disclosed witness or argument) reaches the calling DApp (tx.private.result) but is not present in the published transaction raw bytes.
+ * - A ledger write of disclose(value) is present in the published transaction.
+ *
+ * This source pins the accepted patterns. It does not claim to fix the public indexer or node.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Bytes<32>;
+export ledger calls: Counter;
+
+witness secretValue(): Bytes<32>;
+
+// Returning an argument does not require disclose(); the caller already knows it.
+// The value reaches the DApp but is not written into the published transaction.
+export circuit returnArg(x: Bytes<32>): Bytes<32> {
+  calls.increment(1);
+  return x;
+}
+
+// Returning a witness requires disclose(). The disclosed value reaches the DApp
+// (tx.private.result) but is not present in the published transaction raw.
+export circuit returnWitness(): Bytes<32> {
+  calls.increment(1);
+  return disclose(secretValue());
+}
+
+// Ledger write is the on-chain public boundary. The disclosed value appears
+// in the published transaction.
+export circuit storeArg(x: Bytes<32>): [] {
+  stored = disclose(x);
+  calls.increment(1);
+}
