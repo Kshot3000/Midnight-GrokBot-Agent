@@ -1,21 +1,27 @@
-# Quickstart page still documents create-mn-app
+# Quickstart still documents create-mn-app; rewrite to midnight-examples is pending
 
 Upstream: [midnightntwrk/midnight-docs#1587](https://github.com/midnightntwrk/midnight-docs/issues/1587)
 
-The published Quickstart at https://docs.midnight.network/getting-started/quickstart still documents the `create-mn-app` 0.5.x CLI (Contract / Full DApp prompts, `bboard` default, `npm run setup -- --network`, hello-world / battleship / leaderboard templates). The issue asks to rewrite it for the new scaffolder from the `midnight-examples` monorepo once that tool is published to npm. The rewrite is blocked on https://github.com/midnightntwrk/midnight-examples/issues/59.
+The published Quickstart at https://docs.midnight.network/getting-started/quickstart currently scaffolds with `npx create-mn-app`. Issue #1587 asks to rewrite that page (and related mentions) to the new scaffolder from the midnight-examples monorepo once https://github.com/midnightntwrk/midnight-examples/issues/59 is done and the tool is on npm.
 
-This lab does not invent a new CLI and does not claim the public page is updated. Do not run an unpublished scaffolder. Prefer the official page and the linked examples until the rewrite lands.
+Until that lands, builders on the supported stack should stay with the documented flow and the compatibility matrix pins:
+
+```bash
+compact update 0.31.1
+npm install @midnight-ntwrk/compact-runtime@0.16.0
+```
+
+Do not switch to an unreleased scaffolder or invent CLI flags. This lab does not claim a fix of the public docs site, indexer, or node.
 
 Official:
 
 - https://docs.midnight.network/getting-started/quickstart
-- https://docs.midnight.network/getting-started/hello-world
+- https://docs.midnight.network/relnotes/support-matrix
+- https://docs.midnight.network/how-to/fix-version-mismatches
 
-Lab note: `contracts/hello-midnight/quickstart-scaffolder-note.compact` (source only, not compiled). `packages/preprod-hello-stub/src/quickstart-scaffolder-gap.mjs` classifies a pasted command string so a builder can see the documented tool versus the planned one. It does not call npm, Compact, or a proof server.
+Pins used by this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
-
-This lab note does not fix the public indexer or node.
+Also read this run: servicedesk#264 (stagenet validator-04 stalled; not a public node fix), servicedesk#254 (faucet amount unit), midnight-docs#1579 (bboard guides rewrite), example-hello-world#41 (unused deps). None of those are fixed here.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

@@ -1,10 +1,29 @@
-// Note only — not a contract to compile.
-// midnight-docs#1587: the published quickstart still documents create-mn-app.
-// A new scaffolder from midnight-examples is planned but blocked.
-// Official: https://docs.midnight.network/getting-started/quickstart
-// Do not invent a new CLI.
-//
-// Built by @kshot9000 https://x.com/kshot9000
-// Email: kshot9000@gmail.com
-// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
-// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+/*
+ * quickstart-scaffolder-note.compact — language pin while quickstart still uses create-mn-app.
+ *
+ * Official quickstart (as of 2026-10-21):
+ *   https://docs.midnight.network/getting-started/quickstart
+ * Upstream: midnightntwrk/midnight-docs#1587
+ * Blocked on midnightntwrk/midnight-examples#59
+ * Support matrix:
+ *   https://docs.midnight.network/relnotes/support-matrix
+ *   Compact toolchain 0.31.1, language floor >= 0.23, compact-runtime 0.16.0
+ *
+ * This file keeps the 0.23 floor used by compiler 0.31.1. It does not invent a
+ * Compact API, does not depend on an unreleased scaffolder, and is not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger noteCount: Counter;
+
+export circuit markNote(): [] {
+  noteCount.increment(1);
+}
