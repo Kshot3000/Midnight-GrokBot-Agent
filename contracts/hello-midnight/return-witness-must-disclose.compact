@@ -1,0 +1,25 @@
+// Lab Compact: returning a witness value requires disclose().
+// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+// Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+// Pins: Compact ~0.31.1 / language ~0.23
+// LOCAL-TRUE. Source only. Not deployed.
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+witness secretNum(): Uint<64>;
+
+// Bare return of a witness is rejected by the compiler.
+// export circuit bare(): Uint<64> { return secretNum(); }
+
+// Disclose declares the intent. The returned value reaches the DApp;
+// issue #266 observed it is not written into the published transaction.
+export circuit disclosed(): Uint<64> {
+  return disclose(secretNum());
+}
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation

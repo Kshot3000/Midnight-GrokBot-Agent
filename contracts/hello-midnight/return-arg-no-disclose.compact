@@ -1,30 +1,26 @@
-/*
- * return-arg-no-disclose.compact — returning a circuit argument needs no disclose().
- *
- * Official behavior (not an invented API):
- *   https://docs.midnight.network/compact/reference/explicit-disclosure
- *
- * Circuit arguments are private by default, but the caller already knows them.
- * The compiler accepts `return x;` on an argument without `disclose()`
- * (tested on toolchain 0.31.1 / language 0.23 and 0.35.0).
- * Returning a witness value still requires `disclose()`.
- *
- * The returned value reaches the calling DApp but is not written into the
- * published transaction (see servicedesk#266 on-chain probe).
- *
- * Upstream: midnightntwrk/servicedesk#266
- * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
- *
- * Built by @kshot9000 https://x.com/kshot9000
- * Email: kshot9000@gmail.com
- * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
- * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
- */
+// Lab Compact: returning a circuit argument does not require disclose().
+// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+// Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+// Pins: Compact ~0.31.1 / language ~0.23
+// LOCAL-TRUE. Source only. Not deployed.
 
 pragma language_version >= 0.23;
 
 import CompactStandardLibrary;
 
-export circuit returnArg(x: Uint<64>): Uint<64> {
+export ledger last: Uint<64>;
+
+// Argument is known to the caller. Compiler accepts the bare return.
+export circuit echo(x: Uint<64>): Uint<64> {
   return x;
 }
+
+// Same for a pure circuit.
+export pure circuit add(a: Uint<8>, b: Uint<8>): Uint<16> {
+  return a + b;
+}
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
