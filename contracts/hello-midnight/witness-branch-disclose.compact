@@ -1,0 +1,43 @@
+/*
+ * witness-branch-disclose.compact — branching on a witness then writing the ledger needs disclose().
+ *
+ * Official:
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *   (Indirect disclosure via conditional expression; ledger stores require declare disclosure)
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ * On Compact toolchain 0.31.1 (language 0.23) and 0.35.0 the form
+ *   export circuit f(): [] { if (secretNum() > 5) { val = 1; } else { val = 2; } }
+ * is REJECTED: potential witness-value disclosure must be declared
+ * (ledger write after a branch on a witness).
+ *
+ * This sample discloses the witness value before the branch so the ledger writes
+ * are on a disclosed quantity. The returned/called DApp sees the effect on the ledger;
+ * the witness itself stays private except for the disclosed comparison outcome.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This lab does not claim to fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger val: Uint<64>;
+
+witness secretNum(): Uint<64>;
+
+export circuit setIfLarge(): [] {
+  const n = disclose(secretNum());
+  if (n > 5) {
+    val = 1;
+  } else {
+    val = 2;
+  }
+}
