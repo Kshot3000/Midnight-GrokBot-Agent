@@ -1,42 +1,42 @@
 /*
- * transfer-bounds.compact — bounds checks without the non-compiling sample.
+ * transfer-bounds.compact — Compact sample for bounds and empty-recipient asserts.
  *
- * Official reads (not invented APIs):
+ * Upstream: midnightntwrk/midnight-docs#1487 (test-and-debug page samples do not
+ * compile or run on the pinned stack).
+ *
+ * Official:
  *   https://docs.midnight.network/compact/test-and-debug
- *   The "Comprehensive validation example" uses a top-level const, Bytes<32>{},
- *   and a ledger write of a circuit parameter with no disclose().
- *   https://docs.midnight.network/getting-started/hello-world
- *   Circuit parameters are private. A ledger write needs disclose().
- *   https://docs.midnight.network/compact/smart-contract-security
- *   assert validates bounds and state before the transition.
+ *   https://docs.midnight.network/guides/compact-javascript-runtime
+ *   https://docs.midnight.network/compact/reference/compact-reference
  *
- * Upstream: midnightntwrk/midnight-docs#1487
- * That issue says this Compact sample does not compile on the matrix pin
- * (top-level const, Bytes<32>{}, missing disclose). This file does not edit
- * midnight-docs and does not claim the public page is fixed.
+ * The test-and-debug page shows a transfer circuit with top-level const and
+ * Bytes<32>{}. Those are rejected by Compact ~0.31.1 / language ~0.23.
+ * This sample uses inline bounds and pad(32, "") for the empty check, matching
+ * patterns already used in this lab's hello-midnight contracts.
  *
- * Language pin: Compact ~0.31.1 / language >= 0.23.
- * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
- * This file does not fix the public indexer or node.
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1,
+ * proof-server 8.1.0.
  *
- * Built by @kshot9000 https://x.com/kshot9000
-Email: kshot9000@gmail.com
-Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
-Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ * LOCAL-TRUE. No on-chain deploy is claimed. Does not claim a fix of the public
+ * docs site, indexer, or node.
  */
 
-pragma language_version >= 0.23;
-
+pragma language_version 0.23;
 import CompactStandardLibrary;
 
 export ledger balance: Uint<64>;
-export ledger recipient: Bytes<32>;
 
-// Bounds live inside the circuit. No top-level const. No Bytes<32>{}.
-export circuit transfer(nextRecipient: Bytes<32>, amount: Uint<64>): [] {
+export circuit transfer(recipient: Bytes<32>, amount: Uint<64>): [] {
   assert(amount >= 1, "Amount too small");
   assert(amount <= 1000000, "Amount exceeds maximum");
   assert(balance >= amount, "Insufficient funds");
-  recipient = disclose(nextRecipient);
-  balance = disclose(balance - amount);
+  assert(recipient != pad(32, ""), "Invalid recipient");
+  balance = balance - amount;
 }
+
+/*
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
