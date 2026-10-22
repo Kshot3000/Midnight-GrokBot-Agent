@@ -137,7 +137,8 @@
     "check:language-version-mismatch": "node src/language-version-mismatch-decode.mjs",
     "check:persistent-hash": "node --test test/persistent-hash-invariant.test.mjs || node src/persistent-hash-invariant.mjs",
     "check:explicit-disclosure-return": "node --test test/explicit-disclosure-return.test.mjs",
-    "check:quickstart-create-mn-app": "node src/quickstart-create-mn-app-gap.mjs"
+    "check:quickstart-create-mn-app": "node src/quickstart-create-mn-app-gap.mjs",
+    "check:map-key-disclose": "node src/map-key-disclose-invariant.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
