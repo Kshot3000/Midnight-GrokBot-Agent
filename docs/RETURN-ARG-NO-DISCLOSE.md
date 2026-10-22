@@ -1,18 +1,17 @@
 # Returning a circuit argument needs no disclose()
 
-Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+Upstream: [midnightntwrk/servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266)
 
 Official: https://docs.midnight.network/compact/reference/explicit-disclosure
 
-servicedesk#266 reports that on Compact 0.31.1 (language ~0.23):
+The explicit disclosure page states that disclosure must be declared before storing witness data in the public ledger, returning it from an exported circuit, or passing it to another contract. Issue #266 reports two related observations on Compact toolchain 0.31.1 (language 0.23):
 
-- `return x;` on an exported-circuit argument is accepted without `disclose()`.
-- `return secretNum();` (a witness) is rejected with "potential witness-value disclosure must be declared but is not".
-- A value returned from an exported circuit reaches the calling DApp (`callTx.private.result`) but is not present in the published transaction bytes. A disclosed ledger store is.
+1. Returning an exported circuit argument compiles without `disclose()` (`return x;`). Returning a witness value is rejected until `disclose()` is added.
+2. A returned value reaches the calling DApp (`callTx.private.result`) but is not present in the published transaction bytes the way a `disclose`d ledger write is.
 
-The Explicit disclosure page groups "returning it from an exported circuit" with ledger stores as a disclosure point. The lab sample in `contracts/hello-midnight/return-arg-no-disclose.compact` shows the accepted argument return and the disclosed witness return. It does not invent APIs, does not claim a fix to the public indexer or node, and does not patch upstream docs.
+Lab sample: `contracts/hello-midnight/return-arg-no-disclose.compact` shows `returnArg` (argument, no disclose), `returnWitness` (witness + disclose), and `storeArg` (ledger write).
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+This lab does not claim a fix of the public docs, compiler, indexer, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
