@@ -1,25 +1,11 @@
-/*
- * return-arg-no-disclose.compact — circuit arguments may be returned without disclose().
- *
- * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
- * Disclosure must be declared before storing witness data in the public ledger,
- * returning it from an exported circuit, or passing it to another contract.
- *
- * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
- * On Compact 0.31.1 (language 0.23) the compiler accepts `return x;` for an
- * exported circuit argument and rejects `return secretNum();` without disclose.
- * Returned values reach the calling DApp; they are not written into the
- * published transaction the way a ledger write is.
- *
- * Language pin: Compact ~0.31.1 / language ~0.23.
- * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
- * This file does not fix the public indexer or node.
- *
- * Built by @kshot9000 https://x.com/kshot9000
- * Email: kshot9000@gmail.com
- * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
- * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
- */
+// Lab Compact: returning an exported-circuit argument needs no disclose().
+// Returning a witness value does. Return values reach the calling DApp
+// but are not written into the published transaction.
+// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+// Related: https://docs.midnight.network/guides/security-best-practices
+// Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+// Pins: Compact ~0.31.1 / language ~0.23
+// LOCAL-TRUE. Source only. Not deployed.
 
 pragma language_version >= 0.23;
 
@@ -28,22 +14,25 @@ import CompactStandardLibrary;
 witness secretNum(): Uint<64>;
 
 export ledger stored: Uint<64>;
-export ledger calls: Counter;
 
-// Circuit argument may be returned without disclose(). The caller already knows it.
+// Argument x is already known to the caller. Compiler accepts return x;
+// without disclose() on Compact 0.31.1 / language 0.23 (and later).
 export circuit returnArg(x: Uint<64>): Uint<64> {
-  calls.increment(1);
   return x;
 }
 
-// Witness value must be disclosed before it can leave an exported circuit.
+// Witness value leaves the circuit to the DApp, so disclose is required.
+// The value is not stored on the ledger and is not in the published tx raw bytes.
 export circuit returnWitness(): Uint<64> {
-  calls.increment(1);
   return disclose(secretNum());
 }
 
-// Ledger write is the public boundary that publishes.
+// Positive control: ledger write is public and needs disclose.
 export circuit storeArg(x: Uint<64>): [] {
   stored = disclose(x);
-  calls.increment(1);
 }
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
