@@ -1,27 +1,20 @@
-# Quickstart still documents create-mn-app; rewrite to midnight-examples is pending
+# Quickstart page still describes create-mn-app
 
 Upstream: [midnightntwrk/midnight-docs#1587](https://github.com/midnightntwrk/midnight-docs/issues/1587)
-
-The published Quickstart at https://docs.midnight.network/getting-started/quickstart currently scaffolds with `npx create-mn-app`. Issue #1587 asks to rewrite that page (and related mentions) to the new scaffolder from the midnight-examples monorepo once https://github.com/midnightntwrk/midnight-examples/issues/59 is done and the tool is on npm.
-
-Until that lands, builders on the supported stack should stay with the documented flow and the compatibility matrix pins:
-
-```bash
-compact update 0.31.1
-npm install @midnight-ntwrk/compact-runtime@0.16.0
-```
-
-Do not switch to an unreleased scaffolder or invent CLI flags. This lab does not claim a fix of the public docs site, indexer, or node.
 
 Official:
 
 - https://docs.midnight.network/getting-started/quickstart
+- https://docs.midnight.network/getting-started/hello-world
 - https://docs.midnight.network/relnotes/support-matrix
-- https://docs.midnight.network/how-to/fix-version-mismatches
 
-Pins used by this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+Issue #1587 (opened 2026-10-21) asks to rewrite `docs/getting-started/quickstart.mdx` so it documents the new scaffolder built from the `midnight-examples` monorepo, not `create-mn-app` 0.5.x. The page URL stays the same. The rewrite is blocked on https://github.com/midnightntwrk/midnight-examples/issues/59 until the new tool is published to npm.
 
-Also read this run: servicedesk#264 (stagenet validator-04 stalled; not a public node fix), servicedesk#254 (faucet amount unit), midnight-docs#1579 (bboard guides rewrite), example-hello-world#41 (unused deps). None of those are fixed here.
+Current public quickstart (as of the issue) describes `create-mn-app` prompts (Contract / Full DApp), the `bboard` default, `npm run setup -- --network`, and `npm run cli`. Hello-world instead clones `example-hello-world` directly.
+
+This lab note does not invent a scaffolder API, does not claim the public docs site is updated, and does not replace the upstream rewrite. Builders on the pinned stack (Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0) should follow the hello-world path or wait for the new scaffolder README rather than copy the old `create-mn-app` steps.
+
+Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
