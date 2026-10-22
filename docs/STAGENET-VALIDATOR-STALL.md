@@ -10,6 +10,10 @@ The official networks guide at https://docs.midnight.network/guides/networks-and
 
 When a load-balanced public RPC returns that message on a minority of requests, the cause can be a single stalled validator rather than a missing contract or a client bug. Retry the same call, or point at a different endpoint if you have one. This lab does not call Stagenet, does not claim a fix of the public node or indexer, and does not invent APIs.
 
+## Additional lab guidance
+
+A minority of requests failing with the contract-state message while other requests succeed is consistent with a single stalled backend in a load-balanced set. The official error reference points at node RPC failure; the issue supplies the concrete stalled-validator example on Stagenet. Builders on Preprod should still check their own endpoint health and the support matrix pin before attributing the same string to this Stagenet report.
+
 `packages/preprod-hello-stub/src/stagenet-stall-decode.mjs` classifies the exact error string from the issue and returns a retry hint. It does not open a network connection.
 
 Pins used by this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
