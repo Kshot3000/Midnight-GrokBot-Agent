@@ -1,0 +1,62 @@
+/*
+ * return-value-not-onchain.compact — returning from an exported circuit
+ * hands the value to the calling DApp; it does not place the value in the
+ * published transaction the way a ledger write does.
+ *
+ * Official reads (not invented APIs):
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *   The page requires disclose() before "returning it from an exported
+ *   circuit" and says disclosure occurs "when returned from an exported
+ *   circuit". Servicedesk testing (issue #266) shows the returned value
+ *   reaches the caller (callTx.private.result) but is absent from the
+ *   transaction raw bytes, while a disclosed ledger write is present.
+ *
+ *   Returning a circuit argument compiles without disclose() (caller already
+ *   knows it). Returning a witness value requires disclose().
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1,
+ *       DApp Connector 4.0.1, proof-server 8.1.0.
+ * LOCAL-TRUE. Source only. Not compiled or deployed here.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Bytes<32>;
+export ledger calls: Counter;
+
+witness secretValue(): Bytes<32>;
+
+// Positive control: disclose + ledger write puts the value on chain.
+export circuit storeArg(x: Bytes<32>): [] {
+  stored = disclose(x);
+  calls.increment(1);
+}
+
+// Returning an argument: accepted without disclose(). Caller already knows x.
+// Does not put the value into the published transaction (per #266 probe).
+export circuit returnArg(x: Bytes<32>): Bytes<32> {
+  calls.increment(1);
+  return x;
+}
+
+// Returning a witness value requires disclose(). Reaches the DApp but not
+// the published transaction bytes (per #266 probe).
+export circuit returnWitness(): Bytes<32> {
+  calls.increment(1);
+  return disclose(secretValue());
+}
+
+// Assert-only on an argument does not disclose and does not appear on chain.
+export circuit assertOnly(x: Bytes<32>): [] {
+  assert(x != pad(32, ""), "empty");
+  calls.increment(1);
+}
