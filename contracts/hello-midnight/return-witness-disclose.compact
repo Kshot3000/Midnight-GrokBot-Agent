@@ -1,0 +1,32 @@
+/*
+ * return-witness-disclose.compact — returning a witness requires disclose().
+ *
+ * Official behavior (not an invented API):
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * Without `disclose()`, the compiler rejects:
+ *   potential witness-value disclosure must be declared but is not:
+ *     the value returned from exported circuit ... might disclose the witness value
+ *
+ * With `disclose()`, the return hands the value to the calling DApp.
+ * It does not place the value in the published transaction bytes
+ * (see servicedesk#266 on-chain probe).
+ *
+ * Upstream: midnightntwrk/servicedesk#266
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+witness secretNum(): Uint<64>;
+
+export circuit returnWitness(): Uint<64> {
+  return disclose(secretNum());
+}

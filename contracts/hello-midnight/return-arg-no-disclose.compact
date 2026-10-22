@@ -1,13 +1,19 @@
 /*
- * return-arg-no-disclose.compact
- * Demonstrates the distinction reported in midnightntwrk/servicedesk#266:
- * Returning an exported circuit argument does not require disclose().
- * Returning a witness value does.
- * A returned value reaches the DApp but is not published on-chain like a ledger write.
+ * return-arg-no-disclose.compact — returning a circuit argument needs no disclose().
  *
- * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
- * Pins: Compact ~0.31.1 / language ~0.23
- * LOCAL-TRUE. Source sample only. Not deployed.
+ * Official behavior (not an invented API):
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * Circuit arguments are private by default, but the caller already knows them.
+ * The compiler accepts `return x;` on an argument without `disclose()`
+ * (tested on toolchain 0.31.1 / language 0.23 and 0.35.0).
+ * Returning a witness value still requires `disclose()`.
+ *
+ * The returned value reaches the calling DApp but is not written into the
+ * published transaction (see servicedesk#266 on-chain probe).
+ *
+ * Upstream: midnightntwrk/servicedesk#266
+ * Language pin: Compact ~0.31.1 / language ~0.23. Not compiled here.
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -19,24 +25,6 @@ pragma language_version >= 0.23;
 
 import CompactStandardLibrary;
 
-witness secretNum(): Uint<64>;
-
-export ledger stored: Uint<64>;
-
-// Accepted without disclose(): the caller already knows its argument.
 export circuit returnArg(x: Uint<64>): Uint<64> {
   return x;
-}
-
-// Rejected without disclose(): potential witness-value disclosure.
-// export circuit returnWitness(): Uint<64> { return secretNum(); }
-
-// Accepted: disclose the witness before returning.
-export circuit returnWitnessDisclosed(): Uint<64> {
-  return disclose(secretNum());
-}
-
-// Ledger write of disclosed value is the public on-chain boundary.
-export circuit storeDisclosed(x: Uint<64>): [] {
-  stored = disclose(x);
 }

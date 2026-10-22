@@ -1,40 +1,27 @@
-# Explicit disclosure: return to the DApp is not the same as a ledger write
+# Explicit disclosure: circuit returns vs ledger stores
 
-Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+Upstream: [midnightntwrk/servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266)
 
-Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+Official:
 
-The Explicit disclosure page requires a Compact program to declare disclosure before storing witness data in the public ledger, returning it from an exported circuit, or passing it to another contract. The page also says disclosure does not occur just when witness data is stored in the ledger but also when returned from an exported circuit.
+- https://docs.midnight.network/compact/reference/explicit-disclosure
+- https://docs.midnight.network/getting-started/hello-world
+- https://docs.midnight.network/compact/reference/compact-reference
 
-servicedesk#266 reports two observations against Compact 0.31.1 (language ~0.23) and midnight-js 4.1.1:
+From the explicit disclosure page: a Compact program must declare disclosure "before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract". The page also notes that disclosure does not occur just when witness data is stored in the ledger but also when returned from an exported circuit.
 
-1. A value returned from an exported circuit reaches the calling DApp (`callTx.private.result`) but is not present in the published transaction bytes read back from the indexer. A ledger store of a disclosed argument is present in the transaction. An asserted-only argument is not.
-2. Returning a circuit argument (`return x;` or `return a + b;`) compiles without `disclose()`. Returning a witness value is rejected with "potential witness-value disclosure must be declared but is not" and "the value returned from exported circuit ... might disclose the witness value".
+Issue #266 (opened 2026-10-21) reports two observations on Compact toolchain 0.31.1 (language 0.23) and 0.35.0:
 
-This lab note does not invent APIs, does not claim a fix to the public indexer or node, and does not patch the upstream docs. It only records the published wording and the reported compiler/on-chain distinction so builders on the pinned stack can separate the two meanings.
+1. Circuit return values (whether from a witness via `disclose()` or from an argument) are returned to the calling DApp (`callTx.private.result`) but are **not** present in the published transaction bytes read back from the indexer. A ledger store of a disclosed value **is** present. This suggests `disclose()` on a return means "this leaves the circuit and reaches the DApp", not "this goes on chain".
 
-## Official wording (quoted)
+2. Returning a circuit argument compiles without `disclose()` (`return x;`), while returning a witness value without `disclose()` is rejected. Arguments are known to the caller, so the compiler treats them as already disclosed to the caller.
 
-From the Explicit disclosure page:
+Lab samples (not compiled here, language pin ~0.23):
 
-> a Compact program must explicitly declare its intention to disclose data that might be private before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract.
+- `contracts/hello-midnight/return-arg-no-disclose.compact` — returns an argument without `disclose()`.
+- `contracts/hello-midnight/return-witness-disclose.compact` — returns a witness only after `disclose()`.
 
-> This example also illustrates that disclosure does not occur just when witness data is stored in the ledger but also when returned from an exported circuit.
-
-## Reported compiler outcomes (from the issue, Compact 0.31.1)
-
-- `return x;` on an exported-circuit argument: accepted.
-- `return a + b;` on arguments: accepted.
-- `return secretNum();` (witness): rejected.
-- `assert(m.member(k))` on an argument used as a Map key: rejected (needs disclose).
-- Branching on a witness then writing the ledger: rejected.
-- `assert` on a secret: accepted.
-
-## Lab helper
-
-`packages/preprod-hello-stub/src/explicit-disclosure-return.mjs` classifies a source string against those reported cases. It does not compile Compact and does not call a proof server. LOCAL-TRUE.
-
-Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+This lab does not claim a fix of the public docs site, indexer, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
