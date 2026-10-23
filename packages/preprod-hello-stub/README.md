@@ -188,6 +188,10 @@ Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @carda
 
 `src/explicit-disclosure-return.mjs` classifies the reported cases: return of a circuit argument needs no `disclose()` and reaches the DApp but not the published transaction; return of a witness is rejected; a disclosed ledger store is in the transaction. See [`docs/EXPLICIT-DISCLOSURE-RETURN.md`](../../docs/EXPLICIT-DISCLOSURE-RETURN.md). LOCAL-TRUE. Does not fix the public indexer or node.
 
+## Branching on a witness requires disclose() (servicedesk#266)
+
+`src/branch-witness-disclose-invariant.mjs` checks the sample that discloses a witness comparison before ledger writes in both branches. The bare form is rejected on Compact 0.31.1. See [`docs/BRANCH-WITNESS-DISCLOSE.md`](../../docs/BRANCH-WITNESS-DISCLOSE.md). LOCAL-TRUE. Does not fix the public indexer or node.
+
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
