@@ -1,0 +1,62 @@
+/*
+ * return-disclose.compact — return values leave the circuit to the caller,
+ * not the published transaction.
+ *
+ * Official reads (not invented APIs):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   "The return value of an exported circuit | No, the transaction carries
+ *    only a randomized commitment to the call's inputs and outputs."
+ *   "A return value is not written to the ledger or readable in the
+ *    transaction; only a randomized commitment to the call's inputs and
+ *    outputs is. The compiler still requires disclose() to return a value
+ *    that comes from a witness function, because the value leaves the
+ *    circuit, to your DApp or to a calling contract."
+ *   https://docs.midnight.network/compact/reference/writing
+ *   "One exception is that data contained within the arguments to an
+ *    exported circuit is not considered disclosed when it is returned from
+ *    that circuit, because it is necessarily already known to the caller."
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * Upstream: midnightntwrk/servicedesk#266
+ * Tests in that issue showed returned witness and argument markers reach
+ * callTx.private.result but are absent from the published transaction raw
+ * bytes. Returning a circuit argument compiles without disclose(); returning
+ * a witness does not.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger calls: Counter;
+
+witness secretValue(): Bytes<32>;
+
+// Circuit argument is already known to the caller. No disclose() required.
+export circuit returnArg(x: Bytes<32>): Bytes<32> {
+  calls.increment(1);
+  return x;
+}
+
+// Witness return leaves the circuit to the DApp (or calling contract).
+// disclose() is required by the compiler even though the value is not
+// written to the ledger or placed in the published transaction.
+export circuit returnWitness(): Bytes<32> {
+  calls.increment(1);
+  return disclose(secretValue());
+}
+
+// Positive control: ledger write is the on-chain boundary.
+export circuit storeArg(x: Bytes<32>): [] {
+  // (omitted ledger field for brevity; see disclose-boundary.compact)
+  calls.increment(1);
+}
