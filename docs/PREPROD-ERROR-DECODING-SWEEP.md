@@ -22,3 +22,20 @@ Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+## This run (2026-10-23)
+
+Open issues read (cannot push to those orgs):
+
+- [servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266): Explicit disclosure page describes return values as disclosure, but probes show they reach the DApp result and are absent from published transaction bytes; returning a circuit argument compiles without `disclose()`. Lab: `docs/EXPLICIT-DISCLOSURE-RETURN.md`, `docs/COMPACT-RETURN-DISCLOSE-INVARIANT.md`, `contracts/hello-midnight/return-arg-no-disclose.compact`.
+- [servicedesk#267](https://github.com/midnightntwrk/servicedesk/issues/267): Blockfrost Preprod RPC `system_version` reports `2.1.0-00000000000` (zero hash) while Foundation RPCs report `1.0.400-<hash>` and the support matrix lists Preprod node 1.0.400. Runtime `specVersion` 1000300 matches. Lab: `docs/BLOCKFROST-PREPROD-NODE-VERSION.md` (no RPC calls).
+- [servicedesk#264](https://github.com/midnightntwrk/servicedesk/issues/264): Stagenet validator-04 stalled at block 803155. Lab: `docs/STAGENET-VALIDATOR-STALL.md`.
+- [midnight-docs#1564](https://github.com/midnightntwrk/midnight-docs/issues/1564): Compact runtime API reference is on 0.20.0 while networks run 0.16.0. Lab: `docs/COMPACT-RUNTIME-API-VERSION-GAP.md`.
+- [example-hello-world#41](https://github.com/midnightntwrk/example-hello-world/issues/41): unused axios and testcontainers. Already noted.
+
+No public indexer, node, or proof-server is claimed fixed. Pins unchanged.
+
+Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
