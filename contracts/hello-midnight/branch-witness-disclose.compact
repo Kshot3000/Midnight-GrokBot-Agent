@@ -1,0 +1,40 @@
+/*
+ * branch-witness-disclose.compact — branching on a witness and then writing the ledger requires disclose().
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * servicedesk#266 (Compact 0.31.1 / language ~0.23 and 0.35.0) reports that
+ *   export circuit f(): [] { if (secretNum() > 5) { val = 1; } else { val = 2; } }
+ * is REJECTED with "potential witness-value disclosure must be declared but is not".
+ * The nature of the disclosure is the ledger operation in the taken branch.
+ *
+ * The form that satisfies the check discloses the comparison result (or the values written).
+ * This source does not invent APIs. LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * Does not claim a fix of the public indexer or node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger val: Uint<64>;
+
+witness secretNum(): Uint<64>;
+
+// Branching on a witness-derived comparison and writing the ledger requires disclose().
+// The reported bare form is rejected. This form discloses the Boolean result of the comparison.
+export circuit branchOnWitness(): [] {
+  if (disclose(secretNum() > 5)) {
+    val = 1;
+  } else {
+    val = 2;
+  }
+}
