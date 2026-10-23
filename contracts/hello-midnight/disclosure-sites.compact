@@ -1,0 +1,71 @@
+/*
+ * disclosure-sites.compact — accepted forms for the disclosure sites in servicedesk#266.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ * Official: https://docs.midnight.network/guides/security-best-practices
+ *           https://docs.midnight.network/compact/reference/writing
+ *
+ * Ledger write of a witness-derived value requires disclose() and is on-chain.
+ * Return of a witness requires disclose() but is not readable in the published transaction
+ * (only a randomized commitment to the call's inputs and outputs).
+ * Return of an exported-circuit argument needs no disclose() (caller already knows it).
+ * assert on a secret does not require disclose().
+ * Branching on a witness that then writes the ledger requires disclose() on the comparison.
+ * A circuit argument used as a Map key requires disclose().
+ *
+ * Source only. Not compiled here. Not deployed. Does not invent APIs.
+ * Does not claim a fix of the public indexer or node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger stored: Bytes<32>;
+export ledger val: Uint<64>;
+export ledger m: Map<Bytes<32>, Uint<64>>;
+
+witness secretValue(): Bytes<32>;
+witness secretNum(): Uint<64>;
+
+// Ledger write — disclose required; value is on-chain.
+export circuit storeArg(x: Bytes<32>): [] {
+  stored = disclose(x);
+}
+
+// Return of an argument — no disclose; not in the published transaction.
+export circuit returnArg(x: Bytes<32>): Bytes<32> {
+  return x;
+}
+
+// Return of a witness — disclose required so the value may leave the circuit to the DApp.
+// Still not readable in the published transaction raw bytes.
+export circuit returnWitness(): Bytes<32> {
+  return disclose(secretValue());
+}
+
+// assert on a secret — accepted without disclose().
+export circuit assertOnly(): [] {
+  assert(secretNum() > 5, "too small");
+}
+
+// Branch on a witness that writes the ledger — disclose the comparison.
+export circuit branchThenWrite(): [] {
+  if (disclose(secretNum() > 5)) {
+    val = 1;
+  } else {
+    val = 2;
+  }
+}
+
+// Circuit argument used as a Map key — disclose required.
+export circuit mapKey(k: Bytes<32>): [] {
+  assert(m.member(disclose(k)), "missing");
+}
