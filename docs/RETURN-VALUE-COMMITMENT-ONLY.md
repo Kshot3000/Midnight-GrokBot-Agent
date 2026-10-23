@@ -26,6 +26,7 @@ Writing a contract notes the argument exception: data contained within the argum
 
 Lab samples (source only, not compiled here):
 
+- `contracts/hello-midnight/return-value-commitment-only.compact` — consolidated sample: `returnArg` (no disclose), `returnWitness` (with disclose), and `storeArg` (ledger write).
 - `contracts/hello-midnight/return-arg-no-disclose.compact` — bare `return x;` and pure `return a + b;`.
 - `contracts/hello-midnight/return-witness-disclose.compact` — `return disclose(secret());`.
 
