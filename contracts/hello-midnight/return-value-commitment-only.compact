@@ -1,0 +1,54 @@
+/*
+ * return-value-commitment-only.compact — returning from an exported circuit
+ * hands the value to the caller. It does not put the raw value in the published
+ * transaction. The tx carries only a randomized commitment to the call.
+ *
+ * Official reads (not invented APIs):
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   "A return value is not written to the ledger or readable in the transaction;
+ *    only a randomized commitment to the call's inputs and outputs is."
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *   disclose() declares that a value may leave the circuit; it does not itself
+ *   publish to the ledger.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ * On-chain probe in the issue: returned markers are absent from indexer raw
+ * bytes; a disclosed ledger store is present.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * This file does not fix the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger calls: Counter;
+export ledger stored: Bytes<32>;
+
+witness secretValue(): Bytes<32>;
+
+// Argument is already known to the caller. No disclose required on return.
+// The raw argument does not appear in the published transaction.
+export circuit returnArg(x: Bytes<32>): Bytes<32> {
+  calls.increment(1);
+  return x;
+}
+
+// Witness must be disclosed to leave the circuit. Still not on-chain raw.
+export circuit returnWitness(): Bytes<32> {
+  calls.increment(1);
+  return disclose(secretValue());
+}
+
+// Contrast: ledger write of a disclosed value is the public on-chain path.
+export circuit storeArg(x: Bytes<32>): [] {
+  stored = disclose(x);
+  calls.increment(1);
+}
