@@ -1,17 +1,19 @@
-# Exported-circuit return values are not in the published transaction
+# Circuit return values are not published on-chain
 
 Upstream: [midnightntwrk/servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266)
 
-Official docs (not invented):
-- https://docs.midnight.network/guides/security-best-practices — On-chain visibility table: “The return value of an exported circuit | No, the transaction carries only a randomized commitment to the call's inputs and outputs.”
-- Same page: “Wrapping a value in `disclose()` does not publish it. `disclose()` clears the compiler's private-data check so the value may leave the circuit through a ledger write, a return from an exported circuit, or a contract-to-contract call. A ledger write is visible on-chain. A return value is not written to the ledger or readable in the transaction; only a randomized commitment to the call's inputs and outputs is. The compiler still requires `disclose()` to return a value that comes from a witness function, because the value leaves the circuit, to your DApp or to a calling contract.”
-- https://docs.midnight.network/compact/reference/writing — Confidentiality: “One exception is that data contained within the arguments to an exported circuit is not considered disclosed when it is returned from that circuit, because it is necessarily already known to the caller.”
+Official: https://docs.midnight.network/compact/reference/explicit-disclosure
 
-Issue #266 reports that the explicit-disclosure page can be read as treating a returned value like a ledger write (public on chain), and that the compiler accepts `return x;` on an exported-circuit argument without `disclose()` while rejecting a bare witness return.
+The explicit disclosure page states that a Compact program must declare disclosure before storing data in the public ledger, returning it from an exported circuit, or passing it to another contract. A reader can conclude that a returned value becomes public like a ledger write.
 
-The security-best-practices and writing pages above already distinguish the two: a ledger write is on-chain; a return reaches the calling DApp (or a calling contract) but is not readable in the published transaction. Arguments are exempt from the disclose requirement on return because the caller already knows them.
+Issue #266 (opened 2026-10-21) tested this on a local network with Compact toolchain 0.31.1 (language 0.23). After calling circuits that return a disclosed witness or a circuit argument, the returned value reaches the calling DApp (`callTx.private.result`) but is absent from the published transaction bytes read back from the indexer. A disclosed value stored in the ledger is present in the transaction.
 
-Lab sample: `contracts/hello-midnight/return-arg-no-disclose.compact` shows the argument return (no disclose) and the witness return (with disclose). Source only; not compiled or deployed here.
+The same issue notes that returning a circuit argument compiles without `disclose()` on both 0.31.1 and 0.35.0, while returning a witness value is rejected unless wrapped in `disclose()`. The assumption is that the caller already knows its own arguments.
+
+Lab samples:
+
+- `contracts/hello-midnight/return-arg-no-disclose.compact` — returns an argument without `disclose()` and a witness with `disclose()`.
+- Classifier: `packages/preprod-hello-stub/src/explicit-disclosure-return.mjs` (source check only; does not compile Compact, call proof-server 8.1.0, or touch the public indexer or node).
 
 This lab does not claim a fix of the public docs, compiler, indexer, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
