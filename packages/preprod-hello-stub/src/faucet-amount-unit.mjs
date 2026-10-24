@@ -1,8 +1,8 @@
 /**
- * Classifies the Preprod faucet amount unit reported in servicedesk#254.
- * Does not contact any faucet and does not invent APIs.
- * Official docs currently say 1,000 tNIGHT: https://docs.midnight.network/guides/acquire-tokens
- * Upstream: https://github.com/midnightntwrk/servicedesk/issues/254
+ * Lab note: faucet amount unit (servicedesk#254).
+ * Official guides document 5,000 tNIGHT per drip.
+ * POST /drips multiplies amount by TNIGHT_UNIT (5_000_000 STAR).
+ * Do not invent APIs. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -10,39 +10,15 @@
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
-export const UPSTREAM_FAUCET_AMOUNT = 'https://github.com/midnightntwrk/servicedesk/issues/254';
-export const OFFICIAL_FUNDING_DOCS = 'https://docs.midnight.network/guides/acquire-tokens';
+export const FAUCET_DRIP_TNIGHT = 5000n;
+export const TNIGHT_UNIT_STAR = 5_000_000n;
 
-const STAR_PER_TNIGHT = 1_000_000n;
-const REPORTED_MULTIPLIER = 5n; // amount unit is 5 tNIGHT on the public route
-
-export function classifyFaucetAmount(amount) {
-  const raw = String(amount ?? '').trim();
-  if (!/^\d+$/.test(raw)) {
-    return {
-      kind: 'invalid-amount',
-      reason: 'amount must be a non-negative integer string',
-      upstream: UPSTREAM_FAUCET_AMOUNT,
-    };
-  }
-  const requested = BigInt(raw);
-  const expectedTnight = requested * REPORTED_MULTIPLIER;
-  const expectedStar = expectedTnight * STAR_PER_TNIGHT;
-  return {
-    kind: 'multiplied-unit',
-    requested: raw,
-    unit: '5 tNIGHT',
-    expectedTnight: expectedTnight.toString(),
-    expectedStar: expectedStar.toString(),
-    docsSay: '1000 tNIGHT per request',
-    note: 'public /drips multiplies amount by 5 tNIGHT (servicedesk#254); page confirmation matches the multiplied value',
-    upstream: UPSTREAM_FAUCET_AMOUNT,
-  };
+/** Decode a raw STAR amount from a drip into tNIGHT. */
+export function starToTNight(star) {
+  return star / 1_000_000n;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const result = classifyFaucetAmount('1000');
-  console.log(JSON.stringify(result, null, 2));
-  if (result.kind !== 'multiplied-unit' || result.expectedTnight !== '5000') process.exit(1);
-  console.log('self-check ok');
+/** Expected drip size in STAR for the documented 5,000 tNIGHT. */
+export function expectedDripStar() {
+  return FAUCET_DRIP_TNIGHT * 1_000_000n;
 }

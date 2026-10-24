@@ -1,14 +1,19 @@
-# Faucet POST /drips amount unit is 5 tNIGHT
+# Faucet amount unit on Preprod / Preview
 
 Upstream: [midnightntwrk/servicedesk#254](https://github.com/midnightntwrk/servicedesk/issues/254)
 
-The open issue reports that the faucet's `POST /drips` multiplies the requested `amount` by 5 tNIGHT. A request with `"amount": "1000"` registers a drip of 5,000 tNIGHT (5_000_000_000 STAR). The hosted page confirms 5000 tNight. The same happens on the Preview and Preprod faucets. The unit is undocumented on the public route.
+Official docs:
+- https://docs.midnight.network/guides/acquire-tokens
+- https://docs.midnight.network/guides/networks-and-environments
+- https://docs.midnight.network/tokens/overview
 
-This lab does not claim to fix the public faucet, the faucet-api, the public indexer, or the node. Pins remain Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+The hosted faucet page and official guides state that a successful request delivers **5,000 tNIGHT**. The POST `/drips` endpoint treats the `amount` field in a unit of 5 tNIGHT (TNIGHT_UNIT = 5_000_000 STAR), so a client that sends `"amount": "1000"` receives 5,000 tNIGHT. This matches the page confirmation and the documented drip size.
 
-Official token acquisition page (no amount-unit detail for the faucet API): https://docs.midnight.network/guides/acquire-tokens
+Builders who call the API directly should treat the unit as 5 tNIGHT, not 1 tNIGHT, until the faucet team documents or changes it. Do not invent a different multiplier.
 
-`packages/preprod-hello-stub/src/faucet-amount-decode.mjs` classifies a pasted request body or amount string. `npm test` in that package covers it. This is sample classification only.
+This lab does not edit the public faucet or claim to fix the public indexer or node.
+
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
