@@ -1,10 +1,10 @@
 /*
  * faucet-unit-note.compact — no circuit; funding unit pointer only.
  * Official docs (https://docs.midnight.network/guides/acquire-tokens) say a Preprod faucet
- * request sends 1,000 tNIGHT and the hosted page confirms "You will shortly receive 1000 tNight".
- * Upstream servicedesk#254 reports that POST /drips multiplies the requested amount by 5 tNIGHT
- * (TNIGHT_UNIT = 5_000_000n STAR). A body with "amount": "1000" registers 5,000 tNIGHT and the
- * page confirms 5000. Compact has no faucet API. This file only pins the known mismatch for
+ * request sends 5,000 tNIGHT and the hosted page confirms "You will shortly receive 5000 tNight".
+ * Upstream servicedesk#254 reported that POST /drips multiplies the requested amount by 5 tNIGHT
+ * (TNIGHT_UNIT = 5_000_000n STAR). A body with "amount": "1000" registers 5,000 tNIGHT.
+ * Compact has no faucet API. This file only pins the current official confirmation for
  * builders who fund before calling circuits. LOCAL-TRUE. No on-chain deploy is claimed.
  *
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/254
