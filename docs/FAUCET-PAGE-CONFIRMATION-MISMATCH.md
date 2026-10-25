@@ -1,18 +1,17 @@
-# Preprod faucet page confirmation vs official docs
+# Preprod faucet page confirmation now matches official docs
 
 Upstream: [midnightntwrk/servicedesk#254](https://github.com/midnightntwrk/servicedesk/issues/254)
 
-Official docs ([Funding a wallet](https://docs.midnight.network/guides/acquire-tokens)) state that a Preprod faucet request sends 1,000 tNIGHT and the hosted page confirms:
+Official docs ([Funding a wallet](https://docs.midnight.network/guides/acquire-tokens)) now state that a Preprod faucet request sends **5,000 tNIGHT** and the hosted page confirms:
 
-> You will shortly receive 1000 tNight
+> You will shortly receive 5000 tNight in your wallet.
 
-The open issue reports that the same page actually confirms 5000 tNight because the public `POST /drips` route multiplies the requested `amount` by 5 tNIGHT (`TNIGHT_UNIT = 5_000_000n` STAR). A request body with `"amount": "1000"` registers a drip of 5,000 tNIGHT (5_000_000_000 STAR). The page confirmation and the on-chain credit agree with the multiplied value; the official docs currently describe the un-multiplied figure.
+The open issue (opened 2026-10-16) reported that `POST /drips` multiplies the requested `amount` by 5 tNIGHT (`TNIGHT_UNIT = 5_000_000n` STAR), so a body with `"amount": "1000"` credits 5,000 tNIGHT, and the page confirmed 5000 while the docs at that time described 1,000. The docs page has since been updated to match the actual credit and confirmation of 5,000 tNIGHT.
 
-This lab does not patch the faucet, does not run a faucet, and does not claim the public service is fixed. It only classifies the confirmation so a builder knows the page and the request number currently disagree with the published docs:
+This lab does not patch the faucet, does not run a faucet, and does not claim the public service is fixed. It only records that the published confirmation and the received amount now agree with the official guide:
 
-- docs and request string say 1,000 tNIGHT
-- page confirmation and received amount are 5,000 tNIGHT
-- unit on the public route is an undocumented 5 tNIGHT step
+- official docs and page confirmation: 5,000 tNIGHT
+- request body historically used `"amount": "1000"` which the route scales by the 5 tNIGHT unit
 
 A local classifier lives in `packages/preprod-hello-stub/src/faucet-page-confirmation.mjs`. It does not contact the faucet and does not invent an API. A Compact pointer is in `contracts/hello-midnight/faucet-unit-note.compact`.
 
