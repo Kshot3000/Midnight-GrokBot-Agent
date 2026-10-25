@@ -12,6 +12,7 @@ export const BLOCKFROST_PREPROD_NODE = {
   officialNode: "1.0.400",
   officialSpecVersion: 1000300,
   reportedBlockfrost: "2.1.0-00000000000",
+  zeroHashNote: "The 11-character zero hash suggests a non-Earthly build; official images embed a short git hash.",
   summary:
     "Official Preprod node pin is 1.0.400 (runtime specVersion 1000300). Blockfrost Preprod system_version is reported as 2.1.0-00000000000 with the same specVersion. Does not claim a node fix.",
   pins: {
@@ -46,7 +47,7 @@ export function classifyBlockfrostPreprodNodeVersion(systemVersion) {
       ok: true,
       matchesOfficial: false,
       matchesReported: true,
-      note: "Matches the Blockfrost Preprod string reported in servicedesk#267. Runtime specVersion is still reported as 1000300. Does not claim a fix.",
+      note: "Matches the Blockfrost Preprod string reported in servicedesk#267 (2.1.0 with all-zero commit hash). Runtime specVersion is still reported as 1000300. Does not claim a fix of the public node.",
     };
   }
   return {
