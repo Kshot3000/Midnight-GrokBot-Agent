@@ -1,17 +1,21 @@
 /**
- * Classify midnight-js proof-provider errors that drop the proof-server body
- * or surface a timeout as an AbortError. Does not call a proof server.
+ * proof-provider-error-decode.mjs
+ *
+ * Classifies the truncated error surface reported by
+ * @midnight-ntwrk/midnight-js-http-client-proof-provider when the proof server
+ * rejects a request or the client times out.
  *
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/243
- * Proof-server errors table:
- *   https://docs.midnight.network/api-reference/error-reference/proof-server-errors
- * Verbose logging for rejected requests:
- *   https://docs.midnight.network/guides/local-proving
- * Default prove timeout (300000 ms):
- *   https://docs.midnight.network/0.0.0/develop/reference/midnight-api/midnight-js/@midnight-ntwrk/midnight-js-http-client-proof-provider/variables/DEFAULT_CONFIG
  *
- * Pins: midnight-js 4.1.1, proof-server 8.1.0, DApp Connector 4.0.1.
- * Official docs only: https://docs.midnight.network/.
+ * Official docs (https://docs.midnight.network/guides/run-proof-server and
+ * https://docs.midnight.network/guides/local-proving) describe running a local
+ * proof server on port 6300. They do not document the HTTP error body shape.
+ * This helper only classifies strings that midnight-js already surfaces.
+ * It does not call the proof server, does not invent response schemas, and
+ * does not claim a fix of midnight-js, the proof server, or any public node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1,
+ * DApp Connector 4.0.1, proof-server 8.1.0.
  *
  * Built by @kshot9000 https://x.com/kshot9000
  * Email: kshot9000@gmail.com
@@ -19,91 +23,64 @@
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
-export const UPSTREAM = 'https://github.com/midnightntwrk/servicedesk/issues/243';
-export const PROOF_SERVER_ERRORS =
-  'https://docs.midnight.network/api-reference/error-reference/proof-server-errors';
-export const LOCAL_PROVING = 'https://docs.midnight.network/guides/local-proving';
-export const DEFAULT_TIMEOUT_MS = 300000;
+export const UPSTREAM_ISSUE = 'https://github.com/midnightntwrk/servicedesk/issues/243';
 
-const CREDIT = [
-  'Built by @kshot9000 https://x.com/kshot9000',
-  'Email: kshot9000@gmail.com',
-  'Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v',
-  'Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation',
-].join('\n');
+/** Patterns midnight-js 4.1.1 is reported to emit (issue #243). */
+export const SURFACED_PATTERNS = Object.freeze({
+  failedResponse: /Failed Proof Server response:\s*url="([^"]*)",\s*code="(\d+)",\s*status="([^"]*)"/i,
+  aborted: /The user aborted a request\./i,
+  // Bodies the issue says the server returns (8.x) but midnight-js currently drops.
+  knownBodies: Object.freeze(['bad input', 'Job Queue full', 'internal error']),
+});
 
 /**
- * @param {string | { message?: string }} err
+ * Classify a proof-provider error string.
+ * Returns a plain object; never throws.
+ *
+ * @param {unknown} raw
+ * @returns {{
+ *   kind: 'failed-response' | 'aborted' | 'unknown',
+ *   code: string | null,
+ *   status: string | null,
+ *   url: string | null,
+ *   bodyHint: string | null,
+ *   note: string
+ * }}
  */
-export function decodeProofProviderError(err) {
-  const text =
-    typeof err === 'string'
-      ? err
-      : err && typeof err.message === 'string'
-        ? err.message
-        : '';
-
-  if (!text.trim()) {
+export function classifyProofProviderError(raw) {
+  const text = String(raw ?? '');
+  const failed = text.match(SURFACED_PATTERNS.failedResponse);
+  if (failed) {
     return {
-      ok: false,
-      classification: 'incomplete',
-      title: 'proof-provider error empty',
-      hint: 'Pass the Error.message from httpClientProvingProvider. This helper does not call a proof server.',
-      upstream: UPSTREAM,
-      docs: PROOF_SERVER_ERRORS,
-      credit: CREDIT,
+      kind: 'failed-response',
+      code: failed[2],
+      status: failed[3],
+      url: failed[1],
+      bodyHint: null,
+      note: 'midnight-js 4.1.1 drops the proof-server response body; only the status line is kept (servicedesk#243).',
     };
   }
-
-  const failedResponse = /Failed Proof Server response:\s*url="([^"]*)".*code="(\d+)".*status="([^"]*)"/i.exec(
-    text,
-  );
-  if (failedResponse) {
-    const [, url, code, status] = failedResponse;
+  if (SURFACED_PATTERNS.aborted.test(text)) {
     return {
-      ok: true,
-      classification: 'dropped-body',
-      url,
-      code: Number(code),
-      status,
-      title: 'midnight-js dropped the proof-server response body',
-      hint:
-        'On midnight-js 4.1.1 the httpClientProvingProvider throws this string and never reads the body. The body is where proof-server 8.x reports BadInput, Job Queue full, or InternalError. Enable MIDNIGHT_PROOF_SERVER_VERBOSE=true (see local-proving) so the server logs the reason at DEBUG. This decode does not fix the public indexer or node.',
-      upstream: UPSTREAM,
-      docs: PROOF_SERVER_ERRORS,
-      verbose: LOCAL_PROVING,
-      claim: 'message classification only — not a node or indexer fix',
-      credit: CREDIT,
+      kind: 'aborted',
+      code: null,
+      status: null,
+      url: null,
+      bodyHint: null,
+      note: 'AbortSignal.timeout surfaces as "The user aborted a request." (servicedesk#243).',
     };
   }
-
-  const abort =
-    /AbortError:\s*The user aborted a request/i.test(text) ||
-    /Proof Server request failed:.*AbortError/i.test(text);
-  if (abort) {
-    return {
-      ok: true,
-      classification: 'timeout-as-abort',
-      defaultTimeoutMs: DEFAULT_TIMEOUT_MS,
-      title: 'proof request timed out but surfaced as AbortError',
-      hint:
-        'AbortSignal.timeout on the prove/check fetch becomes AbortError: The user aborted a request. on midnight-js 4.1.1. The documented default timeout is 300000 ms. Raise the timeout option on httpClientProvingProvider or reduce circuit size. This is not a user cancellation.',
-      upstream: UPSTREAM,
-      docs: LOCAL_PROVING,
-      claim: 'message classification only — not a node or indexer fix',
-      credit: CREDIT,
-    };
-  }
-
+  const body = SURFACED_PATTERNS.knownBodies.find((b) => text.includes(b));
   return {
-    ok: false,
-    classification: 'unrecognized',
-    title: 'not the recorded proof-provider drop or abort',
-    hint: 'Look for Failed Proof Server response: ... code=... or AbortError: The user aborted a request.',
-    upstream: UPSTREAM,
-    docs: PROOF_SERVER_ERRORS,
-    credit: CREDIT,
+    kind: 'unknown',
+    code: null,
+    status: null,
+    url: null,
+    bodyHint: body ?? null,
+    note: body
+      ? 'Body text present; midnight-js 4.1.1 normally drops it (servicedesk#243).'
+      : 'Unrecognized proof-provider error string.',
   };
 }
 
-export const proofProviderErrorCredit = CREDIT;
+export default classifyProofProviderError;

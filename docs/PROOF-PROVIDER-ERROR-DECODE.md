@@ -1,26 +1,30 @@
-# Proof-provider dropped-body and timeout decoder
+# Proof provider error decode
 
 Upstream: [midnightntwrk/servicedesk#243](https://github.com/midnightntwrk/servicedesk/issues/243)
 
-Official:
+Official proof-server guide:
 
-- [Proof server errors](https://docs.midnight.network/api-reference/error-reference/proof-server-errors)
-- [Proving transactions locally](https://docs.midnight.network/guides/local-proving) (verbose logging)
-- Default timeout 300000 ms on the http-client proof provider
+https://docs.midnight.network/guides/run-proof-server
 
-On midnight-js 4.1.1, `@midnight-ntwrk/midnight-js-http-client-proof-provider` throws
+Local proving:
+
+https://docs.midnight.network/guides/local-proving
+
+midnight-js 4.1.1's HTTP proof provider (`@midnight-ntwrk/midnight-js-http-client-proof-provider`) is reported to throw only the status line
 
 ```
 Failed Proof Server response: url="…", code="400", status="Bad Request"
 ```
 
-and never reads the response body. The body is the only place proof-server 8.x names BadInput, a full job queue, or an internal error. A timeout from `AbortSignal.timeout` surfaces as `AbortError: The user aborted a request.` with no indication that a timer fired.
+and never read the response body. On proof-server 8.x the body is one of `bad input`, `Job Queue full`, or `internal error`. A client timeout surfaces as `The user aborted a request.`
 
-This lab does not edit midnight-js and does not claim the public indexer or node is fixed. `packages/preprod-hello-stub/src/proof-provider-error-decode.mjs` classifies those two messages so a Preprod prove path can point at the official errors table and the verbose runbook instead of treating them as opaque failures.
+This lab does not edit midnight-js, does not invent a response schema, and does not claim a fix of the proof server, indexer, or node.
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. Official docs only: https://docs.midnight.network/.
+## Lab helper
 
-Workaround until the upstream fix ships: start the proof server with `MIDNIGHT_PROOF_SERVER_VERBOSE=true` and raise the client timeout above the documented 300000 ms default when circuits are large.
+`packages/preprod-hello-stub/src/proof-provider-error-decode.mjs` exports `classifyProofProviderError`. It matches the two strings midnight-js already emits and notes when a known body phrase is present. It performs no network calls. LOCAL-TRUE.
+
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
