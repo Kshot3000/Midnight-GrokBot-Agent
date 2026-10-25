@@ -1,0 +1,50 @@
+/*
+ * disclosure-rules-pin.compact — three Compact disclosure rules reported in servicedesk#266.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * On Compact toolchain 0.31.1 (language ~0.23) the issue reports:
+ * - assert(m.member(k)) on a circuit argument is REJECTED without disclose(k).
+ * - if (secretNum() > 5) { val = 1; } else { val = 2; } is REJECTED without disclose.
+ * - assert(secretNum() > 5, "too small") is ACCEPTED without disclose.
+ *
+ * This source pins the forms that satisfy those reported checks.
+ * It does not invent APIs. LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * Does not claim a fix of the public indexer or node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger val: Uint<64>;
+export ledger m: Map<Bytes<32>, Uint<64>>;
+
+witness secretNum(): Uint<64>;
+
+// Rule from #266: Map key needs disclose() even inside assert(m.member(...)).
+export circuit hasKey(k: Bytes<32>): [] {
+  assert(m.member(disclose(k)), "missing");
+}
+
+// Rule from #266: branching on a witness then writing the ledger needs disclose().
+export circuit branchOnWitness(): [] {
+  if (disclose(secretNum() > 5)) {
+    val = 1;
+  } else {
+    val = 2;
+  }
+}
+
+// Rule from #266: assert on a secret does not require disclose().
+export circuit assertSecret(): [] {
+  assert(secretNum() > 5, "too small");
+}
