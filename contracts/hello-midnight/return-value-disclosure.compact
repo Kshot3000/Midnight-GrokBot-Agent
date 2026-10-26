@@ -1,21 +1,22 @@
 /*
- * return-value-disclosure.compact — return values from exported circuits.
+ * return-value-disclosure.compact — return values leave the circuit but are not on-chain.
  *
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
  * Official:
- *   https://docs.midnight.network/compact/reference/writing (Confidentiality)
- *   https://docs.midnight.network/guides/security-best-practices (On-chain visibility)
+ *   https://docs.midnight.network/compact/reference/explicit-disclosure
+ *   https://docs.midnight.network/guides/security-best-practices
+ *   https://docs.midnight.network/guides/build-a-private-smart-contract
  *
- * From official docs (language ~0.23):
- * - Data in arguments to an exported circuit is not considered disclosed when returned,
- *   because the caller already knows it. Compiler accepts `return x;` without disclose().
- * - Returning a witness value requires disclose(), because the value leaves the circuit.
- * - A return value is not written to the ledger and is not readable in the published
- *   transaction; only a randomized commitment to the call's inputs and outputs is.
- *   disclose() on a return clears the compiler check but does not publish the value on-chain.
+ * servicedesk#266 (Compact 0.31.1 / language ~0.23) reports:
+ * - Returning a circuit argument (`return x;`) is ACCEPTED without disclose().
+ * - Returning a witness value is REJECTED without disclose().
+ * - Neither returned value appears in the published transaction; only a randomized commitment does.
+ * - A disclosed ledger write does appear.
+ *
+ * Official docs confirm the return is not readable in the transaction and that disclose() on a witness return is required because the value leaves the circuit to the DApp (or caller), not because it is published on-chain.
  *
  * This source does not invent APIs. LOCAL-TRUE. Source only. Not compiled here. Not deployed.
- * Does not claim a fix of the public indexer, node, or docs.
+ * Does not claim a fix of the public indexer or node.
  *
  * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
  *
@@ -29,18 +30,21 @@ pragma language_version >= 0.22 && <= 0.23;
 
 import CompactStandardLibrary;
 
-witness secretValue(): Bytes<32>;
+export ledger stored: Bytes<32>;
 
-export ledger calls: Counter;
+witness secret(): Bytes<32>;
 
-// Argument is already known to the caller. No disclose() required.
+// Returning a circuit argument needs no disclose() (caller already knows it).
 export circuit returnArg(x: Bytes<32>): Bytes<32> {
-  calls.increment(1);
   return x;
 }
 
-// Witness value leaves the circuit; disclose() is required.
+// Returning a witness value requires disclose() so it may leave the circuit to the DApp.
 export circuit returnWitness(): Bytes<32> {
-  calls.increment(1);
-  return disclose(secretValue());
+  return disclose(secret());
+}
+
+// Ledger write of a disclosed argument is the on-chain disclosure site.
+export circuit storeArg(x: Bytes<32>): [] {
+  stored = disclose(x);
 }
