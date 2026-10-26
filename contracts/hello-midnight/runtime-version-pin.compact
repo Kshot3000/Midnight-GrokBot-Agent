@@ -1,0 +1,33 @@
+/*
+ * runtime-version-pin.compact — pin note for Compact runtime 0.16.0 vs API reference 0.20.0.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1564
+ * Official: https://docs.midnight.network/relnotes/support-matrix
+ *
+ * Networks (Preview / Preprod / Mainnet) run ledger 8.
+ * Support matrix pairs them with Compact toolchain 0.31.1, Compact runtime 0.16.0,
+ * Midnight.js 4.1.1. Runtimes 0.19.0 / 0.20.0 target ledger 9 and are incompatible.
+ *
+ * This source uses only language features valid under language_version ~0.23.
+ * It does not import or call ledger-9-only runtime helpers.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * Does not claim a fix of the public indexer or node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger note: Uint<64>;
+
+// Minimal circuit that stays within the 0.31.1 / runtime 0.16.0 surface.
+export circuit pinNote(n: Uint<64>): [] {
+  note = n;
+}
