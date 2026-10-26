@@ -1,30 +1,56 @@
-# Preprod wallet sync stall (lab classifier)
+# Preprod wallet sync stalls: what isSynced gates on
 
 Upstream: [midnightntwrk/midnight-docs#1381](https://github.com/midnightntwrk/midnight-docs/issues/1381)
 
-There is no troubleshooting page for Preprod wallet sync stalls. This lab file classifies the symptoms recorded on that issue. It does not add a page to midnight-docs, does not call WalletFacade, and does not fix the public indexer or node.
+Official pages (do not invent):
 
-## What the published pages say
+- Support matrix: https://docs.midnight.network/relnotes/support-matrix — Preprod Wallet SDK 1.2.0, Midnight.js 4.1.1, Indexer 4.3.302 (note: no public tag yet), Node 1.0.400
+- Wallet developer guide: https://docs.midnight.network/sdks/official/wallet-dev-guide
+- Local proving (network table): https://docs.midnight.network/guides/local-proving — Preprod is the live pre-production network for final testing
 
-- Wallet guide: `waitForSyncedState()` waits for the initial sync before balance reads. `state().isSynced` is the published gate. Sample Preprod config sets `provingServerUrl` to `http://localhost:6300` and the indexer client to `indexer.preprod.midnight.network`. https://docs.midnight.network/sdks/official/wallet-developer-guide
-- Acquire tokens: a connectivity check can be true while `isSynced` is still false. A restarted script syncs again from the beginning. Registration waits on `waitForSyncedState()`. https://docs.midnight.network/guides/acquire-tokens
-- Those pages do not publish an expected Preprod sync duration, a dust-history skip, or a checkpoint staleness bound for `restore()`.
+midnight-docs#1381 tracks the missing troubleshooting page for wallet synchronization stalling on Preprod. Reported symptoms include `waitForSyncedState()` never resolving, `FacadeState.isSynced` staying false, the shielded wallet sync leg never connecting, and dust-wallet sync errors about non-linear inserts into the dust commitment tree.
 
-## Recorded symptoms this classifier names
+This lab note only records the gap and a classifier for the reported symptoms. It does not edit midnight-docs, does not call a public indexer or node, and does not claim a fix.
 
-| Symptom on #1381 | Kind | Lab reading |
-| --- | --- | --- |
-| `isSynced` never becomes true after connect | `connected-not-synced` | Matches the acquire-tokens distinction. Not an indexer fix. |
-| `waitForSyncedState()` hangs on Preprod | `wait-for-synced-state` | Published gate. No duration invented. |
-| dust commitment tree insert is non-linear | `dust-commitment-nonlinear` | Recorded string only. No recovery API on the cited pages. |
-| proof server was not running (one self-diagnosis) | `proof-server-not-in-symptom` | Sample URL is localhost:6300. Lab pin remains proof-server 8.1.0. |
-| checkpoint / `restore()` staleness | `checkpoint-staleness-unpublished` | Unanswered on #1381. No bound invented. |
+## What builders hit on Preprod
 
-Indexer tip lag is a different ticket (midnightntwrk/servicedesk#230) and is not classified here.
+From the issue (Kapa traffic 7 Aug–21 Sep 2026):
 
-Helper: `packages/preprod-hello-stub/src/wallet-sync-stall.mjs`
+- Wallet creation succeeds; synchronization starts; then hangs on Preprod (local undeployed works).
+- `waitForSyncedState()` expected duration and dust-channel gating in wallet-sdk 1.2.0.
+- Shielded wallet sync leg never connects or issues subscriptions, so `isSynced` never becomes true.
+- Dust wallet sync process inserts non-linearly into the dust commitment tree (expected index vs received).
+- WalletFacade + HDWallet never becomes isSynced on Preview or Preprod.
+- DUST wallet synchronization is slow because it replays history; no supported skip for a wallet that only needs recent dust.
 
-Pins used by this lab: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+A related recovery question: how stale can a checkpoint be before `restore()` stops working.
+
+## Official pins that matter
+
+Stay on the matrix for Preprod:
+
+- Wallet SDK 1.2.0
+- Midnight.js 4.1.1
+- Compact toolchain ~0.31.1 / language ~0.23 / runtime 0.16.0
+- Proof server 8.1.0 (lab) or 8.1.3 (matrix)
+- Indexer: official matrix lists 4.3.302; Blockfrost is the public Preprod path after STL shutdown
+
+Dust sync replays the generation history. A silent open subscription (see servicedesk#251) keeps `isConnected` true while the applied index freezes. Local undeployed does not have the same history length or public indexer drop behavior.
+
+## Lab classifier (LOCAL-TRUE)
+
+`packages/preprod-hello-stub/src/preprod-wallet-sync-stall.mjs` exports a pure function that classifies a progress snapshot or error string into one of:
+
+- `silent-dust-subscription` — isConnected true, appliedIndex stalled while behind highestRelevant
+- `dust-tree-nonlinear` — error text about non-linear insert / expected index
+- `sync-never-starts` — isSynced false and no subscription activity described
+- `unknown`
+
+It does not open sockets, call Blockfrost, or invent timeouts. Use it to map a pasted log to the open issues rather than treating every hang as a new Compact error.
+
+Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+
+This does not claim the public indexer or node is fixed.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
