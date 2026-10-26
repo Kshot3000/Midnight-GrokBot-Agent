@@ -1,0 +1,29 @@
+/*
+ * examples-scaffolder-note.compact — no circuit; scaffolding pointer only.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1587
+ * Official quickstart still uses create-mn-app:
+ * https://docs.midnight.network/getting-started/quickstart
+ * Issue #1587 proposes rewriting it for the midnight-examples scaffolder
+ * (blocked on midnight-examples#59). The hello-world page clones
+ * example-hello-world directly.
+ *
+ * Compact has no scaffolder API. This file only pins the published path
+ * for builders. LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * Does not claim a fix of the public docs, indexer, or node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+// No exported circuit. Scaffolding classification is off-chain.
+// See docs/MIDNIGHT-EXAMPLES-SCAFFOLDER.md and
+// packages/preprod-hello-stub/src/examples-scaffolder-note.mjs.
