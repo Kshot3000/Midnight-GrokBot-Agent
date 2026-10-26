@@ -140,7 +140,8 @@
     "check:quickstart-create-mn-app": "node src/quickstart-create-mn-app-gap.mjs",
     "check:map-key-disclose": "node src/map-key-disclose-invariant.mjs",
     "check:branch-witness-disclose": "node src/branch-witness-disclose-invariant.mjs",
-    "check:runbook-migration-anchor": "node src/runbook-migration-anchor.mjs"
+    "check:runbook-migration-anchor": "node src/runbook-migration-anchor.mjs",
+    "check:coin-index-gap": "node src/coin-index-gap.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
