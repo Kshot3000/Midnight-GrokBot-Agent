@@ -1,27 +1,27 @@
-# Explicit disclosure: circuit returns vs ledger stores
+# Explicit disclosure: return values vs published transaction
 
 Upstream: [midnightntwrk/servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266)
 
 Official:
 
 - https://docs.midnight.network/compact/reference/explicit-disclosure
-- https://docs.midnight.network/getting-started/hello-world
-- https://docs.midnight.network/compact/reference/compact-reference
+- https://docs.midnight.network/compact/reference/writing (Confidentiality)
+- https://docs.midnight.network/guides/security-best-practices
 
-From the explicit disclosure page: a Compact program must declare disclosure "before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract". The page also notes that disclosure does not occur just when witness data is stored in the ledger but also when returned from an exported circuit.
+Issue #266 notes that the explicit-disclosure page can be read as treating a returned value the same as a ledger write. Official pages clarify the distinction on Compact toolchain ~0.31.1 (language ~0.23):
 
-Issue #266 (opened 2026-10-21) reports two observations on Compact toolchain 0.31.1 (language 0.23) and 0.35.0:
+- Returning an exported-circuit argument does not require `disclose()`. The caller already knows the argument. The compiler accepts `return x;`.
+- Returning a witness value requires `disclose()` so the compiler allows the value to leave the circuit (to the DApp or a calling contract).
+- A returned value reaches the calling DApp (for example via `callTx.private.result`) but is **not** present in the published transaction. The transaction carries only a randomized commitment to the call’s inputs and outputs.
+- A ledger write of a disclosed value **is** present in the published transaction.
 
-1. Circuit return values (whether from a witness via `disclose()` or from an argument) are returned to the calling DApp (`callTx.private.result`) but are **not** present in the published transaction bytes read back from the indexer. A ledger store of a disclosed value **is** present. This suggests `disclose()` on a return means "this leaves the circuit and reaches the DApp", not "this goes on chain".
+`disclose()` itself does not publish a value. It only clears the compiler’s private-data check.
 
-2. Returning a circuit argument compiles without `disclose()` (`return x;`), while returning a witness value without `disclose()` is rejected. Arguments are known to the caller, so the compiler treats them as already disclosed to the caller.
+Lab sample: `contracts/hello-midnight/return-arg-no-disclose.compact`
 
-Lab samples (not compiled here, language pin ~0.23):
+Local classifier: `packages/preprod-hello-stub/src/explicit-disclosure-return.mjs` (see `npm run check:explicit-disclosure-return`).
 
-- `contracts/hello-midnight/return-arg-no-disclose.compact` — returns an argument without `disclose()`.
-- `contracts/hello-midnight/return-witness-disclose.compact` — returns a witness only after `disclose()`.
-
-This lab does not claim a fix of the public docs site, indexer, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+This lab does not claim a fix of the public docs, compiler, indexer, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

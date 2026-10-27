@@ -9,6 +9,8 @@ export const EXPLICIT_DISCLOSURE_RETURN = {
   official: "https://docs.midnight.network/compact/reference/explicit-disclosure",
   summary:
     "Returning an exported-circuit argument does not require disclose() (accepted on 0.31.1). Returning a witness does. A returned value reaches the DApp but is not in the published transaction; a disclosed ledger store is.",
+  sample: "contracts/hello-midnight/return-arg-no-disclose.compact",
+  doc: "docs/EXPLICIT-DISCLOSURE-RETURN.md",
   pins: {
     compact: "~0.31.1",
     language: "~0.23",

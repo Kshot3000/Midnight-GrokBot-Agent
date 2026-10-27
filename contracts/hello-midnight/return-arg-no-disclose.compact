@@ -1,6 +1,13 @@
-// Lab Compact: returning a circuit argument does not require disclose();
-// returning a witness does. Neither return is published on-chain.
-// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+// Lab Compact: returning an exported-circuit argument does not require disclose().
+// Returning a witness does. A return reaches the DApp but is not in the published transaction.
+// Official:
+//   https://docs.midnight.network/compact/reference/writing
+//   "One exception is that data contained within the arguments to an exported
+//    circuit is not considered disclosed when it is returned from that circuit,
+//    because it is necessarily already known to the caller."
+//   https://docs.midnight.network/guides/security-best-practices
+//   return value is not written to the ledger or readable in the transaction;
+//   only a randomized commitment to the call's inputs and outputs is.
 // Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
 // Pins: Compact ~0.31.1 / language ~0.23
 // LOCAL-TRUE. Source only. Not deployed.
@@ -11,18 +18,21 @@ import CompactStandardLibrary;
 
 witness secretNum(): Uint<64>;
 
-export ledger calls: Counter;
+export ledger stored: Uint<64>;
 
-// Argument return is accepted without disclose(). Caller already knows the argument.
+// Accepted without disclose(): argument is already known to the caller.
 export circuit returnArg(x: Uint<64>): Uint<64> {
-  calls.increment(1);
   return x;
 }
 
-// Witness return requires disclose(). Value reaches the DApp but is not in the published tx.
+// Requires disclose(): witness value leaves the circuit to the DApp.
 export circuit returnWitness(): Uint<64> {
-  calls.increment(1);
   return disclose(secretNum());
+}
+
+// Positive control: disclosed ledger store is in the published transaction.
+export circuit storeArg(x: Uint<64>): [] {
+  stored = disclose(x);
 }
 
 // Built by @kshot9000 https://x.com/kshot9000
