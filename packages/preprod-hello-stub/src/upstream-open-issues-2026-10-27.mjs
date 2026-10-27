@@ -9,10 +9,14 @@
  * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
  */
 
-export const SERVICEDESK_OPEN = [267, 266, 254, 249];
-export const DOCS_OPEN = [1587, 1569, 1564, 1487, 1383];
+export const SERVICEDESK_OPEN = [267, 266, 254, 249, 243, 242, 252, 251, 236, 213, 194, 193, 186, 117, 99, 24];
+export const DOCS_OPEN = [1587, 1569, 1564, 1487, 1383, 1381, 1377, 1245, 1092, 902, 834, 831, 285, 63];
 export const HELLO_WORLD_OPEN = [41, 13];
 
 export function issueUrl(orgRepo, number) {
   return `https://github.com/midnightntwrk/${orgRepo}/issues/${number}`;
+}
+
+export function listOpen(issues, orgRepo) {
+  return issues.map((n) => ({ number: n, url: issueUrl(orgRepo, n) }));
 }
