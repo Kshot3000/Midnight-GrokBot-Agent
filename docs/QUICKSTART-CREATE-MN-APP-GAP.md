@@ -1,34 +1,20 @@
-# Quickstart page still documents create-mn-app 0.5.x
+# Quickstart still documents create-mn-app (lab)
 
-Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1587
+Upstream: [midnightntwrk/midnight-docs#1587](https://github.com/midnightntwrk/midnight-docs/issues/1587)
 
 Official: https://docs.midnight.network/getting-started/quickstart
 
-midnight-docs#1587 asks to rewrite `docs/getting-started/quickstart.mdx` so it documents the new scaffolder built from the `midnight-examples` monorepo, not `create-mn-app` 0.5.x. The URL, file and sidebar entry stay the same. The issue is blocked on https://github.com/midnightntwrk/midnight-examples/issues/59 until the new tool is published to npm.
+Issue #1587 tracks rewriting the Quickstart page so it documents the new scaffolder built from the `midnight-examples` monorepo, not `create-mn-app` 0.5.x. The rewrite is blocked on https://github.com/midnightntwrk/midnight-examples/issues/59 until the new tool is published to npm.
 
-The live page (checked 2026-10-21) still opens with:
+Until that lands, the published Quickstart still describes the old `create-mn-app` prompts (Contract / Full DApp), the `bboard` default, and `npm run setup -- --network`. Builders following it today get the old scaffold.
 
-> This guide explains how to scaffold a Midnight DApp using the `create-mn-app` CLI tool.
+This lab does not edit midnight-docs, does not publish an npm package, and does not claim the public indexer or node is fixed. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-It shows `npx create-mn-app [project-name]`, prompts for Contract / Full DApp, lists templates `hello-world`, `battleship`, `bboard`, `leaderboard`, and describes `npm run setup -- --network` for public testnets. The Compact sample uses `pragma language_version >= 0.23;` and `Opaque<"string">`.
+Lab classifier (source only, no npm call): `packages/preprod-hello-stub/src/quickstart-create-mn-app-gap.mjs` (`npm run check:quickstart-create-mn-app`).
 
-This lab note does not invent APIs, does not claim a fix to the public docs or the scaffolder, and does not push to midnightntwrk. It only records the published wording and the open rewrite so builders on the pinned stack (Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1) can see the current official path while the issue is open.
+It flags snippets that still contain `create-mn-app` so a builder can see the gap before they scaffold.
 
-## Official pins
-
-From the support matrix (https://docs.midnight.network/relnotes/support-matrix):
-
-- Compact toolchain 0.31.1
-- Compact runtime 0.16.0
-- Midnight.js 4.1.1
-- DApp Connector API 4.0.1
-- Proof server 8.1.x (lab tracks 8.1.0)
-
-## Lab helper
-
-`packages/preprod-hello-stub/src/quickstart-create-mn-app-gap.mjs` classifies a page snippet for the presence of `create-mn-app` versus a new-scaffolder marker. It does not fetch the live page and does not call npm. LOCAL-TRUE.
-
-Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+Official docs remain the source of truth. Re-check the compatibility matrix and the Quickstart page before starting a new project.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

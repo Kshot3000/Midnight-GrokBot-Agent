@@ -192,6 +192,10 @@ Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @carda
 
 `src/branch-witness-disclose-invariant.mjs` checks the sample that discloses a witness comparison before ledger writes in both branches. The bare form is rejected on Compact 0.31.1. See [`docs/BRANCH-WITNESS-DISCLOSE.md`](../../docs/BRANCH-WITNESS-DISCLOSE.md). LOCAL-TRUE. Does not fix the public indexer or node.
 
+## Quickstart create-mn-app gap (midnight-docs#1587)
+
+`src/quickstart-create-mn-app-gap.mjs` classifies snippets that still contain `create-mn-app`. The published Quickstart still documents the old scaffolder until the rewrite in #1587 lands. See [`docs/QUICKSTART-CREATE-MN-APP-GAP.md`](../../docs/QUICKSTART-CREATE-MN-APP-GAP.md). LOCAL-TRUE. Does not fix the public docs site, indexer, or node.
+
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
