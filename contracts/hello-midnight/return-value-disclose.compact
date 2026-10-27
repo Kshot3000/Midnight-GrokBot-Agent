@@ -1,0 +1,42 @@
+/*
+ * return-value-disclose.compact — return values of exported circuits.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ * Official: https://docs.midnight.network/guides/security-best-practices
+ *           https://docs.midnight.network/compact/reference/writing
+ *
+ * servicedesk#266 (Compact 0.31.1 / language ~0.23) reports:
+ * - Returning a circuit argument compiles without disclose() (caller already knows it).
+ * - Returning a witness value requires disclose().
+ * - Neither return value appears in the published transaction bytes; only a
+ *   randomized commitment to the call’s inputs and outputs is on-chain.
+ *   The value reaches the calling DApp (callTx.private.result).
+ *
+ * This source does not invent APIs. LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * Does not claim a fix of the public indexer or node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+witness secretValue(): Bytes<32>;
+
+// Returning a circuit argument needs no disclose() — the caller already knows it.
+// The returned value reaches the DApp but is not in the published transaction.
+export circuit returnArg(x: Bytes<32>): Bytes<32> {
+  return x;
+}
+
+// Returning a witness value requires disclose(). The value still does not appear
+// in the published transaction; only a commitment does. It reaches the DApp.
+export circuit returnWitness(): Bytes<32> {
+  return disclose(secretValue());
+}
