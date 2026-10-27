@@ -1,0 +1,32 @@
+/*
+ * return-pure-sum-accepted.compact
+ * Compact ~0.31.1 / language ~0.23 pin.
+ *
+ * Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+ *
+ * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+ *
+ * Issue #266 reports that a pure exported circuit that returns the sum of
+ * its arguments compiles without disclose() on Compact 0.31.1 (language 0.23)
+ * and 0.35.0. The caller already knows the inputs, so the return is not a
+ * new witness disclosure.
+ *
+ * This sample pins that accepted form. Source only. Not compiled. Not deployed.
+ * LOCAL-TRUE. Does not claim the public indexer or node is fixed.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1,
+ * proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export pure circuit add(a: Uint<8>, b: Uint<8>): Uint<16> {
+  return a + b; // accepted without disclose() — pure, arguments known to caller
+}
