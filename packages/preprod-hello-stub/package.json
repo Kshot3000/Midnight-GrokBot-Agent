@@ -142,7 +142,8 @@
     "check:branch-witness-disclose": "node src/branch-witness-disclose-invariant.mjs",
     "check:runbook-migration-anchor": "node src/runbook-migration-anchor.mjs",
     "check:coin-index-gap": "node src/coin-index-gap.mjs",
-    "check:kernel-caller-undefined": "node --test test/kernel-caller-undefined-decode.test.mjs"
+    "check:kernel-caller-undefined": "node --test test/kernel-caller-undefined-decode.test.mjs",
+    "check:initswap-partial": "node --test test/initswap-partial-decode.test.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
