@@ -1,7 +1,8 @@
 /**
  * Prove-path error decoder for the local hello increment circuit.
  * Surfaces the dropped response body and timeout-as-abort shapes reported for
- * @midnight-ntwrk/midnight-js-http-client-proof-provider 4.1.1.
+ * @midnight-ntwrk/midnight-js-http-client-proof-provider 4.1.1, plus official
+ * proof-server HTTP statuses from the docs (WorkerPoolError / WorkError).
  * Does not call a proof server, does not invent APIs, does not claim a fix of
  * the public proof server, indexer, or node.
  * Upstream: https://github.com/midnightntwrk/servicedesk/issues/243
@@ -61,6 +62,24 @@ export function decodeProvePathError(error, opts = {}) {
     notes.push('5.0.0-rc.4 wraps the abort; still no body or timeout duration.');
   }
 
+  // Official proof-server HTTP statuses (do not invent; from docs page)
+  if (/code="429"|Too Many Requests|JobQueueFull/i.test(text)) {
+    kind = kind === 'unknown' ? 'job-queue-full' : kind;
+    notes.push('Official WorkerPoolError: JobQueueFull (429). Wait and retry; server under load.');
+  }
+  if (/code="400"|BadInput|bad input/i.test(text) && kind !== 'dropped-body') {
+    kind = 'work-bad-input';
+    notes.push('Official WorkError: BadInput (400). Check transaction data sent for proving.');
+  }
+  if (/code="500"|Internal Server Error|InternalError|ChannelClosed/i.test(text)) {
+    kind = kind === 'unknown' ? 'proof-server-internal' : kind;
+    notes.push('Official 500: InternalError / ChannelClosed / JoinError. Check proof-server logs; restart if it persists.');
+  }
+  if (/code="428"|Precondition Required|JobMissing/i.test(text)) {
+    kind = 'job-missing';
+    notes.push('Official WorkerPoolError: JobMissing (428). Job ID invalid or expired.');
+  }
+
   return {
     kind,
     notes,
@@ -74,6 +93,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const samples = [
     new Error('Failed Proof Server response: url="http://127.0.0.1:6300/check", code="400", status="Bad Request"'),
     Object.assign(new Error('The user aborted a request.'), { name: 'AbortError' }),
+    new Error('Failed Proof Server response: url="http://127.0.0.1:6300/prove", code="429", status="Too Many Requests"'),
   ];
   for (const s of samples) {
     console.log(JSON.stringify(decodeProvePathError(s), null, 2));

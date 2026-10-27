@@ -15,3 +15,10 @@ test('timeout as abort', () => {
   const d = decodeProvePathError(err);
   assert.equal(d.kind, 'timeout-as-abort');
 });
+
+test('official 429 job queue full', () => {
+  const err = new Error('Failed Proof Server response: url="http://127.0.0.1:6300/prove", code="429", status="Too Many Requests"');
+  const d = decodeProvePathError(err);
+  assert.equal(d.kind, 'job-queue-full');
+  assert.ok(d.notes.some((n) => /JobQueueFull/i.test(n)));
+});
