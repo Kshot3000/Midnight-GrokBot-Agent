@@ -1,25 +1,25 @@
-# Returned disclose() values reach the DApp, not the published transaction
+# Returning from an exported circuit: disclose() vs on-chain publication
 
-Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+Upstream: [midnightntwrk/servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266)
 
-Official docs only:
-- Explicit disclosure: https://docs.midnight.network/compact/reference/explicit-disclosure
-- Support matrix: https://docs.midnight.network/relnotes/support-matrix (Compact toolchain 0.31.1, runtime 0.16.0)
+Official: https://docs.midnight.network/compact/reference/explicit-disclosure
 
-The official page states that a Compact program must declare disclosure "before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract" and that "disclosure does not occur just when witness data is stored in the ledger but also when returned from an exported circuit."
+The explicit disclosure page states that a Compact program must explicitly declare its intention to disclose data that might be private before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract. It also notes that disclosure does not occur just when witness data is stored in the ledger but also when returned from an exported circuit.
 
-servicedesk#266 reports empirical results on a local network (Compact 0.31.1 / language 0.23, ledger 8, proof-server 8.1.0, midnight-js 4.1.1):
+Issue #266 (opened 2026-10-21) reports empirical results on Compact toolchain 0.31.1 (language ~0.23) and compiler 0.35.0:
 
-- A value stored with `stored = disclose(x)` appears in the published transaction `raw` bytes.
-- A value returned with `return disclose(secretValue())` or `return x` reaches `callTx.private.result` but is absent from the published transaction bytes.
+- Returning a witness value requires `disclose()`; the bare form is rejected with "potential witness-value disclosure must be declared but is not" and "the value returned from exported circuit ... might disclose the witness value".
+- Returning a circuit argument (`return x;`) compiles without `disclose()`. The issue assumes this is intended because the caller already knows its own arguments.
+- On a local network (ledger 8, proof-server 8.1.0, midnight-js 4.1.1), a value returned from an exported circuit (whether a disclosed witness or a bare argument) reaches the calling DApp via `callTx.private.result` but is **not** present in the published transaction `raw` bytes read back from the indexer. A disclosed argument written to the ledger **is** present in the transaction.
 
-The issue also reports that returning a circuit argument compiles without `disclose()` on toolchain 0.31.1, while returning a bare witness value is rejected.
+This separates two meanings of "disclosure" in the docs:
 
-This lab note records the documented requirement and the reported distinction. It does not invent APIs, does not call public endpoints, and does not claim a fix to the public indexer, node, compiler, or docs.
+1. Compiler-enforced declaration (`disclose()`) so private data may leave the circuit toward the DApp or a ledger write.
+2. Actual on-chain visibility, which occurs when the value is stored in the public ledger.
 
-Lab sample: `contracts/hello-midnight/return-disclose.compact` shows the documented `disclose()` on a witness return and the reported acceptance of a bare argument return.
+The lab sample `contracts/hello-midnight/return-disclose-not-onchain.compact` shows the two return forms that #266 reports as accepted. `packages/preprod-hello-stub/src/return-disclose-invariant.mjs` is a source check only. It does not compile Compact, does not call proof-server 8.1.0, and does not claim a Preprod deploy or a fix of the public indexer or node.
 
-Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
