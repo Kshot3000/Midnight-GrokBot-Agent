@@ -1,19 +1,40 @@
-# Proving topology: local, wallet-delegated, hosted
+# Proving topology: local, wallet-delegated, and hosted
 
 Upstream: [midnightntwrk/midnight-docs#1383](https://github.com/midnightntwrk/midnight-docs/issues/1383)
 
-Official wallet integration (DApp Connector API 4.0.1) names three places a ZK proof can be built. This lab does not add a connector method and does not claim the public Preprod indexer or node was fixed.
+Official docs only (do not invent APIs):
 
-**Note on start command:** the form with `midnight-proof-server -v` after the image name is dropped by the image entrypoint (servicedesk#242, midnight-docs#1527). Use the environment variable form shown below instead of the installation.mdx example.
+- https://docs.midnight.network/guides/local-proving
+- https://docs.midnight.network/guides/run-proof-server
+- https://docs.midnight.network/guides/security-best-practices
+- https://docs.midnight.network/concepts/how-midnight-works/end-to-end-architecture
+- https://docs.midnight.network/api-reference/dapp-connector (getProvingProvider, proverServerUri)
+- https://docs.midnight.network/relnotes/dapp-connector-api/dapp-connector-api-4-0-0
+- https://docs.midnight.network/sdks/community/wallets/community-wallets-integration
 
+Issue #1383 asks for a guide that states the supported topologies (local proof server, wallet-delegated proving, hosted), says what each exposes, covers the getProvingProvider gap, and gives practical guidance. Official pages already cover the pieces; this lab note collects them for builders on the pinned stack.
 
-- Local proof server. Lace has no `getProvingProvider()`. Settings, Midnight, Local points at `http://localhost:6300`. Start with the documented image pin: `docker run -p 6300:6300 -e MIDNIGHT_PROOF_SERVER_VERBOSE=true midnightntwrk/proof-server:8.1.0` (https://docs.midnight.network/getting-started/installation). The lab hello prove path already uses `httpClientProvingProvider` against that URL.
-- Wallet-delegated. `ConnectedAPI.getProvingProvider(keyMaterialProvider)` is the v4 method. Feature-detect with `typeof api.getProvingProvider === "function"` before calling it. 1AM implements it; Lace does not. Do not hard-code the deprecated `Configuration.proverServerUri`.
-- Hosted. The proof-server guide allows a remote machine you control, over an encrypted channel, because the payload includes witness data. An indexer GraphQL URL is not a proof server. This repo does not ship a public prover endpoint.
+## Official topologies
 
-`packages/preprod-hello-stub/src/prove-path.mjs` only classifies that choice. It does not prove, submit, or talk to Preprod. Pins stay Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+| Topology | How it is reached | What the proof server sees | Official guidance |
+| --- | --- | --- | --- |
+| Local proof server | DApp or Lace points at `http://localhost:6300` (or a machine you control). Use `httpClientProofProvider` + `NodeZkConfigProvider` / `FetchZkConfigProvider`. | Witness data and circuit artifacts. It does not hold wallet keys. | Preferred. Run your own. See local-proving and run-proof-server. |
+| Wallet-delegated | `connectedAPI.getProvingProvider(keyMaterialProvider)` (DApp Connector 4.0+). Lace 2.1.0+ exposes it; earlier builds do not. Feature-detect. | Same proof request (witnesses included). The provider the wallet returns sends requests to the proof server configured in the wallet. | Preferred when the wallet implements it. Falls back to local when the method is missing. proverServerUri is deprecated (removal planned in 5.0.0). |
+| Hosted / third-party | A remote proof server you do not control. | Full proof request, including witnesses. | Not recommended for privacy-sensitive data. Official security page: access only a local proof server or one on a machine you control over an encrypted channel. |
 
-Also open on this sweep, not fixed here: servicedesk [#230](https://github.com/midnightntwrk/servicedesk/issues/230) (indexer tip lag), [#225](https://github.com/midnightntwrk/servicedesk/issues/225) (RPC 1010 wrapped as a generic submit error), [#216](https://github.com/midnightntwrk/servicedesk/issues/216) (skipped ledger event ids). example-hello-world [#41](https://github.com/midnightntwrk/example-hello-world/issues/41) is an unused-dependency chore, not a prove-path bug.
+`disclose()` and ledger writes are separate from proving; proving happens after circuit execution and before balancing/submit. See end-to-end architecture and security-best-practices for the trust boundary.
+
+## Common preprod path notes
+
+- Proof server unreachable on port 6300 is a frequent reported error. Confirm the container is running and the URI matches what Lace or the DApp uses.
+- Feature-detect `typeof api.getProvingProvider === "function"` before calling. Catch rejections.
+- Pin: proof-server 8.1.0 (lab), midnight-js 4.1.1, DApp Connector 4.0.1.
+
+This lab does not claim a fix of the public docs, proof server, indexer, or node. Source only. LOCAL-TRUE.
+
+Lab helper: `packages/preprod-hello-stub/src/proving-topology-decode.mjs` classifies reported error strings against the official patterns. It does not call any network or proof server.
+
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
