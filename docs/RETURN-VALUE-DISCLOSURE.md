@@ -1,35 +1,33 @@
-# Explicit disclosure: return values vs ledger writes
+# Return values from exported circuits and disclose()
 
 Upstream: [midnightntwrk/servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266)
 
-Official:
+Official: https://docs.midnight.network/compact/reference/explicit-disclosure
 
-- https://docs.midnight.network/compact/reference/explicit-disclosure
-- https://docs.midnight.network/guides/security-best-practices
-- https://docs.midnight.network/concepts/how-midnight-works/compact-privacy-first-language
-- https://docs.midnight.network/compact/reference/writing
+Issue #266 (opened 2026-10-21, Compact toolchain 0.31.1 / language ~0.23, also checked on 0.35.0) reports two points about explicit disclosure and circuit returns:
 
-Issue #266 (Compact toolchain 0.31.1 / language ~0.23, also checked on 0.35.0) reports that the explicit disclosure page describes returning a value from an exported circuit as a disclosure equivalent to a ledger write. On-chain probes showed the opposite:
+1. Returning a value from an exported circuit (whether a disclosed witness or a circuit argument) does **not** place that value in the published transaction bytes. The value reaches the calling DApp (`callTx.private.result`) but is absent from the transaction `raw` searched on a local network. A ledger write via `disclose` *does* appear in the transaction. The docs currently describe return as a disclosure site in the same terms as a ledger store; the observed behavior is that the return is disclosed to the DApp, not necessarily to the chain.
 
-- A disclosed value written to a ledger field appears in the published transaction bytes.
-- A value returned from an exported circuit (whether a disclosed witness result or a plain circuit argument) reaches the calling DApp (`callTx.private.result`) but is **not** present in the transaction `raw` bytes. The transaction carries only a randomized commitment to the call's inputs and outputs.
+2. Returning a circuit argument is accepted by the compiler without `disclose()`:
 
-Official pages already state the distinction:
+```compact
+export circuit f(x: Uint<64>): Uint<64> { return x; }
+```
 
-- From security-best-practices (On-chain visibility): "Wrapping a value in `disclose()` does not publish it. ... A ledger write is visible on-chain. A return value is not written to the ledger or readable in the transaction; only a randomized commitment to the call's inputs and outputs is. The compiler still requires `disclose()` to return a value that comes from a witness function, because the value leaves the circuit, to your DApp or to a calling contract."
-- From compact-privacy-first-language: "A ledger write makes the value public. A return value goes to your DApp or to a calling contract. It is not written to the ledger or readable in the transaction..."
-- From writing a contract: "One exception is that data contained within the arguments to an exported circuit is not considered disclosed when it is returned from that circuit, because it is necessarily already known to the caller."
+while returning a witness value is rejected unless wrapped in `disclose()`:
 
-Compiler behavior matching the issue:
+```compact
+export circuit f(): Uint<64> { return secretNum(); }  // rejected
+export circuit f(): Uint<64> { return disclose(secretNum()); }  // accepted
+```
 
-- `return x;` on an exported circuit argument compiles (no `disclose()` needed).
-- `return secretNum();` (witness) is rejected until wrapped in `disclose()`.
-- `assert` on a secret is accepted without `disclose()`.
-- A branch on a witness that then writes the ledger requires `disclose()` on the controlling expression.
+The issue assumes the argument case is intended (the caller already knows its own inputs). Map keys and branching that affect ledger writes still require `disclose()`; an `assert` on a secret does not.
 
-This lab note cites the upstream issue and the official clarification. It does not claim a fix of the public docs, compiler, indexer, or node.
+Lab sample: `contracts/hello-midnight/return-value-disclose.compact` shows both the argument return (no disclose) and the witness return (with disclose).
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+`packages/preprod-hello-stub/src/return-value-disclose-invariant.mjs` is a source check only. It does not compile Compact, does not call proof-server 8.1.0, and does not claim a Preprod deploy or a fix of the public indexer or node.
+
+This lab does not claim a fix of the public docs, compiler, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com

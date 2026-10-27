@@ -1,6 +1,6 @@
-// Local source check for the exported-circuit return disclosure rules reported in
+// Local source check for the return-value disclosure rules reported in
 // https://github.com/midnightntwrk/servicedesk/issues/266
-// Official: https://docs.midnight.network/guides/security-best-practices
+// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
 // Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1
 // LOCAL-TRUE. Does not compile Compact, call a proof server, or touch the public indexer/node.
 
@@ -13,9 +13,9 @@ const sample = join(here, "../../../contracts/hello-midnight/return-value-disclo
 
 export const RETURN_VALUE_DISCLOSE = {
   upstream: "https://github.com/midnightntwrk/servicedesk/issues/266",
-  official: "https://docs.midnight.network/guides/security-best-practices",
+  official: "https://docs.midnight.network/compact/reference/explicit-disclosure",
   summary:
-    "Returning a circuit argument needs no disclose(); returning a witness does. Neither return value is in the published transaction — only a randomized commitment. The value reaches the calling DApp.",
+    "Returning a circuit argument needs no disclose(); returning a witness does. Neither return appears in the published transaction; a disclosed ledger write does.",
   pins: {
     compact: "~0.31.1",
     language: "~0.23",
@@ -27,33 +27,28 @@ export const RETURN_VALUE_DISCLOSE = {
 
 /**
  * @param {string} source
- * @returns {{ok: boolean, hasReturnArgBare: boolean, hasReturnWitnessDisclose: boolean, note: string}}
+ * @returns {{ok: boolean, hasArgReturn: boolean, hasWitnessDisclose: boolean, note: string}}
  */
 export function checkReturnValueDisclose(source) {
   if (typeof source !== "string") {
-    return {
-      ok: false,
-      hasReturnArgBare: false,
-      hasReturnWitnessDisclose: false,
-      note: "not a string",
-    };
+    return { ok: false, hasArgReturn: false, hasWitnessDisclose: false, note: "not a string" };
   }
   const normalized = source.replace(/\s+/g, " ");
-  const hasReturnArgBare = /export circuit returnArg\([^)]*\):[^\{]*\{[^}]*return x;/.test(normalized);
-  const hasReturnWitnessDisclose = /return disclose\(\s*secretValue\s*\(\s*\)\s*\)/.test(normalized);
-  if (hasReturnArgBare && hasReturnWitnessDisclose) {
+  const hasArgReturn = /return\s+x\s*;/.test(normalized) && !/return\s+disclose\s*\(\s*x\s*\)/.test(normalized);
+  const hasWitnessDisclose = /return\s+disclose\s*\(\s*secretValue\s*\(\s*\)\s*\)/.test(normalized);
+  if (hasArgReturn && hasWitnessDisclose) {
     return {
       ok: true,
-      hasReturnArgBare: true,
-      hasReturnWitnessDisclose: true,
-      note: "Sample returns a bare argument and a disclosed witness value.",
+      hasArgReturn: true,
+      hasWitnessDisclose: true,
+      note: "Sample returns an argument without disclose and a witness with disclose.",
     };
   }
   return {
     ok: false,
-    hasReturnArgBare,
-    hasReturnWitnessDisclose,
-    note: "Expected bare return of circuit arg and disclose(secretValue()) for the witness return.",
+    hasArgReturn,
+    hasWitnessDisclose,
+    note: "Expected bare return x; and return disclose(secretValue());",
   };
 }
 
