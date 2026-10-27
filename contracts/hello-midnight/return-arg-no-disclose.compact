@@ -1,16 +1,8 @@
-// Lab Compact: returning an exported-circuit argument does not require disclose().
-// Returning a witness does. A return reaches the DApp but is not in the published transaction.
-// Official:
-//   https://docs.midnight.network/compact/reference/writing
-//   "One exception is that data contained within the arguments to an exported
-//    circuit is not considered disclosed when it is returned from that circuit,
-//    because it is necessarily already known to the caller."
-//   https://docs.midnight.network/guides/security-best-practices
-//   return value is not written to the ledger or readable in the transaction;
-//   only a randomized commitment to the call's inputs and outputs is.
+// Lab Compact: returning a circuit argument needs no disclose(); returning a witness does.
+// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
 // Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
 // Pins: Compact ~0.31.1 / language ~0.23
-// LOCAL-TRUE. Source only. Not deployed.
+// LOCAL-TRUE. Source only. Not deployed. Does not claim a fix of public indexer or node.
 
 pragma language_version >= 0.23;
 
@@ -18,21 +10,22 @@ import CompactStandardLibrary;
 
 witness secretNum(): Uint<64>;
 
-export ledger stored: Uint<64>;
+export ledger val: Uint<64>;
 
-// Accepted without disclose(): argument is already known to the caller.
+// Returning a circuit argument is accepted without disclose().
+// The caller already knows its own argument.
 export circuit returnArg(x: Uint<64>): Uint<64> {
   return x;
 }
 
-// Requires disclose(): witness value leaves the circuit to the DApp.
+// Returning a witness value requires disclose().
 export circuit returnWitness(): Uint<64> {
   return disclose(secretNum());
 }
 
-// Positive control: disclosed ledger store is in the published transaction.
-export circuit storeArg(x: Uint<64>): [] {
-  stored = disclose(x);
+// Ledger store still requires disclose() for witness data.
+export circuit store(x: Uint<64>): [] {
+  val = disclose(x);
 }
 
 // Built by @kshot9000 https://x.com/kshot9000
