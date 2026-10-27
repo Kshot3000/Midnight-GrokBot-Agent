@@ -89,6 +89,11 @@ leaderboard and `contracts/agent-escrow`.
 
 Do not invent APIs or RPCs here. Use official Midnight.js, indexer, and DApp connector docs when wiring TypeScript clients.
 
+
+## Return boundary (servicedesk #266)
+
+`contracts/hello-midnight/return-boundary.compact` shows `return x` on an argument (no `disclose()`), `return disclose(secretMarker())`, and a disclosed ledger write. Official security page: a return is not in the published transaction; only a commitment is. See `docs/RETURN-NOT-IN-TX.md`. Source check only; not a deploy.
+
 ## Bitwise gap (midnight-docs #1387)
 
 `contracts/hello-midnight/no-bitwise.compact` folds a Boolean with `flag ? 1 : 0`. The published Compact grammar has no `&`, `|`, `^`, `<<`, `>>`, or `>>>`. See `docs/COMPACT-BITWISE-GAP.md`. Source check only; not a deploy.
