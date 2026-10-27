@@ -1,28 +1,22 @@
-# Proof provider error decode
+# Proof provider error decoding
 
 Upstream: [midnightntwrk/servicedesk#243](https://github.com/midnightntwrk/servicedesk/issues/243)
 
-Official proof-server guide:
+Official proof-server error reference:
 
-https://docs.midnight.network/guides/run-proof-server
+https://docs.midnight.network/api-reference/error-reference/proof-server-errors
 
-Local proving:
+Install and pin notes:
 
-https://docs.midnight.network/guides/local-proving
+https://docs.midnight.network/getting-started/installation
 
-midnight-js 4.1.1's HTTP proof provider (`@midnight-ntwrk/midnight-js-http-client-proof-provider`) is reported to throw only the status line
+Issue #243 reports that `@midnight-ntwrk/midnight-js-http-client-proof-provider` (pinned 4.1.1) drops the proof-server response body on non-2xx replies. A 400 from proof-server 8.1.0 surfaces only as `Failed Proof Server response: url="…", code="400", status="Bad Request"`. The body (`bad input`, `Job Queue full`, or `internal error` on 8.x; a reason string on later builds) is discarded. Timeouts surface as `AbortError: The user aborted a request.` with no timeout duration.
 
-```
-Failed Proof Server response: url="…", code="400", status="Bad Request"
-```
+Lab decoder (does not call a proof server, wallet, indexer, or node):
 
-and never read the response body. On proof-server 8.x the body is one of `bad input`, `Job Queue full`, or `internal error`. A client timeout surfaces as `The user aborted a request.`
+- `packages/preprod-hello-stub/src/proof-provider-error-decode.mjs`
 
-This lab does not edit midnight-js, does not invent a response schema, and does not claim a fix of the proof server, indexer, or node.
-
-## Lab helper
-
-`packages/preprod-hello-stub/src/proof-provider-error-decode.mjs` exports `classifyProofProviderError`. It matches the two strings midnight-js already emits and notes when a known body phrase is present. It performs no network calls. LOCAL-TRUE.
+It matches the error strings quoted in the issue and extracts any body text that happens to be present. This lab does not patch midnight-js, the public indexer, or the node.
 
 Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
