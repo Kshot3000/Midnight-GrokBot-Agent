@@ -1,0 +1,67 @@
+/*
+ * disclosure-sites-266.compact — pins the compiler outcomes reported in
+ * midnightntwrk/servicedesk#266 for Compact ~0.31.1 / language ~0.23.
+ *
+ * Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+ * The page requires disclose() before storing in the ledger, returning from
+ * an exported circuit, or passing to another contract. Issue #266 shows
+ * additional compiler behaviour learned from errors:
+ *   - returning a circuit argument is accepted without disclose();
+ *   - returning a witness value is rejected without disclose();
+ *   - assert on a secret is accepted (no disclose);
+ *   - a Map key from an argument requires disclose() even inside assert(member);
+ *   - a conditional branch on a witness that then writes the ledger requires
+ *     disclose() on the condition.
+ *
+ * LOCAL-TRUE. Source only. Not compiled or deployed here.
+ * Does not claim a fix of the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger val: Uint<64>;
+export ledger m: Map<Bytes<32>, Uint<64>>;
+
+witness secretNum(): Uint<64>;
+witness secretBytes(): Bytes<32>;
+
+// Returning a circuit argument is accepted without disclose().
+export circuit returnArg(x: Uint<64>): Uint<64> {
+  return x;
+}
+
+// Returning a witness value requires disclose().
+export circuit returnWitness(): Uint<64> {
+  return disclose(secretNum());
+}
+
+// Assert on a secret does not require disclose().
+export circuit assertSecret(): [] {
+  assert(secretNum() > 5, "too small");
+}
+
+// Map key from an argument requires disclose() even inside assert(member).
+export circuit hasKey(k: Bytes<32>): [] {
+  assert(m.member(disclose(k)), "missing");
+}
+
+// Conditional branch on a witness that writes the ledger requires disclose().
+export circuit branchWrite(): [] {
+  if (disclose(secretNum() > 5)) {
+    val = 1;
+  } else {
+    val = 2;
+  }
+}
+
+// Ledger store of an argument still requires disclose().
+export circuit storeArg(x: Uint<64>): [] {
+  val = disclose(x);
+}
