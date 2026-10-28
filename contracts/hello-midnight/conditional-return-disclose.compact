@@ -1,0 +1,43 @@
+// Conditional return disclose invariant (servicedesk#266)
+// Pins: Compact ~0.31.1 / language ~0.23. LOCAL-TRUE. Not compiled or deployed here.
+// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+//           https://docs.midnight.network/compact/reference/writing
+//           https://docs.midnight.network/concepts/how-midnight-works/compact-privacy-first-language
+//           https://docs.midnight.network/guides/security-best-practices
+//
+// A return of a witness-derived value (including via a comparison) must be declared with disclose().
+// A return of a circuit argument does not. disclose() itself does not publish the value on-chain.
+
+pragma language_version 0.23;
+import CompactStandardLibrary;
+
+witness getBalance(): Uint<64>;
+
+// REJECTED without disclose(): potential witness-value disclosure via the return.
+// export circuit balanceExceedsBad(n: Uint<64>): Boolean {
+//   return getBalance() > n;
+// }
+
+// ACCEPTED: disclose the comparison result before returning from the exported circuit.
+export circuit balanceExceeds(n: Uint<64>): Boolean {
+  return disclose(getBalance() > n);
+}
+
+// ACCEPTED: circuit argument may be returned without disclose() (caller already knows it).
+export circuit returnArg(x: Uint<64>): Uint<64> {
+  return x;
+}
+
+// REJECTED: returning a bare witness value requires disclose().
+// export circuit returnWitnessBad(): Uint<64> {
+//   return getBalance();
+// }
+
+export circuit returnWitness(): Uint<64> {
+  return disclose(getBalance());
+}
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
