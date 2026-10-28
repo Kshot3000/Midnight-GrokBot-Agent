@@ -1,25 +1,23 @@
-# Preprod wallet sync stall troubleshooting (lab)
+# Preprod wallet synchronization stall symptoms
 
 Upstream: [midnightntwrk/midnight-docs#1381](https://github.com/midnightntwrk/midnight-docs/issues/1381)
 
-Official sources only (do not invent APIs):
+Official docs ([Funding a wallet](https://docs.midnight.network/guides/acquire-tokens), [Wallet SDK API Reference](https://docs.midnight.network/api-reference/wallet-sdk), [How to generate DUST programmatically on Preprod](https://docs.midnight.network/guides/generating-dust-programmatically)) describe `isSynced` as the gate after the shielded, unshielded, and dust channels have completed their progress. A wallet can be connected while still syncing. On Preprod the dust channel replays generation history; local devnet finishes much faster.
 
-- [Networks and environments](https://docs.midnight.network/guides/networks-and-environments) — troubleshooting table for wallet sync
-- [Wallet developer guide](https://docs.midnight.network/sdks/official/wallet-developer-guide) — `waitForSyncedState()` and `state().subscribe`
-- [Wallet SDK API reference](https://docs.midnight.network/api-reference/wallet-sdk) — same methods
-- [Funding a wallet](https://docs.midnight.network/guides/acquire-tokens) — DUST registration after a fully synced wallet
+The open documentation issue reports repeated builder symptoms on Preprod (local works):
 
-This lab does not edit midnight-docs, does not call a wallet, and does not claim a public indexer or node fix. `packages/preprod-hello-stub/src/wallet-sync-stall-classify.mjs` only maps reported symptom strings to the documented causes below.
+- `waitForSyncedState()` or `FacadeState.isSynced` never becomes true
+- dustWallet sync process errors, including non-linear insertion into the dust commitment tree (expected index vs received)
+- shielded sync leg never connects or issues subscriptions
+- slow dust replay of full history
 
-## Documented causes and actions
+This lab does not patch the public indexer, node, proof-server, or wallet-sdk. It only records the symptoms from the issue and points builders to the official guides that distinguish connected vs synced and that require a fully synced state before registering NIGHT for DUST.
 
-| Symptom (from official troubleshooting) | Documented cause | Documented action |
-| --- | --- | --- |
-| Wallet sync never finishes; log shows values inserted non-linearly into dust generation tree / zswap commitment tree / dust commitment tree | Saved sync state from the old indexer is not portable; event and transaction ids differ between indexers | Discard that state and sync from genesis. Do not shift cursors by hand. A full sync on Preprod takes over an hour. |
-| Wallet sync timeout right after a transaction, although the funds arrived | On an idle subscription the indexer sends unshielded sync progress less often, backing off to about 4 minutes (up to about 5 with jitter) | Wait for the expected balance or spendable DUST, or allow more than 5 minutes, instead of a short synced-state timeout. |
-| `isSynced` never becomes true | `isSynced` gates on shielded, unshielded, and DUST all being strictly complete | Wait for all three. A local devnet sync is much faster than Preprod. |
+A local string classifier that matches those symptom phrases (no network calls, no invented APIs) lives in `packages/preprod-hello-stub/src/wallet-sync-stall-decode.mjs`. A Compact pointer is in `contracts/hello-midnight/wallet-sync-stall-note.compact`.
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0, wallet-sdk 1.2.0.
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+
+This does not claim a fix of the public indexer, node, or wallet sync.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
