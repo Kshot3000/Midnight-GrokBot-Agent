@@ -1,0 +1,19 @@
+// Upstream: https://github.com/midnightntwrk/example-hello-world/issues/41
+// Official: https://docs.midnight.network/getting-started/hello-world
+// Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, proof-server 8.1.0
+//
+// The official example declares axios and testcontainers but neither is imported.
+// This lab note is a minimal pure circuit that does not depend on them.
+// This does not claim a fix of the public example, indexer, or node.
+//
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+pragma language_version 0.23;
+import CompactStandardLibrary;
+
+export pure circuit unusedDepsNote(): Uint<8> {
+  return 0;
+}
