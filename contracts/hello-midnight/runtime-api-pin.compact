@@ -1,0 +1,18 @@
+// Lab sample for midnight-docs#1564. Language pin only.
+// Does not call any runtime function that 0.16.0 lacks.
+// Official matrix: Compact toolchain ~0.31.1, language ~0.23, compact-runtime 0.16.0.
+//
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger note: Uint<64>;
+
+export circuit setNote(v: Uint<64>): [] {
+  note = disclose(v);
+}
