@@ -2,11 +2,23 @@
 
 Upstream issue: [midnightntwrk/servicedesk#266](https://github.com/midnightntwrk/servicedesk/issues/266)
 
-Official reference (do not invent APIs):
+Official references (do not invent APIs):
 
 - https://docs.midnight.network/compact/reference/explicit-disclosure
+- https://docs.midnight.network/compact/reference/writing
+- https://docs.midnight.network/concepts/how-midnight-works/compact-privacy-first-language
+- https://docs.midnight.network/guides/security-best-practices
 
-The official page states that a Compact program must explicitly declare disclosure of potentially private data before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract. Issue #266 reports test results on Compact 0.31.1 / language 0.23 (and 0.35.0 for compile cases) that refine how that rule is applied in practice.
+The explicit disclosure page states that a Compact program must explicitly declare disclosure of potentially private data before storing it in the public ledger, returning it from an exported circuit, or passing it to another contract.
+
+Additional official pages clarify the distinction:
+
+- A ledger write makes the value public on chain.
+- A return from an exported circuit hands the value to the calling DApp or calling contract. It is not written to the ledger or readable in the published transaction; the transaction carries only a randomized commitment to the call's inputs and outputs.
+- `disclose()` itself does not publish the value; it only notifies the compiler that the value may leave the circuit.
+- Data contained within the arguments to an exported circuit is not considered disclosed when returned from that circuit, because the caller already knows the argument. Returning a witness value still requires `disclose()`.
+
+Issue #266 reports test results on Compact 0.31.1 / language 0.23 (and 0.35.0 for compile cases) that match these clarifications.
 
 ## Reported compiler outcomes (0.31.1 / language ~0.23)
 
@@ -25,7 +37,7 @@ A local network probe (midnight-node 1.0.0 / ledger 8, proof-server 8.1.0, midni
 - A ledger write of a disclosed argument places the value in the published transaction raw bytes.
 - Returning a disclosed witness value or a circuit argument hands the value to the calling DApp (`callTx.private.result`) but the marker was not present in the published transaction raw bytes.
 
-The issue asks whether `disclose()` on a return means "this leaves the circuit and reaches the DApp" rather than "this goes on chain." Contract-to-contract behaviour was not tested on ledger 8.
+This matches the official distinction that a return reaches the DApp but is not published on chain.
 
 ## Lab pin
 
