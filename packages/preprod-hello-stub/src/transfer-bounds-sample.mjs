@@ -30,9 +30,10 @@ const CREDIT = [
  */
 export function classifyTransferSample(source) {
   const text = String(source || '');
-  const topLevelConst = /^\s*const\s+/m.test(text) && !/export circuit/.test(text.split(/export circuit/)[0] || '');
+  const beforeCircuit = text.split(/export\s+circuit/)[0] || '';
+  const topLevelConst = /^\s*const\s+/m.test(beforeCircuit);
   const emptyBytes = /Bytes\s*<\s*32\s*>\s*\{\s*\}/.test(text);
-  const ledgerWriteNoDisclose = /balance\s*=\s*(?!disclose\()/.test(text) && /balance\s*=/.test(text);
+  const ledgerWriteNoDisclose = /\bbalance\s*=\s*(?!disclose\()/.test(text);
   const problems = [];
   if (topLevelConst) problems.push('top-level const');
   if (emptyBytes) problems.push('empty Bytes<32>{}');
