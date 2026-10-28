@@ -1,20 +1,34 @@
-# Compact runtime API reference documents 0.20.0 while networks run 0.16.0
+# Compact runtime version mismatch on ledger 8 networks
 
 Upstream: [midnightntwrk/midnight-docs#1564](https://github.com/midnightntwrk/midnight-docs/issues/1564)
 
-Official compatibility matrix: [https://docs.midnight.network/relnotes/support-matrix](https://docs.midnight.network/relnotes/support-matrix)
+Official references:
 
-The Compact runtime API reference at [https://docs.midnight.network/api-reference/compact-runtime](https://docs.midnight.network/api-reference/compact-runtime) is generated from `@midnight-ntwrk/compact-runtime` v0.20.0. That is the ledger 9 line.
+- https://docs.midnight.network/relnotes/support-matrix (Preview / Preprod / Mainnet matrices and Known incompatible combinations)
+- https://docs.midnight.network/guides/compact-javascript-runtime (Errors from the generated module)
+- https://docs.midnight.network/relnotes/compact/toolchain-0.31.1
 
-Preview, Preprod, and Mainnet all run ledger 8. The support matrix pairs them with Compact toolchain 0.31.1 and Compact runtime 0.16.0. The matrix note states that runtimes 0.19.0 and 0.20.0 do not work with those versions.
+The Compact runtime API reference on docs.midnight.network currently documents `@midnight-ntwrk/compact-runtime` v0.20.0. That is the ledger 9 line. Preview, Preprod, and Mainnet run ledger 8 and pair Compact toolchain 0.31.1 with Compact runtime 0.16.0. Runtimes 0.19.0 and 0.20.0 do not work with those networks.
 
-Functions listed on the reference (for example `jubjubSchnorrSign`, `jubjubSchnorrVerifyingKey`, `sampleJubjubSchnorrSk`) are not exported by 0.16.0. Importing them on the supported stack fails with a TypeScript "has no exported member" error. Published packages confirm 0.16.0 lacks them while 0.19.0 and 0.20.0 include them.
+Importing generated code checks the runtime:
 
-This lab pins Compact ~0.31.1 / language ~0.23, compact-runtime 0.16.0, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0. It does not invent APIs. Prefer the matrix and the 0.16.0 surface until the networks move to ledger 9.
+```js
+import * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
+__compactRuntime.checkRuntimeVersion('0.16.0');
+```
 
-Suggested upstream fix (from the issue): generate the reference from the runtime that toolchain 0.31.1 ships (0.16.0), or add a banner stating the reference is for ledger 9 / 0.34.0+ toolchains with a link to the matrix. The same applies to other Compact references that track main.
+Known mismatch messages from the support matrix:
 
-This note does not edit midnight-docs. It cites the open issue so lab consumers stay on the compatible pin.
+| Combination | Error on import |
+|---|---|
+| Toolchain 0.31.1 (expects 0.16.0) with runtime 0.19.0 or 0.20.0 | `Version mismatch: compiled code expects 0.16.0, runtime is 0.19.0` (or `0.20.0`) |
+| Toolchain 0.34.0 / 0.35.0 (expects 0.19.0 / 0.20.0) with runtime 0.16.0 | `Version mismatch: compiled code expects 0.19.0, runtime is 0.16.0` (0.20.0 for 0.35.0) |
+
+Pin both sides from the matrix: `compact update 0.31.1` and `npm install @midnight-ntwrk/compact-runtime@0.16.0`. A bare `compact update` or an unpinned `npm install` can pull the ledger 9 line.
+
+Lab decoder: `packages/preprod-hello-stub/src/compact-runtime-version-decode.mjs` maps these messages to the matrix pairs. Lab note: `contracts/hello-midnight/runtime-version-note.compact`.
+
+This lab does not claim a fix of the public docs, API reference, compiler, indexer, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
