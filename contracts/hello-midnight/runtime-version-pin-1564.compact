@@ -1,0 +1,32 @@
+/*
+ * runtime-version-pin-1564.compact
+ *
+ * Pins the supported stack reported in midnightntwrk/midnight-docs#1564.
+ * Official matrix: https://docs.midnight.network/relnotes/support-matrix
+ *
+ * Networks run Compact runtime 0.16.0 with toolchain 0.31.1 / language ~0.23.
+ * The Compact runtime API reference currently documents 0.20.0 (ledger 9).
+ * Symbols that appear only on 0.19.0 / 0.20.0 (for example JubJub Schnorr helpers)
+ * are not present in 0.16.0 and must not be imported when targeting Preview,
+ * Preprod, or Mainnet.
+ *
+ * LOCAL-TRUE. Source only. Not compiled or deployed here.
+ * Does not claim a fix of the public indexer, node, or docs site.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger calls: Counter;
+
+// Minimal exported circuit that stays on the 0.16.0 / 0.31.1 surface.
+// No JubJub Schnorr helpers (those land on the 0.19.0 / 0.20.0 line).
+export circuit ping(): [] {
+  calls.increment(1);
+}
