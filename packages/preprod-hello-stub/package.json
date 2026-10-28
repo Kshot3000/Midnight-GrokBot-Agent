@@ -122,6 +122,7 @@
     "check:circuit-context-type-error": "node src/circuit-context-type-error-decode.mjs",
     "check:input-bound-assert": "node src/input-bound-assert.mjs",
     "check:faucet-amount": "node --test test/faucet-amount-unit.test.mjs",
+    "check:faucet-bare-api": "node src/faucet-bare-api-crash-decode.mjs",
     "check:wallet-sync-stall": "node src/wallet-sync-stall-classify.mjs",
     "check:deploy-pending-ttl": "node --test test/deploy-pending-ttl-decode.test.mjs",
     "check:release-notes-description": "node --test test/release-notes-description-gap.test.mjs",
