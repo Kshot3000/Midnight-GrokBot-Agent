@@ -1,30 +1,30 @@
-# Open issues read 2026-10-28
+# Open upstream issues read this run (2026-10-28)
 
-This lab read open issues in midnightntwrk/servicedesk, midnightntwrk/midnight-docs, and midnightntwrk/example-hello-world. It cannot push to those orgs. This note does not claim a fix of the public indexer, node, or compiler. Official docs only: https://docs.midnight.network/. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+This lab read open issues in midnightntwrk/servicedesk, midnightntwrk/midnight-docs, and midnightntwrk/example-hello-world. It cannot push to those orgs. This note only records what was open and points at official docs. It does not invent APIs and does not claim a fix of the public indexer, node, or compiler.
 
-## servicedesk (selected open)
+Official docs: https://docs.midnight.network/
 
-- [#267](https://github.com/midnightntwrk/servicedesk/issues/267) — Which node build does Blockfrost preprod RPC run? It reports "2.1.0-00000000000", which matches no release. Lab note: docs/BLOCKFROST-PREPROD-NODE-VERSION.md
-- [#266](https://github.com/midnightntwrk/servicedesk/issues/266) — Explicit disclosure: circuit return values are not in the published transaction, and returning a circuit argument needs no disclose(). Lab notes: docs/CIRCUIT-RETURN-DISCLOSURE.md, docs/EXPLICIT-DISCLOSURE-RETURN.md, contracts/hello-midnight/return-disclosure.compact and related.
-- [#254](https://github.com/midnightntwrk/servicedesk/issues/254) — Faucet POST /drips multiplies amount by 5 tNIGHT. Lab: docs/FAUCET-AMOUNT-UNIT.md
-- [#252](https://github.com/midnightntwrk/servicedesk/issues/252) — proof-server 9.0.0-rc.9 DUST-spend proofs rejected by Stagenet node 2.0.0 (1010 Custom error 170). Lab: docs/DUST-SPEND-PROOF-170.md
-- [#251](https://github.com/midnightntwrk/servicedesk/issues/251) — Wallet SDK DUST sync never notices a subscription that stays open but stops delivering events. Lab: docs/DUST-SILENT-SUBSCRIPTION.md
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
-## midnight-docs (selected open)
+## midnightntwrk/servicedesk
 
-- [#1587](https://github.com/midnightntwrk/midnight-docs/issues/1587) — Replace the Quickstart page's create-mn-app content with the new midnight-examples scaffolder (blocked). Lab: docs/QUICKSTART-CREATE-MN-APP-GAP.md
-- [#1569](https://github.com/midnightntwrk/midnight-docs/issues/1569) — Wallet and connector pages: stale lines. Lab: docs/DAPP-CONNECTOR-STALE-DECODE.md and related.
-- [#1564](https://github.com/midnightntwrk/midnight-docs/issues/1564) — Compact runtime API reference documents 0.20.0, but the networks run 0.16.0. Lab: docs/COMPACT-RUNTIME-API-VERSION-GAP.md
-- [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page: code samples don't run as written. Lab: docs/CIRCUIT-CONTEXT-SAMPLE.md
-- [#1383](https://github.com/midnightntwrk/midnight-docs/issues/1383) — Document proving topology. Lab: docs/PROVING-TOPOLOGY.md
-- [#1381](https://github.com/midnightntwrk/midnight-docs/issues/1381) — Add a troubleshooting page for wallet sync stalls on Preprod. Lab: docs/PREPROD-WALLET-SYNC-STALL.md
+- [#267](https://github.com/midnightntwrk/servicedesk/issues/267) — Blockfrost Preprod RPC reports system_version "2.1.0-00000000000", which matches no release. Official support matrix lists Preprod node 1.0.400. Lab: docs/BLOCKFROST-PREPROD-NODE-VERSION.md.
+- [#266](https://github.com/midnightntwrk/servicedesk/issues/266) — Explicit disclosure: circuit return values are not in the published transaction; returning a circuit argument needs no disclose(); Map key and branch-on-witness do. Lab: docs/CIRCUIT-RETURN-DISCLOSURE.md, docs/MAP-KEY-DISCLOSE.md, docs/BRANCH-WITNESS-DISCLOSE.md.
+- [#254](https://github.com/midnightntwrk/servicedesk/issues/254) — Faucet POST /drips multiplies amount by 5 tNIGHT. Lab: docs/FAUCET-AMOUNT-UNIT.md.
 
-## example-hello-world (open)
+## midnightntwrk/midnight-docs
 
-- [#41](https://github.com/midnightntwrk/example-hello-world/issues/41) — chore: remove unused dependencies (axios, testcontainers). Lab: docs/HELLO-WORLD-UNUSED-DEPS.md
-- [#13](https://github.com/midnightntwrk/example-hello-world/issues/13) — Dependency Dashboard (Renovate).
+- [#1587](https://github.com/midnightntwrk/midnight-docs/issues/1587) — Replace Quickstart page's create-mn-app content with the new midnight-examples scaffolder (blocked). Lab notes the old flow only; does not invent the new tool.
+- [#1564](https://github.com/midnightntwrk/midnight-docs/issues/1564) — Compact runtime API reference documents 0.20.0, but networks run 0.16.0. Lab: docs/COMPACT-RUNTIME-API-VERSION-GAP.md.
+- [#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487) — Test and debug page samples do not run as written. Lab: docs/TEST-DEBUG-SAMPLE-GAP.md.
 
-This snapshot is for builders on the pinned stack. Prefer the lab Compact samples and preprod-hello-stub classifiers over inventing APIs. Does not claim a fix of the public indexer or node.
+## midnightntwrk/example-hello-world
+
+- [#41](https://github.com/midnightntwrk/example-hello-world/issues/41) — remove unused dependencies (axios, testcontainers). Lab: docs/HELLO-WORLD-UNUSED-DEPS.md.
+
+Lab sample: contracts/hello-midnight/open-issues-note.compact (source only).
+
+This lab does not claim any public fix.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
