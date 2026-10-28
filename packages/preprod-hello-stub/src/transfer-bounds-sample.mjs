@@ -25,9 +25,6 @@ const CREDIT = [
   'Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation',
 ].join('\n');
 
-/**
- * @param {string} source Compact source
- */
 export function classifyTransferSample(source) {
   const text = String(source || '');
   const beforeCircuit = text.split(/export\s+circuit/)[0] || '';
@@ -55,8 +52,12 @@ export function classifyTransferSample(source) {
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMain) {
-  const stale = classifyTransferSample(
-    'const MAX: Uint<64> = 1;\nexport circuit t(r: Bytes<32>): [] { assert(r != Bytes<32>{}); balance = balance - 1; }',
-  );
-  const good = classifyTransferSample(
-    'export circuit transfer(recipient: Bytes<32>, amount: Uint<64>): [] { const MAX: Uint<64> = 1; assert(recipient != pad(32, \
+  const stale = classifyTransferSample('const MAX: Uint<64> = 1;\nexport circuit t(): [] { balance = 1; }');
+  const good = classifyTransferSample('export circuit t(): [] { balance = disclose(1); }');
+  const ok = !stale.ok && stale.problems.length > 0 && good.ok;
+  if (!ok) {
+    console.error(JSON.stringify({ stale, good }, null, 2));
+    process.exit(1);
+  }
+  console.log(JSON.stringify({ ok: true, credit: CREDIT }, null, 2));
+}
