@@ -1,0 +1,29 @@
+/*
+ * test-debug-sample-note.compact — pin for builders reading the test-and-debug page.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1487
+ * Official language pragma and runtime pairing:
+ *   https://docs.midnight.network/relnotes/support-matrix
+ *   Compact toolchain 0.31.1, language ~0.23, compact-runtime 0.16.0
+ * Working circuit-call pattern (createConstructorContext / createCircuitContext,
+ * result.context, ledger(...)) is on:
+ *   https://docs.midnight.network/guides/compact-javascript-runtime
+ *
+ * The test-and-debug page samples do not match this pin. This file does not
+ * invent a Compact API and is not deployed.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger rounds: Counter;
+
+export circuit tick(): [] {
+  rounds.increment(1);
+}
