@@ -200,3 +200,12 @@ Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+## Pure circuit in contract type gap (servicedesk#249)
+
+`src/pure-interface-gap.mjs` classifies source that places `pure circuit` inside a contract type. Ordinary `export pure circuit` is fine on Compact 0.31.1 / language 0.23. The PureInterfaceCircuit failure is reported on the 0.35 / runtime 0.20 line. See [`docs/PURE-INTERFACE-CIRCUIT-GAP.md`](../../docs/PURE-INTERFACE-CIRCUIT-GAP.md). LOCAL-TRUE. Does not fix the public indexer or node.
+
+Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
