@@ -146,7 +146,8 @@
     "check:kernel-caller-undefined": "node --test test/kernel-caller-undefined-decode.test.mjs",
     "check:initswap-partial": "node --test test/initswap-partial-decode.test.mjs",
     "check:pure-interface-gap": "node src/pure-interface-gap.mjs",
-    "check:open-issues-2026-10-28": "node src/open-issues-2026-10-28.mjs"
+    "check:open-issues-2026-10-28": "node src/open-issues-2026-10-28.mjs",
+    "check:open-issues-2026-10-29": "node src/open-issues-2026-10-29.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
