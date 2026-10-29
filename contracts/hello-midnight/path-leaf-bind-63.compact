@@ -1,0 +1,54 @@
+/*
+ * path-leaf-bind-63.compact — bind Merkle membership to the claimed leaf.
+ *
+ * Official (do not invent APIs):
+ *   https://docs.midnight.network/concepts/how-midnight-works/keeping-data-private
+ *   The documented check circuit asserts path.leaf == item before
+ *   items.checkRoot(disclose(merkleTreePathRoot<...>(path))).
+ *   Without that assert a witness can supply any valid path in the tree.
+ *   https://docs.midnight.network/compact/reference/ledger-adt
+ *   MerkleTree.insert(item) inserts a new leaf at the first free index.
+ *   MerkleTree.insertHash(hash: Bytes<32>) inserts a leaf that is already a hash.
+ *   pathForLeaf / findPathForLeaf are TypeScript-only helpers on the ledger ADT.
+ *
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/63
+ * The open issue asks for a clear distinction between insert and insertHash
+ * because a path built for the raw value succeeds after insert and fails after
+ * insertHash. This source pins the documented membership binding only.
+ * It does not guess a hash formula for insertHash and does not deploy.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23.
+ * LOCAL-TRUE. Source only. Does not claim a fix of the public indexer or node.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger items: MerkleTree<10, Field>;
+
+witness findItem(item: Field): MerkleTreePath<10, Field>;
+
+// insert hashes the leaf (documented). insertHash stores an already-hashed
+// Bytes<32>. This circuit only demonstrates the insert path that the
+// private-data page pairs with a path.leaf binding.
+export circuit insertItem(item: Field): [] {
+  assert(!items.isFull(), "tree is full");
+  items.insert(disclose(item));
+}
+
+// Documented membership check. The path.leaf assert binds the proof to
+// the claimed item. Without it any valid path would satisfy checkRoot.
+export circuit checkItem(item: Field): [] {
+  const path = findItem(item);
+  assert(path.leaf == item, "path is not for this item");
+  assert(
+    items.checkRoot(disclose(merkleTreePathRoot<10, Field>(path))),
+    "path must be valid"
+  );
+}
