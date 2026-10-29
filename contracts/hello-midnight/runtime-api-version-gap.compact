@@ -1,0 +1,20 @@
+// Note: Compact runtime API reference is for 0.20.0; networks pin 0.16.0.
+// Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1564
+// Official matrix: https://docs.midnight.network/relnotes/support-matrix
+// Do not import jubjubSchnorrSign / jubjubSchnorrVerifyingKey / sampleJubjubSchnorrSk
+// on Compact 0.31.1 / compact-runtime 0.16.0. Those names are on the 0.20.0 reference only.
+//
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+pragma language_version 0.23;
+import CompactStandardLibrary;
+
+export ledger note: Uint<64>;
+
+export circuit pinRuntimeSurface(): [] {
+  // Stays on the 0.31.1 / 0.16.0 surface. No ledger-9-only runtime calls.
+  note = 16;
+}
