@@ -209,3 +209,12 @@ Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
 Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+
+## Test and debug samples gap (midnight-docs#1487)
+
+The published test-and-debug page still shows hand-built `{ privateState, ledgerState }` contexts and expects `newLedgerState` / `newContext`. Those fail on compact-runtime 0.16.0. The official JavaScript runtime guide uses `RT.createConstructorContext` / `RT.createCircuitContext` and reads `call.context.currentQueryContext.state` via `ledger()`. See [`docs/TEST-AND-DEBUG-SAMPLES-GAP.md`](../../docs/TEST-AND-DEBUG-SAMPLES-GAP.md) and `contracts/hello-midnight/circuit-context-pin.compact`. LOCAL-TRUE. Does not fix the public docs site, indexer, or node.
+
+Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation

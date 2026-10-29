@@ -1,31 +1,49 @@
-# Test-and-debug page samples do not match the pinned runtime
+# Test and debug page: code samples do not run as written (midnight-docs#1487)
 
-Upstream: [midnightntwrk/midnight-docs#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487)
+Upstream issue: [midnightntwrk/midnight-docs#1487](https://github.com/midnightntwrk/midnight-docs/issues/1487)
 
-Official:
+Official docs (do not invent APIs):
 
 - https://docs.midnight.network/compact/test-and-debug
 - https://docs.midnight.network/guides/compact-javascript-runtime
 - https://docs.midnight.network/relnotes/support-matrix
+- https://docs.midnight.network/api-reference/compact-runtime/
 
-Issue #1487 (opened 2026-10-03) reports that samples on the Test and debug page do not run as written against Compact toolchain 0.31.1, Compact runtime 0.16.0, and Midnight.js 4.1.1.
+## Reported problems on Compact toolchain 0.31.1 / runtime 0.16.0 / midnight-js 4.1.1
 
-Observed mismatches (from the issue and the live page):
+The test-and-debug page samples were checked against the support matrix pins and do not run as written:
 
-- Hand-built `{ privateState, ledgerState }` objects are passed to `impureCircuits.*`. The generated code expects a `CircuitContext` built with `createConstructorContext` / `createCircuitContext` from `@midnight-ntwrk/compact-runtime`.
-- Results are read as `newLedgerState` / `newContext`. A call returns `result`, `context`, `proofData`, and `gasCost`. Ledger state is read with the generated `ledger()` helper on `context.currentQueryContext.state`.
-- On-chain snippets call `tx.wait()` and expect status `'APPLIED_TO_CHAIN'` and a `receipt.found` field. `callTx` already resolves with the finalized transaction; statuses are `SucceedEntirely`, `FailFallible`, and `FailEntirely`.
-- Compact sample uses top-level `const`, `Bytes<32>{}`, and a ledger write that may need disclosure handling. These are rejected or incorrect on language ~0.23.
-- Assert messages in the samples (`'Board is occupied'`, `'Board is vacant'`, `'Not authorized'`) do not match the actual bulletin-board contract messages.
-- Link to the retired Counter tutorial.
+- Hand-built context objects `{ privateState, ledgerState }` are rejected. Generated code expects a real `CircuitContext`. Use the runtime helpers instead.
+- Result shape is wrong. A circuit call returns `{ result, context, proofData, gasCost }`. There is no `newLedgerState` or `newContext`.
+- Expected assert messages do not match the bulletin board contract (e.g. `'Board is occupied'` vs the actual contract strings).
+- On-chain snippets call `tx.wait()` and expect `'APPLIED_TO_CHAIN'` / `receipt.found`. `callTx` already resolves with the finalized transaction; statuses are `SucceedEntirely`, `FailFallible`, `FailEntirely`.
+- Compact sample uses top-level `const`, `Bytes<32>{}`, and a ledger write that needs `disclose()`.
+- Counter tutorial is retired (redirects to bulletin board); samples still reference it.
+- Next-steps link text is outdated.
 
-The Compact JavaScript runtime guide (https://docs.midnight.network/guides/compact-javascript-runtime) shows the working pattern for the same runtime: construct contexts with the runtime helpers, call through `impureCircuits`, and decode state with `ledger()`.
+## Correct pattern (from the official JavaScript runtime guide)
 
-Lab sample (not compiled here):
+The guide at https://docs.midnight.network/guides/compact-javascript-runtime pins its samples to Compact toolchain 0.31.1 (language 0.23) and `@midnight-ntwrk/compact-runtime` 0.16.0 and shows the working approach:
 
-- `contracts/hello-midnight/transfer-bounds.compact` — bounds and empty-recipient asserts that avoid the rejected top-level const and `Bytes<32>{}` forms.
+```typescript
+import * as RT from '@midnight-ntwrk/compact-runtime';
+// ...
+const ctor = contract.initialState(RT.createConstructorContext(privateState, coinPublicKey), ...ctorArgs);
+const ctx = RT.createCircuitContext(contractAddress, coinPublicKey, ctor.currentContractState, privateState);
+const call = contract.impureCircuits.someCircuit(ctx, ...args);
+// call.result, call.context, call.proofData, call.gasCost
+const ledgerView = ledger(call.context.currentQueryContext.state);
+```
 
-This lab note does not invent APIs and does not claim a fix of the public docs site, indexer, or node. Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+Hand-built objects fail validation because a real `CircuitContext` carries query-context state.
+
+## Lab pin
+
+This note cites the upstream issue and points to the official working guide. It does not edit midnight-docs, does not invent APIs, and does not claim a fix of the public docs site, indexer, or node.
+
+See also `contracts/hello-midnight/circuit-context-pin.compact` for a related Compact source pin.
+
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
