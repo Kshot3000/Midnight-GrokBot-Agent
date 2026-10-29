@@ -71,7 +71,9 @@ function textOf(error) {
  * @param {{ timeoutMs?: number }} [opts]
  */
 export function decodeProofProviderError(error, opts = {}) {
-  const text = textOf(error).trim();
+  const rawText = textOf(error);
+  const name = (error && typeof error === "object" && error.name) || "";
+  const text = (name ? name + ": " : "") + rawText.trim();
   const timeoutMs = typeof opts.timeoutMs === 'number' ? opts.timeoutMs : 300000;
 
   const isAbort =
