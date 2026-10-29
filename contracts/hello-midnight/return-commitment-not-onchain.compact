@@ -1,0 +1,38 @@
+// Lab Compact invariant: exported-circuit return is not an on-chain disclosure.
+// A returned value reaches the calling DApp (or another contract) after disclose()
+// when it comes from a witness, but it is not written into the published transaction.
+// The transaction carries only a randomized commitment to the call's inputs and outputs.
+// Official: https://docs.midnight.network/guides/security-best-practices
+// Official: https://docs.midnight.network/compact/reference/explicit-disclosure
+// Upstream: https://github.com/midnightntwrk/servicedesk/issues/266
+// Pins: Compact ~0.31.1 / language ~0.23
+// LOCAL-TRUE. Source only. Not deployed. Does not claim a fix of public indexer or node.
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger marker: Bytes<32>;
+
+witness secretMarker(): Bytes<32>;
+
+// Returning a witness requires disclose(); the value leaves the circuit to the DApp.
+// It does not appear in the transaction raw bytes.
+export circuit returnSecretMarker(): Bytes<32> {
+  return disclose(secretMarker());
+}
+
+// Returning a circuit argument needs no disclose(); the caller already knows it.
+export circuit returnArgMarker(x: Bytes<32>): Bytes<32> {
+  return x;
+}
+
+// Only a ledger write makes the value public on chain.
+export circuit storeMarker(x: Bytes<32>): [] {
+  marker = disclose(x);
+}
+
+// Built by @kshot9000 https://x.com/kshot9000
+// Email: kshot9000@gmail.com
+// Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+// Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
