@@ -1,0 +1,25 @@
+// Pin for Compact ~0.31.1 / language ~0.23
+// Official: https://docs.midnight.network/getting-started/hello-world
+// and https://docs.midnight.network/compact/reference/explicit-disclosure
+// Upstream open issues read this run: servicedesk#267 #266, midnight-docs#1587 #1564 #1487 #1381, example-hello-world#41
+// This file is a lab pin only. It does not fix public indexer, node, or docs.
+
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger note: Opaque<"string">;
+
+export circuit storeNote(msg: Opaque<"string">): [] {
+  // Ledger write requires disclose() so the private argument can enter public state.
+  // Official: disclose() clears the private-data check; the ledger write is what makes the value visible on-chain.
+  note = disclose(msg);
+}
+
+// Returning an argument does not require disclose(); returning a witness does.
+// See servicedesk#266 and https://docs.midnight.network/guides/security-best-practices
+
+Built by @kshot9000 https://x.com/kshot9000
+Email: kshot9000@gmail.com
+Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
