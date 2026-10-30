@@ -1,28 +1,42 @@
-// ownPublicKey() is a prover-controlled witness.
-// Do not use it as the sole caller authenticator.
-// Upstream: https://github.com/midnightntwrk/midnight-docs/issues/902
-// Official: https://docs.midnight.network/guides/security-best-practices
+// own-public-key-warning.compact
+// Compact ~0.31.1 / language ~0.23
+// Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0
+// Demonstrates correct caller authentication derived from a witness secret
+// instead of the unsafe ownPublicKey() pattern for verification.
+// ownPublicKey() is a witness the prover controls; the protocol does not check it against the signing wallet.
+// Official: https://docs.midnight.network/compact/smart-contract-security
+// Upstream issue: https://github.com/midnightntwrk/midnight-docs/issues/902
 //
 // Built by @kshot9000 https://x.com/kshot9000
 // Email: kshot9000@gmail.com
 // Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
 // Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
 
-pragma language_version >= 0.23;
+pragma language_version 0.23;
 import CompactStandardLibrary;
 
 export ledger owner: Bytes<32>;
+
 witness secretKey(): Bytes<32>;
 
-// Store a domain-separated hash of the secret. Caller must know the secret.
-export circuit claimOwnership(): [] {
-  owner = disclose(persistentHash<Vector<2, Bytes<32>>>([pad(32, "lab:owner:"), secretKey()]));
+// Safe derived identity: only the holder of the secret can reproduce the hash.
+export pure circuit deriveOwner(sk: Bytes<32>): Bytes<32> {
+  persistentHash<Vector<2, Bytes<32>>>([pad(32, "lab:ownpk:owner:v1"), sk]);
 }
 
-// Re-derive and assert. A lying prover who does not hold secretKey() fails.
-export circuit onlyOwner(): [] {
-  assert(owner == persistentHash<Vector<2, Bytes<32>>>([pad(32, "lab:owner:"), secretKey()]), "not owner");
+constructor() {
+  // Record the deployer's derived key. Never ownPublicKey().
+  owner = disclose(deriveOwner(secretKey()));
 }
 
-// ownPublicKey() may name a recipient after the secret gate has already run.
-// It must not be the gate itself.
+// Correct authorization: prove knowledge of the secret whose hash is on the ledger.
+export circuit setValue(v: Uint<64>): [] {
+  assert(deriveOwner(secretKey()) == owner, "unauthorized");
+  // After authentication, ownPublicKey() may be used only to route a value to the caller
+  // (for example as a shielded-token recipient). It must never decide who is allowed to call.
+}
+
+// DO NOT DO THIS for caller verification:
+// export circuit unsafeSet(v: Uint<64>): [] {
+//   assert(ownPublicKey().bytes == owner, "unauthorized"); // bypassable
+// }
