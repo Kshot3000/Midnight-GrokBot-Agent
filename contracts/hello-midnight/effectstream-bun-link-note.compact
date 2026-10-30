@@ -1,0 +1,25 @@
+/* 
+ * effectstream-bun-link-note.compact — no circuit; link classification pointer only.
+ * Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1245
+ * Official Bun setup path: https://docs.midnight.network/how-to/bun-runtime-midnight
+ * The EffectStream guides previously used a relative link that 404'd.
+ * Published pages now use the absolute /how-to/bun-runtime-midnight path.
+ * Compact has no link API. This file only pins the published path for builders.
+ * LOCAL-TRUE. Source only. Not compiled here. Not deployed.
+ * Does not claim a fix of the public docs, indexer, or node.
+ *
+ * Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+// No exported circuit. Link classification is off-chain.
+// See docs/EFFECTSTREAM-BUN-LINK.md and
+// packages/preprod-hello-stub/src/effectstream-bun-link.mjs.
