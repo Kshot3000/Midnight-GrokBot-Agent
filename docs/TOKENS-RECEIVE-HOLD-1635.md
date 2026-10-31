@@ -1,66 +1,54 @@
-# Tokens: how a Compact contract receives and holds tokens
+# How a Compact contract receives and holds tokens (midnight-docs#1635)
 
-**Upstream issue:** [midnightntwrk/midnight-docs#1635](https://github.com/midnightntwrk/midnight-docs/issues/1635)  
-Tokens pages: explain how a contract receives and holds tokens.
+Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1635
 
-Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.  
-Official docs only: https://docs.midnight.network/. Do not invent APIs.
+Official sources only (no invented APIs):
 
-This lab note summarizes the official patterns so builders can find them without piecing tutorials together. It does **not** claim to fix the public docs, indexer, or node.
+- https://docs.midnight.network/tokens/overview (mentions receiveShielded / sendShielded without detailing custody)
+- https://docs.midnight.network/tokens/unshielded-token
+- https://docs.midnight.network/tokens/shielded-token
+- https://docs.midnight.network/examples/contracts/token-transfers
+- https://docs.midnight.network/tutorials/private-party/smart-contract (receiveUnshielded for entry fee)
+- https://docs.midnight.network/tutorials/private-tip-jar/smart-contract (receiveShielded + insertCoin for custody)
+- https://docs.midnight.network/compact/standard-library/exports (receiveUnshielded, receiveShielded, insertCoin, mint*, send*)
+- https://docs.midnight.network/compact/reference/ledger-adt (insertCoin on Map/Set of QualifiedShieldedCoinInfo)
 
-## Unshielded receive (e.g. NIGHT)
+## Unshielded receive (NIGHT or custom)
 
-From [Private Party smart contract](https://docs.midnight.network/tutorials/private-party/smart-contract) and [Token transfers example](https://docs.midnight.network/examples/contracts/token-transfers):
+`receiveUnshielded(color: Bytes<32>, amount: Uint<128>)` adds a validation condition that the transaction must supply the given amount of that token color to the contract. The caller's wallet funds it when balancing the transaction (see Private Party entry-fee path).
 
-```compact
-receiveUnshielded(nativeToken(), entryFee as Uint<128>);
-```
+After the call, the contract's unshielded balance for that color increases; later circuits read it with `unshieldedBalance` / `unshieldedBalanceGte` and spend with `sendUnshielded`.
 
-- `receiveUnshielded(color, amount)` adds a validation that the given amount of that color is paid into the contract.
-- The caller's wallet supplies the funds when it balances the transaction.
-- Unshielded transfers are public (sender, recipient, amount visible).
-- `nativeToken()` is NIGHT. Units are STAR (1 NIGHT = 1_000_000 STAR).
-- To check balance: `unshieldedBalance` / `unshieldedBalanceGte`.
-- To send out: `sendUnshielded(color, amount, recipient)` where recipient is `Either<ContractAddress, UserAddress>`.
-
-See also [Compact standard library exports](https://docs.midnight.network/compact/standard-library/exports).
+Native NIGHT uses `nativeToken()` or `default<Bytes<32>>` as the color. Custom colors come from `tokenType(domain, kernel.self())`.
 
 ## Shielded receive and hold
 
-From [Private Tip Jar smart contract](https://docs.midnight.network/tutorials/private-tip-jar/smart-contract):
+`receiveShielded(coin: ShieldedCoinInfo)` claims a fresh (same-transaction) coin addressed to the contract. The DApp constructs the coin; the caller's wallet creates the corresponding Zswap output when balancing.
+
+To hold it for a later spend, store the qualified form:
 
 ```compact
-receiveShielded(disclose(coin));
-pot.insertCoin(
-  disclose(coin.nonce),
-  disclose(coin),
-  right<ZswapCoinPublicKey, ContractAddress>(kernel.self())
-);
+export ledger pot: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
+
+export circuit tip(coin: ShieldedCoinInfo): [] {
+  receiveShielded(disclose(coin));
+  pot.insertCoin(
+    disclose(coin.nonce),
+    disclose(coin),
+    right<ZswapCoinPublicKey, ContractAddress>(kernel.self())
+  );
+}
 ```
 
-Key points (official):
+`insertCoin` looks up the Merkle index allocated in the current transaction and stores a `QualifiedShieldedCoinInfo`. A later circuit can spend that entry with `sendShielded` (see Private Tip Jar).
 
-- The `coin: ShieldedCoinInfo` the caller passes is a **fresh** coin description, not one of the tipper's existing wallet coins. The wallet creates the corresponding Zswap output and pays from its coins (making change).
-- `receiveShielded` claims that coin for this contract.
-- `insertCoin` (on a Map or Set whose value type is `QualifiedShieldedCoinInfo`) looks up the Merkle tree index allocated in **this** transaction and stores the qualified coin so the contract can later spend it with `sendShielded`.
-- This works only for coins created in the same transaction. For coins from earlier transactions the index typically comes from the indexer.
-- `writeCoin` is the alternative mentioned in ledger ADT docs for the same purpose.
-- Fresh coins (same tx) use `sendImmediateShielded`; committed coins use `sendShielded` (needs `mt_index`).
+`writeCoin` is the Set analogue (same docs). Fresh coins can also be spent immediately with `sendImmediateShielded` without storage (shielded-token tutorial).
 
-See [Ledger ADT reference](https://docs.midnight.network/compact/reference/ledger-adt) for `insertCoin` / `writeCoin` signatures and [Shielded token tutorial](https://docs.midnight.network/tokens/shielded-token) for mint-and-send patterns (`mintShieldedToken` + `sendImmediateShielded`).
+Committed coins from earlier transactions require the DApp to supply a `QualifiedShieldedCoinInfo` that already has `mt_index` (typically from the indexer).
 
-## Lab skeleton
+These notes do not edit upstream docs, do not invent APIs, and do not claim a fix of the public indexer or node.
 
-See `contracts/hello-midnight/receive-hold-tokens.compact` for a minimal, non-deployed example using only the official primitives above.
-
-## Related official pages
-
-- https://docs.midnight.network/tokens/overview
-- https://docs.midnight.network/tokens/shielded-token
-- https://docs.midnight.network/tokens/unshielded-token
-- https://docs.midnight.network/examples/contracts/token-transfers
-- https://docs.midnight.network/tutorials/private-party/smart-contract
-- https://docs.midnight.network/tutorials/private-tip-jar/smart-contract
+Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 
 Built by @kshot9000 https://x.com/kshot9000
 Email: kshot9000@gmail.com
