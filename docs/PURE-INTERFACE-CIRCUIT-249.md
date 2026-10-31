@@ -1,25 +1,25 @@
-# Pure circuits in contract types: PureInterfaceCircuit (servicedesk#249)
+# Pure circuits in contract types fail at runtime with PureInterfaceCircuit (servicedesk#249)
 
 Upstream issue: [midnightntwrk/servicedesk#249](https://github.com/midnightntwrk/servicedesk/issues/249)
 
 Official references (do not invent APIs):
 
-- https://docs.midnight.network/compact/reference/compact-reference (contract types and pure circuits)
-- https://docs.midnight.network/guides/compact-javascript-runtime (pureCircuits export)
-- https://docs.midnight.network/api-reference/compact-runtime/type-aliases/InterfaceCircuitDeclaration
-- https://docs.midnight.network/api-reference/compact-runtime (notes on pureCircuits)
+- https://docs.midnight.network/compact/reference/compact-reference (pure vs impure circuits)
+- https://docs.midnight.network/api-reference/compact-runtime/type-aliases/PureCircuit
+- https://docs.midnight.network/guides/compact-javascript-runtime
+- https://docs.midnight.network/guides/use-compact-javascript-implementation
 
-The Compact language reference documents `pure` as an optional keyword on circuit declarations and on circuits inside contract type (`contract T { ... }`) forms. A contract satisfies a contract type when exported circuits match the declared signatures, including the `pure` flag when the type declaration requires it.
+A Compact circuit is pure when it computes its outputs from its inputs without reference to or modification of public state (ledger) or private state (witnesses). Pure circuits are evaluable outside a transaction and carry no proof obligation. The generated module exposes them on `pureCircuits` (and also under `circuits` with a context that is ignored).
 
-The JavaScript runtime guide states that an exported pure circuit is available on the generated `pureCircuits` object and can be called without a circuit context. Impure circuits require a context and produce proof data.
+Issue #249 reports that CoIP-2 described pure circuits in contract type declarations as supported. With compactc 0.35.0 such a declaration compiles (including ZKIR and proving keys), but every cross-contract call through it fails at runtime with `ModuleResolutionError` kind `PureInterfaceCircuit` (compact-runtime). CoIP-4's list of failure kinds omitted `PureInterfaceCircuit`. A comment on the issue confirms this is intentional: pure circuits have no associated standalone proofs and therefore do not make sense as targets of cross-contract calls. The language spec and CoIP-2 are expected to be updated accordingly.
 
-Issue #249 reports that, on compactc 0.35.0 / compact-runtime 0.20.0, a pure circuit declared inside a contract type compiles (including ZKIR and proving keys) but every call through the interface fails at runtime with `ModuleResolutionError` kind `PureInterfaceCircuit`. CoIP 4's listed failure kinds omit this one. The API reference for compact-runtime 0.20.0 notes that a pure circuit in a contract type cannot be called and that nothing dispatches through it (see the `pureCircuits` field comment referencing `PureInterfaceCircuit`).
+## Lab guidance (Compact ~0.31.1 / language ~0.23)
 
-This is a known limitation on the ledger-9 / 0.34+ toolchain line. The lab pin remains Compact ~0.31.1 / language ~0.23 (ledger 8). On that pin, pure circuits exported from a contract (not via an interface) are the documented path; interface pure circuits are outside the supported matrix for networks.
+- Call pure circuits via the generated `pureCircuits` object.
+- Do not declare or target pure circuits for cross-contract calls.
+- An exported pure circuit is available without a circuit context and returns a bare value.
 
-## Lab pin
-
-See `contracts/hello-midnight/pure-circuit-pin.compact` for a source-only Compact example of an exported pure circuit that matches the official 0.31.1 surface. LOCAL-TRUE. Not compiled or deployed here. This lab does not claim a fix of the public indexer, node, runtime, or official docs.
+See `contracts/hello-midnight/pure-interface-circuit-249.compact` for a source-only Compact pin of a pure circuit. LOCAL-TRUE. Not compiled or deployed here. This lab does not claim a fix of the public indexer, node, or official docs.
 
 Pins: Compact ~0.31.1 / language ~0.23, midnight-js 4.1.1, DApp Connector 4.0.1, proof-server 8.1.0.
 

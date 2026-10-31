@@ -1,0 +1,44 @@
+/*
+ * pure-interface-circuit-249.compact
+ *
+ * Pins the limitation reported in midnightntwrk/servicedesk#249.
+ *
+ * Official: https://docs.midnight.network/compact/reference/compact-reference
+ * (pure circuits: no ledger, no witnesses, evaluable outside a transaction, no proof obligation)
+ * https://docs.midnight.network/api-reference/compact-runtime/type-aliases/PureCircuit
+ *
+ * CoIP-2 allowed pure circuits in contract type declarations. On compactc 0.35.0
+ * such a declaration compiles (including ZKIR), but every cross-contract call
+ * through it fails at runtime with ModuleResolutionError kind PureInterfaceCircuit
+ * (compact-runtime). Pure circuits have no associated standalone proofs, so they
+ * are not valid targets for cross-contract calls.
+ *
+ * Use pureCircuits from the generated JS/TS module for pure circuits.
+ * Do not declare pure circuits as cross-contract call targets.
+ *
+ * LOCAL-TRUE. Source only. Not compiled or deployed here.
+ * Does not claim a fix of the public indexer, node, or official docs.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.22 && <= 0.23;
+
+import CompactStandardLibrary;
+
+// Pure circuit: no ledger access, no witnesses. Safe for pureCircuits.
+export pure circuit add(a: Uint<64>, b: Uint<64>): Uint<64> {
+  return a + b;
+}
+
+// Impure circuit that would try to call a pure circuit via a contract type
+// is the pattern that fails at runtime with PureInterfaceCircuit.
+// This file only shows the pure form; do not use pure circuits as
+// cross-contract call targets.
+export circuit demoImpure(): Uint<64> {
+  // Local pure call is fine.
+  return add(1, 2);
+}
