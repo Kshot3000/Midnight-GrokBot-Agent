@@ -4,33 +4,41 @@ Upstream: https://github.com/midnightntwrk/midnight-docs/issues/1635
 
 Official sources only (no invented APIs):
 
-- https://docs.midnight.network/tokens/overview (mentions receiveShielded / sendShielded without detailing custody)
-- https://docs.midnight.network/tokens/unshielded-token
-- https://docs.midnight.network/tokens/shielded-token
-- https://docs.midnight.network/examples/contracts/token-transfers
-- https://docs.midnight.network/tutorials/private-party/smart-contract (receiveUnshielded for entry fee)
-- https://docs.midnight.network/tutorials/private-tip-jar/smart-contract (receiveShielded + insertCoin for custody)
-- https://docs.midnight.network/compact/standard-library/exports (receiveUnshielded, receiveShielded, insertCoin, mint*, send*)
-- https://docs.midnight.network/compact/reference/ledger-adt (insertCoin on Map/Set of QualifiedShieldedCoinInfo)
+- Tokens overview: https://docs.midnight.network/tokens/overview — names `receiveShielded` / `sendShielded` and the dual ledger; does not expand receive or custody.
+- Standard library: https://docs.midnight.network/compact/standard-library/exports — `receiveUnshielded`, `receiveShielded`, `sendUnshielded`, `insertCoin` / `writeCoin` on Map/Set of QualifiedShieldedCoinInfo.
+- Token-transfers example: https://docs.midnight.network/examples/contracts/token-transfers — `receiveUnshielded`, `receiveShielded`, `receiveNightTokens`.
+- Private Party: https://docs.midnight.network/tutorials/private-party/smart-contract — `receiveUnshielded(nativeToken(), entryFee as Uint<128>)`; the caller's wallet supplies the funds when it balances the transaction.
+- Private Tip Jar: https://docs.midnight.network/tutorials/private-tip-jar/smart-contract — fresh `ShieldedCoinInfo` + `receiveShielded` + `Map.insertCoin` so the contract can later `sendShielded`.
 
-## Unshielded receive (NIGHT or custom)
+## What the Tokens pages omit (from the issue)
 
-`receiveUnshielded(color: Bytes<32>, amount: Uint<128>)` adds a validation condition that the transaction must supply the given amount of that token color to the contract. The caller's wallet funds it when balancing the transaction (see Private Party entry-fee path).
+The Tokens pages cover mint and send. They do not explain:
 
-After the call, the contract's unshielded balance for that color increases; later circuits read it with `unshieldedBalance` / `unshieldedBalanceGte` and spend with `sendUnshielded`.
+1. How `receiveUnshielded` / `receiveShielded` work inside a circuit.
+2. What the DApp must pass.
+3. That the caller's wallet funds the receive when it balances the transaction.
+4. How a contract stores a shielded coin with `insertCoin` (or `writeCoin`) so it can spend it later without the indexer.
 
-Native NIGHT uses `nativeToken()` or `default<Bytes<32>>` as the color. Custom colors come from `tokenType(domain, kernel.self())`.
+## Documented patterns (Compact ~0.31.1 / language ~0.23)
 
-## Shielded receive and hold
-
-`receiveShielded(coin: ShieldedCoinInfo)` claims a fresh (same-transaction) coin addressed to the contract. The DApp constructs the coin; the caller's wallet creates the corresponding Zswap output when balancing.
-
-To hold it for a later spend, store the qualified form:
+### Unshielded receive (Private Party + token-transfers)
 
 ```compact
-export ledger pot: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
+receiveUnshielded(nativeToken(), entryFee as Uint<128>);
+// or
+receiveUnshielded(color, disclose(amount));
+```
 
+- `receiveUnshielded` adds a validation condition that the given amount of that color is paid into the contract.
+- The caller's wallet supplies those funds when it balances the transaction (Private Party docs).
+- Unshielded transfers are public: sender, recipient, and amount are visible.
+- NIGHT uses `nativeToken()` or `default<Bytes<32>>` depending on the example; amounts are in STAR (1 NIGHT = 1_000_000 STAR).
+
+### Shielded receive + custody (Private Tip Jar)
+
+```compact
 export circuit tip(coin: ShieldedCoinInfo): [] {
+  // guards...
   receiveShielded(disclose(coin));
   pot.insertCoin(
     disclose(coin.nonce),
@@ -40,11 +48,21 @@ export circuit tip(coin: ShieldedCoinInfo): [] {
 }
 ```
 
-`insertCoin` looks up the Merkle index allocated in the current transaction and stores a `QualifiedShieldedCoinInfo`. A later circuit can spend that entry with `sendShielded` (see Private Tip Jar).
+- `coin` is a *fresh* `ShieldedCoinInfo` (color, value, nonce), not one of the tipper's existing wallet coins.
+- `receiveShielded` claims it for the contract: the transaction must contain a Zswap output creating that coin for the contract.
+- The tipper's wallet pays for it from its own coins of that color and receives change under fresh nonces.
+- `insertCoin` (available when the Map/Set value type is `QualifiedShieldedCoinInfo`) looks up the `mt_index` the ledger assigns in the same transaction and stores the qualified coin.
+- Later `sendShielded` can spend that qualified coin. The indexer is not required for a coin received or minted in the same transaction.
+- Publishing the coin is safe when the nonce is fresh (commitment is a hash of nonce/color/value/owner; a fresh nonce does not link to a wallet coin).
 
-`writeCoin` is the Set analogue (same docs). Fresh coins can also be spent immediately with `sendImmediateShielded` without storage (shielded-token tutorial).
+### Mint-to-self then hold
 
-Committed coins from earlier transactions require the DApp to supply a `QualifiedShieldedCoinInfo` that already has `mt_index` (typically from the indexer).
+token-transfers shows `mintShieldedToken(..., right<ZswapCoinPublicKey, ContractAddress>(kernel.self()))`. The same `insertCoin` / `writeCoin` pattern from Tip Jar applies when the contract mints the coin itself in the same transaction.
+
+## Lab artifacts
+
+- `contracts/hello-midnight/receive-tokens-skeleton.compact` — language-pinned skeleton of the two receive patterns copied from the official examples. Source only; not compiled or deployed here.
+- `packages/preprod-hello-stub/src/tokens-receive-hold-1635.mjs` — exports the cited URLs and a short checklist. LOCAL-TRUE. No network calls.
 
 These notes do not edit upstream docs, do not invent APIs, and do not claim a fix of the public indexer or node.
 
