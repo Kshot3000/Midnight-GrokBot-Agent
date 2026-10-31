@@ -1,10 +1,10 @@
-// Lab Compact invariant for receive + hold patterns.
-// Cites midnightntwrk/midnight-docs#1635
-// Patterns drawn only from official docs and tutorials:
-// - https://docs.midnight.network/examples/contracts/token-transfers
-// - https://docs.midnight.network/tutorials/private-tip-jar/smart-contract
-// - https://docs.midnight.network/tutorials/private-party/smart-contract
-// Does not invent APIs. Pins language ~0.23.
+// Compact skeleton: receive and hold tokens (shielded + unshielded)
+// Pins: Compact ~0.31.1 / language ~0.23
+// Official: https://docs.midnight.network/examples/contracts/token-transfers
+//           https://docs.midnight.network/tutorials/private-tip-jar/smart-contract
+//           https://docs.midnight.network/tutorials/private-party/smart-contract
+// Cites upstream: midnightntwrk/midnight-docs#1635
+// Does not invent APIs. Patterns from official docs/examples only.
 //
 // Built by @kshot9000 https://x.com/kshot9000
 // Email: kshot9000@gmail.com
@@ -15,16 +15,21 @@ pragma language_version 0.23;
 
 import CompactStandardLibrary;
 
+// Map of nonce -> qualified coin for holding shielded coins created in this tx
 export ledger pot: Map<Bytes<32>, QualifiedShieldedCoinInfo>;
 
-// Unshielded receive (Private Party pattern). Caller's wallet funds the output.
 export circuit receiveUnshieldedExample(amount: Uint<128>): [] {
-  receiveUnshielded(default<Bytes<32>>, disclose(amount));
+  // Official: receiveUnshielded(color, amount) claims the amount for this contract.
+  // Caller's wallet funds it when balancing the transaction (see Private Party).
+  const color = nativeToken(); // NIGHT
+  receiveUnshielded(color, disclose(amount));
 }
 
-// Shielded receive + hold for later spend (Private Tip Jar pattern).
-// insertCoin only succeeds for a coin created in the current transaction.
-export circuit receiveShieldedAndHold(coin: ShieldedCoinInfo): [] {
+export circuit receiveAndHoldShielded(coin: ShieldedCoinInfo): [] {
+  // Official Private Tip Jar pattern:
+  // 1. Client builds a fresh coin (not from wallet UTXO).
+  // 2. receiveShielded claims it for this contract.
+  // 3. insertCoin stores it with mt_index filled for same-tx coin so it can be spent later.
   receiveShielded(disclose(coin));
   pot.insertCoin(
     disclose(coin.nonce),
@@ -32,3 +37,7 @@ export circuit receiveShieldedAndHold(coin: ShieldedCoinInfo): [] {
     right<ZswapCoinPublicKey, ContractAddress>(kernel.self())
   );
 }
+
+// Note: spending later uses sendShielded on a QualifiedShieldedCoinInfo from the map.
+// insertCoin / writeCoin at receive or mint time avoids needing the indexer for mt_index.
+// Official docs: https://docs.midnight.network/compact/reference/ledger-adt
