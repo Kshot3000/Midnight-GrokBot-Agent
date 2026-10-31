@@ -1,0 +1,28 @@
+/*
+ * proof-server-remote-align-1631.compact — lab note only.
+ *
+ * Upstream: midnightntwrk/midnight-docs#1631
+ * Official: https://docs.midnight.network/guides/local-proving
+ *           https://docs.midnight.network/guides/run-proof-server
+ *
+ * Records the published recommendation to prefer local proving.
+ * Does not invent a TEE or remote API. Does not compile in this lab.
+ * Does not claim to fix the public indexer or node.
+ *
+ * Language pin: Compact ~0.31.1 / language ~0.23.
+ *
+ * Built by @kshot9000 https://x.com/kshot9000
+ * Email: kshot9000@gmail.com
+ * Cardano donation: addr1q8hnl6vl5a6k3rw3n5g3jtte696zcl76kfatzv7gpswa9r0dj7fma6klq55y4ffm7tf0em09udnyhuk4ah92pl5x9jpqjae44v
+ * Teams: @midnightntwrk @MidnightNtwrk @midnightfdn @Cardano @InputOutputHK @cardano-foundation
+ */
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+// Placeholder circuit that does not touch proving configuration.
+// Proving location is a DApp/provider concern, not a Compact circuit concern.
+export circuit noteLocalProving(): [] {
+  // no-op; see docs/PROOF-SERVER-REMOTE-ALIGN-1631.md
+}
